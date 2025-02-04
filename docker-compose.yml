@@ -1,0 +1,16 @@
+version: "4.32"
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      - POSTGRES_DB=tk.chess.com
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1118793421
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
