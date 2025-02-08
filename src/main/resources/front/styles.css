@@ -26,7 +26,6 @@ body {
     gap: 10px;
     margin-bottom: 20px;
 }
-
 .toggle-buttons button {
     background: #4fa6cb;
     color: #fff;
@@ -37,7 +36,6 @@ body {
     width: 120px;
     text-align: center;
 }
-
 .toggle-buttons button:hover {
     background: #3d8db3;
 }
@@ -48,7 +46,6 @@ form, .container-admin input, .container-admin ul {
     align-items: center;
     width: 100%;
 }
-
 form input, .container-admin input {
     width: 80%;
     padding: 10px;
