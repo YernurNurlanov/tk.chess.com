@@ -21,15 +21,21 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Size(min = 5, max = 50, message = "Name must contain from 5 to 50 characters")
-    @NotBlank(message = "Full name can not be empty")
-    @Column(nullable = false, unique = true, name = "full_name")
-    private String fullName;
+    @Size(min = 2, max = 20, message = "Name must contain from 2 to 20 characters")
+    @NotBlank(message = "Firstname can not be empty")
+    @Column(nullable = false, name = "first_name")
+    private String firstName;
+
+    @Size(min = 2, max = 20, message = "Name must contain from 2 to 20 characters")
+    @NotBlank(message = "Lastname can not be empty")
+    @Column(nullable = false, name = "last_name")
+    private String lastName;
 
     @Size(min = 10, max = 100, message = "Email must contain from 10 to 100 characters")
     @NotBlank(message = "Email can not be empty")
@@ -42,19 +48,13 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String phone;
 
-    @Size(min = 8, max = 100, message = "Length of password contain from 8 to 100 characters")
+    @Size(min = 8, max = 255, message = "Length of password contain from 8 to 100 characters")
     @NotBlank(message = "Password can not be empty")
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-
-    @Column(name = "last_payment")
-    private LocalDateTime lastPayment;
-
-    @Column(name = "hourly_rate")
-    private int hourlyRate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
