@@ -2,6 +2,7 @@ package com.chess.tk.config;
 
 import com.chess.tk.filter.JwtAuthenticationFilter;
 import com.chess.tk.service.AdminService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -40,7 +41,7 @@ public class SecurityConfiguration {
                 .cors(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource( _ -> {
                     var corsConfiguration = new CorsConfiguration();
-                    corsConfiguration.setAllowedOrigins(List.of("http://localhost:8080"));
+                    corsConfiguration.setAllowedOrigins(List.of("http://localhost:8080","http://localhost:3000"));
                     corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     corsConfiguration.setAllowedHeaders(List.of("*"));
                     corsConfiguration.setAllowCredentials(true);
@@ -49,11 +50,26 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-resources/*", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/endpoint", "/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/teacher/**").hasRole("TEACHER")
+                        .requestMatchers("/student/**").hasRole("STUDENT")
+                        .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\": \"Unauthorized request.\"}");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\": \"You don't have the rights to execute the request.\"}");
+                        })
+                );
         return http.build();
     }
 

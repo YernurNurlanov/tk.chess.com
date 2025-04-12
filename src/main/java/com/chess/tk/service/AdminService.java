@@ -4,20 +4,16 @@ import com.chess.tk.db.entities.*;
 import com.chess.tk.db.repositories.StudentRepository;
 import com.chess.tk.db.repositories.TeacherRepository;
 import com.chess.tk.db.repositories.UserRepository;
-import com.chess.tk.dto.AttachStudentRequest;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.hibernate.Hibernate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AdminService {
@@ -35,38 +31,42 @@ public class AdminService {
 
     @Transactional
     public ResponseEntity<String> addTeacher(User user, Teacher teacher) {
-        teacher.setUser(setFields(user));
+        teacher.setUser(setFieldsToUser(user, Role.ROLE_TEACHER));
         teacherRepo.save(teacher);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body("Teacher added successfully");
     }
 
     @Transactional
     public ResponseEntity<String> addStudent(User user, Student student) {
-        student.setUser(setFields(user));
+        student.setUser(setFieldsToUser(user, Role.ROLE_STUDENT));
         studentRepo.save(student);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body("Student added successfully");
     }
 
-    private User setFields(User user) {
+    private User setFieldsToUser(User user, Role role) {
         user.setCreatedAt(LocalDateTime.now());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole(Role.ROLE_TEACHER);
+        user.setRole(role);
         return userRepo.save(user);
     }
 
+    @Transactional
     public ResponseEntity<String> deleteUser(Long id) {
-        Optional<User> userOptional = userRepo.findById(id);
-        if (userOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with ID " + id + " not found");
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User with id " + id + " not found"));
+
+        if (user.getRole() == Role.ROLE_TEACHER) {
+            studentRepo.findByTeacherId(user.getId()).forEach(student -> {
+                student.setTeacherId(null);
+                studentRepo.save(student);
+            });
         }
-        if (userOptional.get().getRole().equals(Role.ROLE_TEACHER)) {
-            teacherRepo.deleteById(id);
-        }
-        studentRepo.deleteById(id);
-        userRepo.delete(userOptional.get());
+
+        userRepo.delete(user);
         return ResponseEntity.status(HttpStatus.OK).body("User with ID " + id + " was deleted");
     }
-    public ResponseEntity<String> updateUser(User user) {
+
+    public ResponseEntity<String> updateUser(User user) { // TODO переделать метод
 //        Optional<User> userOptional = userRepo.findById(user.getId());
 //        if (userOptional.isEmpty()) {
 //            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with ID " + user.getId() + " not found");
@@ -80,36 +80,47 @@ public class AdminService {
 //        userToUpdate.setHourlyRate(user.getHourlyRate());
 //        userToUpdate.setRole(user.getRole());
 //        userRepo.save(userToUpdate);
-        return ResponseEntity.ok("User updated successfully");
+        return ResponseEntity.ok("User with id " + user.getId() + " updated successfully");
     }
 
-    public ResponseEntity<String> attachStudentToTeacher(AttachStudentRequest request) {
-        if (!teacherRepo.existsById(request.getId())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Teacher with this id is not exists");
+    public ResponseEntity<String> attachStudentToTeacher(Long id, Long studentId) {
+        Teacher teacher = teacherRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Teacher with id " + id + " not found"));
+
+        Student student = studentRepo.findById(studentId)
+                .orElseThrow(() -> new EntityNotFoundException("Student with id " + studentId + " not found"));
+
+        if (student.getTeacherId() != null) {
+            return ResponseEntity.badRequest().body("Student with id " + studentId + " is already attached to teacher");
         }
-        Optional<Student> optionalStudent = studentRepo.findById(request.getStudentId());
-        Student student;
-        if (optionalStudent.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Student with this id is not exists");
-        } else {
-            student = optionalStudent.get();
-        }
-        student.setTeacherId(request.getId());
+
+        student.setTeacherId(teacher.getId());
         studentRepo.save(student);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("Student with email " + student.getUser().getEmail()
+                        + " attached to teacher with email " + teacher.getUser().getEmail());
+    }
+
+    public ResponseEntity<String> detachStudentFromTeacher(Long id) {
+        Student student = studentRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Student with id " + id + " not found"));
+
+        student.setTeacherId(null);
+        studentRepo.save(student);
+
+        return ResponseEntity.ok().body("Student with id " + id + " detached from teacher");
     }
 
     public List<Student> getStudentsByTeacherId(Long id) {
-        if (!teacherRepo.existsById(id)) {
-            return new ArrayList<>();// TODO прописать нормально обработку ошибки
-        }
-        return studentRepo.findByTeacherId(id);
+        Teacher teacher = teacherRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Teacher with id " + id + " not found"));
+
+        return studentRepo.findByTeacherId(teacher.getId());
     }
 
     public User getByEmail(String email) {
         return userRepo.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
+                .orElseThrow(() -> new EntityNotFoundException("User with email " + email + " not found"));
     }
 
     public UserDetailsService userDetailsService() {

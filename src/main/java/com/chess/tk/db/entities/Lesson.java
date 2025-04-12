@@ -18,16 +18,24 @@ public class Lesson {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String title;
+    @Column(name = "teacher_id")
+    private Long teacherId;
 
+    @Column(name = "group_id")
     private Long groupId;
 
+    @Column(name = "start_time")
     private LocalDateTime startTime;
 
+    @Column(name = "end_time")
     private LocalDateTime endTime;
 
     @ElementCollection
     @CollectionTable(name = "lesson_tasks", joinColumns = @JoinColumn(name = "lesson_id"))
     @Column(name = "task_id")
     private List<Long> taskIds;
+
+    @ManyToOne
+    @JoinColumn(name = "group_id", insertable = false, updatable = false)
+    private Group group;
 }

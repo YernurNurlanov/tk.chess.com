@@ -4,9 +4,9 @@ import jakarta.persistence.Id;
 import lombok.Data;
 
 @Data
-public class AttachStudentRequest {
+public class StudentInGroupRequest {
     @Id
-    private Long id;
+    private Long groupId;
 
     @Id
     private Long studentId;

@@ -24,6 +24,6 @@ public class Student {
     @Column(name = "teacher_id")
     private Long teacherId;
 
-    @Column(name = "created_at")
+    @Column(name = "last_payment")
     private LocalDateTime lastPayment;
 }

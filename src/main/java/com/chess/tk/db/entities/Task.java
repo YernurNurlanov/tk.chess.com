@@ -18,4 +18,8 @@ public class Task {
     private String level;
 
     private String topic;
+
+    private String startFin;
+
+    private String endFin;
 }

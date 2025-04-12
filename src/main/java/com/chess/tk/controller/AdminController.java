@@ -29,17 +29,13 @@ public class AdminController {
     }
 
     @PostMapping("/addTeacher")
-    public ResponseEntity<String> addTeacher(@RequestBody AddTeacherRequest request) {
-        User user = request.getUser();
-        Teacher teacher = request.getTeacher();
-        return adminService.addTeacher(user, teacher);
+    public ResponseEntity<String> addTeacher(@Valid @RequestBody AddTeacherRequest request) {
+        return adminService.addTeacher(request.getUser(), request.getTeacher());
     }
 
     @PostMapping("/addStudent")
-    public ResponseEntity<String> addStudent(@RequestBody AddStudentRequest request) {
-        User user = request.getUser();
-        Student student = request.getStudent();
-        return adminService.addStudent(user, student);
+    public ResponseEntity<String> addStudent(@Valid @RequestBody AddStudentRequest request) {
+        return adminService.addStudent(request.getUser(), request.getStudent());
     }
 
     @DeleteMapping("/{id}")
@@ -63,12 +59,18 @@ public class AdminController {
     }
 
     @PostMapping("/attach")
-    public ResponseEntity<String> addStudents(@RequestBody AttachStudentRequest request) {
-        return adminService.attachStudentToTeacher(request);
+    public ResponseEntity<String> attachStudentToTeacher(@RequestBody AttachStudentRequest request) {
+        return adminService.attachStudentToTeacher(request.getId(), request.getStudentId());
+    }
+
+    @PostMapping("/detach/{id}")
+    public ResponseEntity<String> detachStudentFromTeacher(@PathVariable Long id) {
+        return adminService.detachStudentFromTeacher(id);
     }
 
     @GetMapping("/{id}")
     public List<Student> getStudentsByTeacherId(@PathVariable Long id) {
         return adminService.getStudentsByTeacherId(id);
     }
+
 }
