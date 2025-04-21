@@ -1,4 +1,4 @@
-package com.chess.tk.db.entities;
+package com.chess.tk.db.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,6 +34,11 @@ public class Lesson {
     @CollectionTable(name = "lesson_tasks", joinColumns = @JoinColumn(name = "lesson_id"))
     @Column(name = "task_id")
     private List<Long> taskIds;
+
+    @ElementCollection
+    @CollectionTable(name = "lesson_attendance", joinColumns = @JoinColumn(name = "lesson_id"))
+    @Column(name = "present_student_id")
+    private List<Long> presentStudentIds;
 
     @ManyToOne
     @JoinColumn(name = "group_id", insertable = false, updatable = false)

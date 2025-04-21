@@ -1,7 +1,7 @@
-package com.chess.tk.db.repositories;
+package com.chess.tk.db.repository;
 
-import com.chess.tk.db.entities.Role;
-import com.chess.tk.db.entities.User;
+import com.chess.tk.db.enums.Role;
+import com.chess.tk.db.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

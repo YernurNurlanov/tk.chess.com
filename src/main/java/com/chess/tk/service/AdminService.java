@@ -1,9 +1,11 @@
 package com.chess.tk.service;
 
-import com.chess.tk.db.entities.*;
-import com.chess.tk.db.repositories.StudentRepository;
-import com.chess.tk.db.repositories.TeacherRepository;
-import com.chess.tk.db.repositories.UserRepository;
+import com.chess.tk.db.entity.*;
+import com.chess.tk.db.enums.Role;
+import com.chess.tk.db.repository.StudentRepository;
+import com.chess.tk.db.repository.TaskRepository;
+import com.chess.tk.db.repository.TeacherRepository;
+import com.chess.tk.db.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
@@ -21,26 +23,27 @@ public class AdminService {
     private final PasswordEncoder passwordEncoder;
     private final StudentRepository studentRepo;
     private final TeacherRepository teacherRepo;
+    private final TaskRepository taskRepo;
 
-    public AdminService(UserRepository userRepo, PasswordEncoder passwordEncoder, StudentRepository studentRepo, TeacherRepository teacherRepo) {
+    public AdminService(UserRepository userRepo, PasswordEncoder passwordEncoder, StudentRepository studentRepo,
+                        TeacherRepository teacherRepo, TaskRepository taskRepo) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
         this.studentRepo = studentRepo;
         this.teacherRepo = teacherRepo;
+        this.taskRepo = taskRepo;
     }
 
     @Transactional
-    public ResponseEntity<String> addTeacher(User user, Teacher teacher) {
+    public Teacher addTeacher(User user, Teacher teacher) {
         teacher.setUser(setFieldsToUser(user, Role.ROLE_TEACHER));
-        teacherRepo.save(teacher);
-        return ResponseEntity.ok().body("Teacher added successfully");
+        return teacherRepo.save(teacher);
     }
 
     @Transactional
-    public ResponseEntity<String> addStudent(User user, Student student) {
+    public Student addStudent(User user, Student student) {
         student.setUser(setFieldsToUser(user, Role.ROLE_STUDENT));
-        studentRepo.save(student);
-        return ResponseEntity.ok().body("Student added successfully");
+        return studentRepo.save(student);
     }
 
     private User setFieldsToUser(User user, Role role) {
@@ -83,7 +86,7 @@ public class AdminService {
         return ResponseEntity.ok("User with id " + user.getId() + " updated successfully");
     }
 
-    public ResponseEntity<String> attachStudentToTeacher(Long id, Long studentId) {
+    public Student attachStudentToTeacher(Long id, Long studentId) {
         Teacher teacher = teacherRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Teacher with id " + id + " not found"));
 
@@ -91,24 +94,19 @@ public class AdminService {
                 .orElseThrow(() -> new EntityNotFoundException("Student with id " + studentId + " not found"));
 
         if (student.getTeacherId() != null) {
-            return ResponseEntity.badRequest().body("Student with id " + studentId + " is already attached to teacher");
+            throw new IllegalArgumentException("Student with id " + studentId + " is already attached to teacher");
         }
 
         student.setTeacherId(teacher.getId());
-        studentRepo.save(student);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body("Student with email " + student.getUser().getEmail()
-                        + " attached to teacher with email " + teacher.getUser().getEmail());
+        return studentRepo.save(student);
     }
 
-    public ResponseEntity<String> detachStudentFromTeacher(Long id) {
+    public Student detachStudentFromTeacher(Long id) {
         Student student = studentRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Student with id " + id + " not found"));
 
         student.setTeacherId(null);
-        studentRepo.save(student);
-
-        return ResponseEntity.ok().body("Student with id " + id + " detached from teacher");
+        return studentRepo.save(student);
     }
 
     public List<Student> getStudentsByTeacherId(Long id) {
@@ -116,6 +114,22 @@ public class AdminService {
                 .orElseThrow(() -> new EntityNotFoundException("Teacher with id " + id + " not found"));
 
         return studentRepo.findByTeacherId(teacher.getId());
+    }
+
+    public Task addTask(Task task) {
+        if (taskRepo.findByStartFinAndEndFin(task.getStartFin(), task.getEndFin()) != null) {
+            throw new IllegalArgumentException("Task with this position already exists");
+        }
+
+        return taskRepo.save(task);
+    }
+
+    public ResponseEntity<String> deleteTask(Long id) {
+        Task task = taskRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Task with id " + id + " not found"));
+
+        taskRepo.delete(task);
+        return ResponseEntity.ok().body("Task with id " + id + " deleted successfully");
     }
 
     public User getByEmail(String email) {

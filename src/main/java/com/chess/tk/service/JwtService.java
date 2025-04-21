@@ -1,6 +1,6 @@
 package com.chess.tk.service;
 
-import com.chess.tk.db.entities.User;
+import com.chess.tk.db.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

@@ -1,8 +1,8 @@
 package com.chess.tk.controller;
 
-import com.chess.tk.db.entities.*;
-import com.chess.tk.db.repositories.StudentRepository;
-import com.chess.tk.db.repositories.TeacherRepository;
+import com.chess.tk.db.entity.*;
+import com.chess.tk.db.repository.StudentRepository;
+import com.chess.tk.db.repository.TeacherRepository;
 import com.chess.tk.dto.AddStudentRequest;
 import com.chess.tk.dto.AddTeacherRequest;
 import com.chess.tk.dto.AttachStudentRequest;
@@ -25,16 +25,16 @@ public class AdminController {
     public AdminController(AdminService adminService, TeacherRepository teacherRepo, StudentRepository studentRepo) {
         this.adminService = adminService;
         this.teacherRepo = teacherRepo;
-        this.studentRepo = studentRepo;
+        this.studentRepo = studentRepo; 
     }
 
-    @PostMapping("/addTeacher")
-    public ResponseEntity<String> addTeacher(@Valid @RequestBody AddTeacherRequest request) {
+    @PostMapping("/teachers")
+    public Teacher addTeacher(@Valid @RequestBody AddTeacherRequest request) {
         return adminService.addTeacher(request.getUser(), request.getTeacher());
     }
 
-    @PostMapping("/addStudent")
-    public ResponseEntity<String> addStudent(@Valid @RequestBody AddStudentRequest request) {
+    @PostMapping("/students")
+    public Student addStudent(@Valid @RequestBody AddStudentRequest request) {
         return adminService.addStudent(request.getUser(), request.getStudent());
     }
 
@@ -59,12 +59,12 @@ public class AdminController {
     }
 
     @PostMapping("/attach")
-    public ResponseEntity<String> attachStudentToTeacher(@RequestBody AttachStudentRequest request) {
+    public Student attachStudentToTeacher(@RequestBody AttachStudentRequest request) {
         return adminService.attachStudentToTeacher(request.getId(), request.getStudentId());
     }
 
     @PostMapping("/detach/{id}")
-    public ResponseEntity<String> detachStudentFromTeacher(@PathVariable Long id) {
+    public Student detachStudentFromTeacher(@PathVariable Long id) {
         return adminService.detachStudentFromTeacher(id);
     }
 
@@ -73,4 +73,13 @@ public class AdminController {
         return adminService.getStudentsByTeacherId(id);
     }
 
+    @PostMapping("/tasks")
+    public Task addTask(@Valid @RequestBody Task task) {
+        return adminService.addTask(task);
+    }
+
+    @DeleteMapping("/tasks/{id}")
+    public ResponseEntity<String> deleteTask(@PathVariable Long id) {
+        return adminService.deleteTask(id);
+    }
 }

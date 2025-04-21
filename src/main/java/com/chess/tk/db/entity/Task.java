@@ -1,5 +1,6 @@
-package com.chess.tk.db.entities;
+package com.chess.tk.db.entity;
 
+import com.chess.tk.db.enums.TaskLevel;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,10 +16,14 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String level;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TaskLevel level;
 
+    @Column(nullable = false)
     private String topic;
 
+    @Column(nullable = false)
     private String startFin;
 
     private String endFin;

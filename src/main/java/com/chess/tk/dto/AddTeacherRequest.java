@@ -1,7 +1,7 @@
 package com.chess.tk.dto;
 
-import com.chess.tk.db.entities.Teacher;
-import com.chess.tk.db.entities.User;
+import com.chess.tk.db.entity.Teacher;
+import com.chess.tk.db.entity.User;
 import jakarta.validation.Valid;
 import lombok.Data;
 

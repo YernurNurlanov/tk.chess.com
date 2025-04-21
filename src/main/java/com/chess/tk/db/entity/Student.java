@@ -1,4 +1,4 @@
-package com.chess.tk.db.entities;
+package com.chess.tk.db.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

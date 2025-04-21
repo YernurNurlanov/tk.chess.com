@@ -1,6 +1,6 @@
 package com.chess.tk.dto;
 
-import com.chess.tk.db.entities.Lesson;
+import com.chess.tk.db.entity.Lesson;
 import lombok.Data;
 
 import java.time.LocalDateTime;

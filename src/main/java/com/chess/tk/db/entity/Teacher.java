@@ -1,4 +1,4 @@
-package com.chess.tk.db.entities;
+package com.chess.tk.db.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
