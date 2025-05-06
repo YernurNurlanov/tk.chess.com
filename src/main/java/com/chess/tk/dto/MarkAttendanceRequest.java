@@ -1,5 +1,6 @@
 package com.chess.tk.dto;
 
+import com.chess.tk.db.entity.Lesson;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -14,4 +15,13 @@ public class MarkAttendanceRequest {
     private Long lessonId;
 
     private List<Long> studentIds;
+
+    public MarkAttendanceRequest() {
+
+    }
+
+    public MarkAttendanceRequest(Lesson lesson) {
+        this.lessonId = lesson.getId();
+        this.studentIds = lesson.getPresentStudentIds();
+    }
 }

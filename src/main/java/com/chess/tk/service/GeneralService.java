@@ -35,7 +35,7 @@ public class GeneralService {
     private final TeacherRepository teacherRepo;
     private final TaskRepository taskRepo;
 
-    public ResponseEntity<String> signIn(SignInRequest request) {
+    public ResponseEntity<?> signIn(SignInRequest request) {
         User user = userRepo.findByEmail(request.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("User with email " + request.getEmail() + " not found"));
 
@@ -52,7 +52,16 @@ public class GeneralService {
 
         return ResponseEntity.ok()
                 .header("Set-Cookie", "jwt=" + jwt + "; HttpOnly; Path=/; Max-Age=86400")
-                .body("Successful login");
+                .body(Map.of(
+                        "message", "Successful login",
+                        "role", user.getRole()
+                ));
+    }
+
+    public User getCurrentUser(String jwt) {
+        String email = jwtService.extractUserName(jwt);
+        return userRepo.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User with email " + email + " not found"));
     }
 
     public List<Student> getStudentsByTeacherId(Long id) {

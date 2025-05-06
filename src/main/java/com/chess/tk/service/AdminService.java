@@ -15,7 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class AdminService {
@@ -107,13 +106,6 @@ public class AdminService {
 
         student.setTeacherId(null);
         return studentRepo.save(student);
-    }
-
-    public List<Student> getStudentsByTeacherId(Long id) {
-        Teacher teacher = teacherRepo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Teacher with id " + id + " not found"));
-
-        return studentRepo.findByTeacherId(teacher.getId());
     }
 
     public Task addTask(Task task) {

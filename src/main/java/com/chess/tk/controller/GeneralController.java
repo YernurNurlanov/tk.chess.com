@@ -1,6 +1,7 @@
 package com.chess.tk.controller;
 
 import com.chess.tk.db.entity.Student;
+import com.chess.tk.db.entity.User;
 import com.chess.tk.dto.LevelTasksDTO;
 import com.chess.tk.dto.SignInRequest;
 import com.chess.tk.service.GeneralService;
@@ -32,5 +33,11 @@ public class GeneralController {
     @GetMapping("/tasks")
     public List<LevelTasksDTO> getTasks() {
         return generalService.getTasks();
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER') or hasRole('STUDENT')")
+    @GetMapping("/me")
+    public User getCurrentUser(@CookieValue("jwt") String jwt) {
+        return generalService.getCurrentUser(jwt);
     }
 }

@@ -2,7 +2,6 @@ package com.chess.tk.controller;
 
 import com.chess.tk.db.entity.Group;
 import com.chess.tk.db.entity.Lesson;
-import com.chess.tk.db.entity.Student;
 import com.chess.tk.dto.*;
 import com.chess.tk.service.TeacherService;
 import jakarta.validation.Valid;
@@ -19,11 +18,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TeacherController {
     private final TeacherService teacherService;
-
-    @GetMapping("/{id}/students")
-    public List<Student> getStudentsByTeacherId(@PathVariable Long id) {
-        return teacherService.getStudentsByTeacherId(id);
-    }
 
     @PatchMapping("/students")
     public Group addStudentToGroup(@RequestBody StudentInGroupRequest request) {
@@ -51,7 +45,7 @@ public class TeacherController {
     }
 
     @PutMapping("/groups")
-    public GroupStudentInfoDTO updateGroup(@Valid @RequestBody GroupBaseDTO group) {
+    public GroupBaseDTO updateGroup(@Valid @RequestBody GroupBaseDTO group) {
         return teacherService.updateGroup(group.getId(), group.getGroupName());
     }
 
@@ -71,17 +65,17 @@ public class TeacherController {
     }
 
     @PostMapping("/lessons")
-    public Lesson addLesson(@Valid @RequestBody Lesson lesson) {
+    public AllLessonsDTO addLesson(@Valid @RequestBody Lesson lesson) {
         return teacherService.addLesson(lesson);
     }
 
-    @DeleteMapping("lesson/{id}")
+    @DeleteMapping("lessons/{id}")
     public ResponseEntity<String> deleteLesson(@PathVariable Long id) {
         return teacherService.deleteLesson(id);
     }
 
     @PutMapping("/lessons")
-    public Lesson updateLesson(@Valid @RequestBody UpdateLessonRequest request) {
+    public LessonDTO updateLesson(@Valid @RequestBody UpdateLessonRequest request) {
         return teacherService.updateLesson(request.getLessonId(), request.getStartTime(), request.getEndTime(), request.getGroupId());
     }
 
@@ -91,7 +85,7 @@ public class TeacherController {
     }
 
     @PostMapping("/attendance")
-    public Lesson markAttendance(@Valid @RequestBody MarkAttendanceRequest request) {
+    public MarkAttendanceRequest markAttendance(@Valid @RequestBody MarkAttendanceRequest request) {
         return teacherService.markAttendance(request.getLessonId(), request.getStudentIds());
     }
 }
