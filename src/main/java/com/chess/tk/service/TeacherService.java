@@ -77,6 +77,7 @@ public class TeacherService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public GroupStudentInfoDTO getGroupById(Long groupId) { // надо протестировать
         Group group = groupRepo.findById(groupId)
                 .orElseThrow(() -> new EntityNotFoundException("Group with id " + groupId + " not found"));
@@ -128,14 +129,14 @@ public class TeacherService {
         return groupRepo.save(group);
     }
 
-    public GroupStudentInfoDTO updateGroup(Long groupId, String groupName) {
+    public GroupBaseDTO updateGroup(Long groupId, String groupName) {
         Group group = groupRepo.findById(groupId)
                 .orElseThrow(() -> new EntityNotFoundException("Group with id " + groupId + " not found"));
 
         group.setGroupName(groupName);
         groupRepo.save(group);
 
-        return getGroupById(group.getId());
+        return new GroupBaseDTO(group);
     }
 
     public ResponseEntity<String> deleteGroup(Long id) {
@@ -199,7 +200,7 @@ public class TeacherService {
         return lessonDTO;
     }
 
-    public Lesson addLesson(Lesson lesson) {
+    public AllLessonsDTO addLesson(Lesson lesson) {
         Group group = groupRepo.findById(lesson.getGroupId())
                 .orElseThrow(() -> new EntityNotFoundException("Group with id " + lesson.getGroupId() + " not found"));
 
@@ -211,7 +212,7 @@ public class TeacherService {
         lesson.setTaskIds(new ArrayList<>(new HashSet<>(lesson.getTaskIds())));
         lesson.setGroup(group);
         lesson.setTeacherId(group.getTeacherId());
-        return lessonRepo.save(lesson);
+        return new AllLessonsDTO(lessonRepo.save(lesson));
     }
 
     public ResponseEntity<String> deleteLesson(Long id) {
@@ -222,7 +223,8 @@ public class TeacherService {
         return ResponseEntity.ok().body("Lesson with ID " + id + " was deleted");
     }
 
-    public Lesson updateLesson(Long lessonId, LocalDateTime startTime, LocalDateTime endTime, Long groupId) {
+    @Transactional
+    public LessonDTO updateLesson(Long lessonId, LocalDateTime startTime, LocalDateTime endTime, Long groupId) {
         Lesson lesson = lessonRepo.findById(lessonId)
                 .orElseThrow(() -> new EntityNotFoundException("Lesson with id " + lessonId + " not found"));
 
@@ -233,7 +235,7 @@ public class TeacherService {
         lesson.setEndTime(endTime);
         lesson.setGroupId(group.getId());
 
-        return lessonRepo.save(lesson);
+        return getLessonById(lessonRepo.save(lesson).getId());
     }
 
     @Transactional
@@ -259,7 +261,7 @@ public class TeacherService {
     }
 
     @Transactional
-    public Lesson markAttendance(Long lessonId, List<Long> presentStudentIds) {
+    public MarkAttendanceRequest markAttendance(Long lessonId, List<Long> presentStudentIds) {
         Lesson lesson = lessonRepo.findById(lessonId)
                 .orElseThrow(() -> new EntityNotFoundException("Lesson with id " + lessonId + " not found"));
 
@@ -268,13 +270,6 @@ public class TeacherService {
         }
 
         lesson.setPresentStudentIds(presentStudentIds);
-        return lessonRepo.save(lesson);
-    }
-
-    public List<Student> getStudentsByTeacherId(Long id) {
-        Teacher teacher = teacherRepo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Teacher with id " + id + " not found"));
-
-        return studentRepo.findByTeacherId(teacher.getId());
+        return new MarkAttendanceRequest(lessonRepo.save(lesson));
     }
 }

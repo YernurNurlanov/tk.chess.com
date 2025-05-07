@@ -1,0 +1,658 @@
+:root {
+    --primary-color: #50a6cd; /* Main color for buttons and accents */
+    --secondary-color: #f5f5f5; /* Background color */
+    --text-color: #333; /* Default text color */
+    --white: #fff; /* White color */
+    --gray: #ddd; /* Light gray for borders and placeholders */
+    --dark-gray: #aaa; /* Darker gray for subtle text */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 250px;
+    background: var(--primary-color);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--white);
+    margin-right: 10px;
+}
+
+.user-avatar img {
+    width: 100%;
+    border-radius: 50%;
+}
+
+.username {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--white);
+    margin: 0;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    margin-bottom: 10px;
+}
+
+.nav-item {
+    text-decoration: none;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.nav-item i {
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+.sidebar-divider {
+    width: 80%;
+    margin: 20px auto;
+    border: none;
+}
+
+.sidebar-divider hr {
+    border: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.3);
+    margin: 0;
+}
+
+/* Main Content Styles */
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.btn {
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn:hover {
+    background: #007acc; /* Darker shade for hover effect */
+}
+
+/* Schedule Section */
+.schedule {
+    flex-grow: 1;
+    background: var(--white);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.date-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--primary-color);
+    transition: color 0.3s;
+}
+
+.nav-btn:hover {
+    color: #007acc; /* Darker shade for hover effect */
+}
+
+.current-date {
+    margin: 0;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.view-options {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Calendar Styles */
+.calendar {
+    margin-top: 20px;
+    background: var(--gray);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.time-slot {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.time {
+    width: 50px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.lesson {
+    flex-grow: 1;
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 10px;
+    border-radius: 5px;
+    margin-left: 10px;
+    display: flex;
+    justify-content: space-between; /* Space between text and delete button */
+    align-items: center; /* Vertically center content */
+    position: relative; /* Ensure the delete button is positioned correctly */
+}
+
+/* Delete Button Styles */
+.delete-btn {
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--white); /* White color for visibility */
+    transition: color 0.3s;
+    margin-left: 10px; /* Add some spacing between text and button */
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.delete-btn:hover {
+    color: #ff0000; /* Red color on hover */
+}
+
+.lesson.empty {
+    background: var(--gray);
+    color: var(--dark-gray);
+    font-style: italic;
+}
+
+/* Footer Styles */
+.footer {
+    text-align: center;
+    padding: 20px;
+    background: var(--white);
+    margin-top: 20px;
+    border-top: 1px solid var(--gray);
+}
+
+.footer p {
+    margin: 5px 0;
+    color: var(--text-color);
+    font-size: 14px;
+}
+
+/* Modal Styles */
+/* styles.css */
+.modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    z-index: 1000; /* Ensure the modal is on top of other elements */
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative; /* Ensure the close button is positioned correctly */
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.close-btn:hover {
+    color: var(--primary-color); /* Change color on hover */
+}
+
+/* Modal Title */
+.modal-content h2 {
+    margin-top: 0;
+    font-size: 20px;
+    color: var(--text-color);
+    text-align: center;
+}
+
+/* Form Styles */
+.modal-content form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.modal-content label {
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.modal-content textarea,
+.modal-content select,
+.modal-content input {
+    padding: 10px;
+    border: 1px solid var(--gray);
+    border-radius: 5px;
+    font-size: 14px;
+    color: var(--text-color);
+    background: var(--white);
+    transition: border-color 0.3s;
+}
+
+.modal-content select:focus,
+.modal-content input:focus {
+    border-color: var(--primary-color); /* Highlight on focus */
+    outline: none;
+}
+
+/* Save Button */
+.modal-content .btn {
+    padding: 10px;
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.modal-content .btn:hover {
+    background: #007acc; /* Darker shade on hover */
+}
+
+/* Lesson Type Styles */
+.lesson.individual {
+    background: #50a6cd; /* Blue for individual lessons */
+}
+
+.lesson.group {
+    background: #4caf50; /* Green for group lessons */
+}
+
+/* Confirmation Modal Styles */
+#confirmModal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    justify-content: center;
+    align-items: center;
+    z-index: 1001; /* Ensure it's above other modals */
+}
+
+#confirmModal .modal-content {
+    background: var(--white);
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+#confirmModal h2 {
+    margin-top: 0;
+    font-size: 20px;
+    color: var(--text-color);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-actions .btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+
+#confirmDeleteBtn {
+    background-color: #ff4d4d; /* Red for delete action */
+    color: var(--white);
+}
+
+#confirmDeleteBtn:hover {
+    background-color: #cc0000; /* Darker red on hover */
+}
+
+#cancelDeleteBtn {
+    background-color: var(--gray); /* Gray for cancel action */
+    color: var(--text-color);
+}
+
+#cancelDeleteBtn:hover {
+    background-color: #bbb; /* Darker gray on hover */
+}
+
+/* Admin Panel Styles */
+/* UsersTable Styles */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.table-row {
+    display: flex;
+    border-bottom: 1px solid var(--gray);
+    padding: 10px 0;
+}
+
+.table-row.header {
+    font-weight: bold;
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+.table-cell {
+    flex: 1;
+    padding: 10px;
+}
+
+/* Action Buttons */
+.actions {
+    display: flex;
+    gap: 10px; /* Space between buttons */
+    align-items: center; /* Vertically center buttons */
+}
+
+.btn-attach {
+    background-color: #4caf50; /* Green for attach action */
+    color: var(--white);
+}
+
+.btn-update {
+    background-color: #50a6cd; /* Blue for update action */
+    color: var(--white);
+}
+
+.btn-delete {
+    background-color: #ff4d4d; /* Red for delete action */
+    color: var(--white);
+}
+
+.btn-attach:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
+
+.btn-update:hover {
+    background-color: #007acc; /* Darker blue on hover */
+}
+
+.btn-delete:hover {
+    background-color: #cc0000; /* Darker red on hover */
+}
+.nav-item.active {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* My Students Tab Styles */
+.students-list {
+    background: var(--white);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.students-list h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.students-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gray);
+}
+
+.student-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gray);
+}
+
+.student-row:last-child {
+    border-bottom: none;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    color: #ff4d4d;
+    cursor: pointer;
+    font-size: 14px;
+    transition: color 0.3s;
+}
+
+.delete-btn:hover {
+    color: #cc0000;
+}
+
+/* My Groups Tab Styles */
+/* My Groups Tab Styles */
+.groups-list {
+    padding: 20px;
+}
+
+.group-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Increase gap between group cards */
+}
+
+.group-card {
+    background: var(--white);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add stronger shadow */
+    padding: 20px;
+    width: 300px;
+    position: relative;
+    border: 2px solid var(--primary-color); /* Use primary color for border */
+    transition: transform 0.3s, box-shadow 0.3s; /* Add hover effect */
+}
+
+.group-card:hover {
+    transform: translateY(-5px); /* Lift card on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Enhance shadow on hover */
+}
+
+.group-card h2 {
+    margin: 0 0 10px 0;
+    font-size: 20px;
+    display: flex;
+    justify-content: space-between; /* Align group name and delete button */
+    align-items: center; /* Vertically center the delete button */
+}
+
+.group-level {
+    font-size: 14px;
+    color: var(--dark-gray);
+}
+
+.group-students {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.group-students li {
+    padding: 5px 0;
+    border-bottom: 1px solid var(--gray);
+}
+
+.group-students li:last-child {
+    border-bottom: none;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--text-color);
+    transition: color 0.3s;
+    padding: 0; /* Remove padding to ensure proper alignment */
+    margin: 0; /* Remove margin to ensure proper alignment */
+}
+
+.delete-btn:hover {
+    color: #ff4d4d;
+}
+
+/* Login Page Specific Styles */
+.login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--secondary-color);
+}
+
+.login h2 {
+    font-size: 24px;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+#login-form {
+    background: var(--white);
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+#login-form label {
+    display: block;
+    margin-bottom: 15px;
+}
+
+#login-form input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--gray);
+    border-radius: 5px;
+    font-size: 16px;
+    margin-top: 5px;
+}
+
+#login-form input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+#login-form button {
+    width: 100%;
+    padding: 10px;
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#login-form button:hover {
+    background: #007acc;
+}
+
+/* Additional Styles for Aesthetic Enhancements */
+.login .form-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: var(--dark-gray);
+}
+
+.login .form-footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.login .form-footer a:hover {
+    color: #007acc;
+}

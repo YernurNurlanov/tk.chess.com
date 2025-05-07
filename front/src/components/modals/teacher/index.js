@@ -1,0 +1,9 @@
+export { default as AddLessonModal } from "./AddLessonModal.jsx";
+export { default as UpdateLessonModal } from "./UpdateLessonModal.jsx";
+export { default as DeleteLessonModal } from "./DeleteLessonModal.jsx";
+export { default as AddTaskModal } from "./AddTaskModal.jsx";
+export { default as AddGroupModal } from "./AddGroupModal";
+export { default as DeleteGroupModal } from "./DeleteGroupModal";
+export { default as UpdateGroupNameModal } from "./UpdateGroupNameModal";
+export { default as AddStudentToGroupModal } from "./AddStudentToGroupModal";
+export { default as DeleteStudentFromGroupModal } from "./DeleteStudentFromGroupModal";

@@ -58,19 +58,14 @@ public class AdminController {
         return studentRepo.findAll();
     }
 
-    @PostMapping("/attach")
-    public Student attachStudentToTeacher(@RequestBody AttachStudentRequest request) {
+    @PutMapping("/attach")
+    public Student attachStudentToTeacher(@Valid @RequestBody AttachStudentRequest request) {
         return adminService.attachStudentToTeacher(request.getId(), request.getStudentId());
     }
 
-    @PostMapping("/detach/{id}")
+    @PutMapping("/detach/{id}")
     public Student detachStudentFromTeacher(@PathVariable Long id) {
         return adminService.detachStudentFromTeacher(id);
-    }
-
-    @GetMapping("/{id}")
-    public List<Student> getStudentsByTeacherId(@PathVariable Long id) {
-        return adminService.getStudentsByTeacherId(id);
     }
 
     @PostMapping("/tasks")

@@ -1,6 +1,7 @@
 package com.chess.tk.exception;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -73,5 +75,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(StudentAlreadyInGroupException.class)
     public ResponseEntity<String> handleStudentAlreadyInGroup(StudentAlreadyInGroupException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        Map<String, String> errors = new HashMap<>();
+        String msg = ex.getRootCause() != null ? ex.getRootCause().getMessage().toLowerCase() : "";
+
+        if (msg.contains("email")) {
+            errors.put("email", "Email already exists");
+        } else if (msg.contains("phone")) {
+            errors.put("phone", "Phone number already exists");
+        } else {
+            errors.put("error", "Data integrity error");
+        }
+
+        return ResponseEntity.badRequest().body(errors);
     }
 }
