@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from '../styles/LoginPage.module.css';
+import styles from '../styles/loginPage.module.css';
+import axios from "../axiosInstance.js";
 
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -11,31 +12,28 @@ const LoginPage = () => {
         const data = Object.fromEntries(formData.entries());
 
         try {
-            const res = await fetch("http://localhost:8080/auth/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify(data),
-            });
+            const res = await axios.post(`/auth/`, data);
 
-            if (res.ok) {
-                const result = await res.json();
-                switch (result.role) {
-                    case 'ROLE_ADMIN':
-                        navigate('/admin');
-                        break;
-                    case 'ROLE_TEACHER':
-                        navigate('/teacher');
-                        break;
-                    default:
-                        navigate('/');
-                }
-            } else {
-                const responseText = await res.text();
-                alert("Login failed:\n" + responseText);
+            switch (res.data.role) {
+                case 'ROLE_ADMIN':
+                    navigate('/admin');
+                    break;
+                case 'ROLE_TEACHER':
+                    navigate('/teacher');
+                    break;
+                case 'ROLE_STUDENT':
+                    navigate('/student');
+                    break;
+                default:
+                    navigate('/');
             }
         } catch (error) {
-            alert('Error: ' + error.message);
+            const validationErrors = error.response.data;
+            const message = Object.entries(validationErrors)
+                .map(([field, msg]) => `${field}: ${msg}`)
+                .join('\n');
+
+            alert('Validation errors:\n' + message);
         }
     };
 

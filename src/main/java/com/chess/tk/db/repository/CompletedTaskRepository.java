@@ -9,5 +9,6 @@ import java.util.List;
 @Repository
 public interface CompletedTaskRepository extends JpaRepository<CompletedTask, Long> {
     List<CompletedTask> findByStudentIdAndTaskIdIn(Long studentId, List<Long> taskIds);
+    CompletedTask findByStudentIdAndTaskId(Long studentId, Long taskId);
     List<CompletedTask> findByStudentId(Long studentId);
 }

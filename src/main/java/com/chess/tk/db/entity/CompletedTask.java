@@ -1,6 +1,8 @@
 package com.chess.tk.db.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -23,6 +25,8 @@ public class CompletedTask {
     @Column(name = "task_id")
     private Long taskId;
 
+    @Min(0)
+    @Max(3)
     @Column(name = "attempt_number")
     private int attemptNumber;
 

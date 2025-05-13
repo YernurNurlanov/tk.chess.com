@@ -1,6 +1,6 @@
-package com.chess.tk.db.repositories;
+package com.chess.tk.db.repository;
 
-import com.chess.tk.db.entities.Student;
+import com.chess.tk.db.entity.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
