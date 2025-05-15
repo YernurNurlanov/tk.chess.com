@@ -1,13 +1,12 @@
 import React, {useEffect, useState} from "react";
-import AdminSidebar from "../components/AdminSidebar"; // Import AdminSidebar
+import AdminSidebar from "../components/AdminSidebar";
 import Modal from "../components/Modal";
 import UsersTable from "../components/UsersTable";
 import TasksTable from "../components/TasksTable";
-import "../styles.css";
-import axios from "axios";
+import axios from "../axiosInstance.js";
+import CheckTaskModal from "../components/modals/teacher/lesson/CheckTaskModal.jsx";
 
 const AdminPage = () => {
-    const url = import.meta.env.VITE_API_URL;
     const [activeTab, setActiveTab] = useState("students");
     const [isAddStudentModalOpen, setAddStudentModalOpen] = useState(false);
     const [isUpdateStudentModalOpen, setUpdateStudentModalOpen] = useState(false);
@@ -27,14 +26,13 @@ const AdminPage = () => {
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [selectedTeacher, setSelectedTeacher] = useState(null);
     const [selectedTask, setSelectedTask] = useState(null);
+    const [isCheckTaskModalOpen ,setCheckTaskModalOpen] = useState(false);
 
     useEffect(() => {
 
         const fetchStudents = async () => {
             try {
-                const response = await axios.get(`${url}/admin/students`, {
-                    withCredentials: true,
-                });
+                const response = await axios.get(`/admin/students`);
                 setStudents(response.data);
                 console.log("Students received");
             } catch (error) {
@@ -44,9 +42,7 @@ const AdminPage = () => {
 
         const fetchTeachers = async () => {
             try {
-                const response = await axios.get(`${url}/admin/teachers`, {
-                    withCredentials: true,
-                });
+                const response = await axios.get(`/admin/teachers`);
                 setTeachers(response.data);
                 console.log("Teachers received");
             } catch (error) {
@@ -56,9 +52,7 @@ const AdminPage = () => {
 
         const fetchTasks = async () => {
             try {
-                const response = await axios.get(`${url}/tasks`, {
-                    withCredentials: true,
-                });
+                const response = await axios.get(`/tasks`);
                 setTasks(response.data);
                 console.log("Tasks received");
             }  catch(error) {
@@ -73,11 +67,9 @@ const AdminPage = () => {
 
     const handleAddStudent = async (newStudent) => {
         try {
-            await axios.post(`${url}/admin/students`, newStudent, {
-                withCredentials: true,
-            });
-            // After successful deletion, update the state to remove the teacher from the list
+            await axios.post(`/admin/students`, newStudent);
             setStudents([...students, {id: students.length + 1, ...newStudent}]);
+            alert("Student added successfully!")
             setAddStudentModalOpen(false);
         } catch (error) {
             const validationErrors = error.response.data;
@@ -90,7 +82,6 @@ const AdminPage = () => {
         }
     };
 
-    // Update Student
     const handleUpdateStudent = async (updatedStudent) => {
         try {
             await axios.put(`http://localhost:8080/admin/`, updatedStudent, {
@@ -120,11 +111,8 @@ const AdminPage = () => {
 
     const handleDeleteStudent = async () => {
         try {
-            const response = await axios.delete(`${url}/admin/${selectedStudent.id}`, {
-                withCredentials: true,
-            });
+            const response = await axios.delete(`/admin/${selectedStudent.id}`);
             alert(response.data);
-            // After successful deletion, update the state to remove the teacher from the list
             setStudents(students.filter((student) => student.id !== selectedStudent.id));
             setDeleteStudentModalOpen(false);
         } catch (error) {
@@ -132,13 +120,9 @@ const AdminPage = () => {
         }
     };
 
-    // Assign Teacher
     const handleAssignTeacher = async (request) => {
         try {
-            await axios.put(`${url}/admin/attach`, request, {
-                withCredentials: true,
-            });
-            // After successful deletion, update the state to remove the teacher from the list
+            await axios.put(`/admin/attach`, request);
             selectedStudent.teacherId = request.id;
             setAssignTeacherModalOpen(false);
         } catch (error) {
@@ -155,9 +139,7 @@ const AdminPage = () => {
 
     const handleDetachStudent = async () => {
         try {
-            await axios.put(`${url}/admin/detach/${selectedStudent.id}`, "", {
-                withCredentials: true,
-            });
+            await axios.put(`/admin/detach/${selectedStudent.id}`);
             alert("Student detached successfully");
             selectedStudent.teacherId = null;
             setDetachStudentModalOpen(false);
@@ -170,10 +152,7 @@ const AdminPage = () => {
 
     const handleAddTeacher = async (newTeacher) => {
         try {
-            await axios.post(`${url}/admin/teachers`, newTeacher, {
-                withCredentials: true,
-            });
-            // After successful deletion, update the state to remove the teacher from the list
+            await axios.post(`/admin/teachers`, newTeacher);
             setTeachers([...teachers, {id: teachers.length + 1, ...newTeacher}]);
             setAddTeacherModalOpen(false);
         } catch (error) {
@@ -187,7 +166,6 @@ const AdminPage = () => {
         }
     };
 
-    // Update Teacher
     const handleUpdateTeacher = async (updatedTeacher) => {
         try {
             await axios.put(`http://localhost:8080/admin/`, updatedTeacher,{
@@ -217,11 +195,8 @@ const AdminPage = () => {
 
     const handleDeleteTeacher = async () => {
         try {
-            const response = await axios.delete(`${url}/admin/${selectedTeacher.id}`, {
-                withCredentials: true,
-            });
+            const response = await axios.delete(`/admin/${selectedTeacher.id}`);
             alert(response.data);
-            // After successful deletion, update the state to remove the teacher from the list
             setTeachers(teachers.filter((teacher) => teacher.id !== selectedTeacher.id));
             setDeleteTeacherModalOpen(false);
         } catch (error) {
@@ -231,11 +206,8 @@ const AdminPage = () => {
 
     const handleDeleteTask = async () => {
         try {
-            const response = await axios.delete(`${url}/admin/tasks/${selectedTask.id}`, {
-                withCredentials: true,
-            });
+            const response = await axios.delete(`/admin/tasks/${selectedTask.id}`);
             alert(response.data);
-            // After successful deletion, update the state to remove the teacher from the list
             setTasks(tasks.filter((task) => task.id !== selectedTask.id));
             setDeleteTaskModalOpen(false);
         } catch (error) {
@@ -245,10 +217,7 @@ const AdminPage = () => {
 
     const handleAddTask = async (newTask) => {
         try {
-            await axios.post(`${url}/admin/tasks`, newTask, {
-                withCredentials: true,
-            });
-            // After successful deletion, update the state to remove the teacher from the list
+            await axios.post(`/admin/tasks`, newTask);
             setTasks([...tasks, {id: tasks.length + 1, ...newTask}]);
             setAddTaskModalOpen(false);
         } catch (error) {
@@ -265,7 +234,7 @@ const AdminPage = () => {
     return (
         <div className="container">
             <AdminSidebar
-                onTabChange={(tab) => setActiveTab(tab)} // Pass the tab change handler
+                onTabChange={(tab) => setActiveTab(tab)}
                 onLogout={() =>
                     window.location.href = "/auth"
                 }
@@ -339,6 +308,10 @@ const AdminPage = () => {
                             setSelectedTask(task)
                             setDeleteTaskModalOpen(true);
                         }}
+                        onCheck={(task) => {
+                            setSelectedTask(task)
+                            setCheckTaskModalOpen(true);
+                        }}
                     />
                 )}
             </main>
@@ -363,11 +336,7 @@ const AdminPage = () => {
                                     lastPayment: formData.get("lastPayment")
                                 }
                             };
-                            handleAddStudent(newStudent)
-                                .then(() => alert("Student added successfully!"))
-                                .catch((error) => {
-                                    console.error("Failed to add student:", error);
-                                });
+                            handleAddStudent(newStudent).then();
                         }}
                     >
                         <label htmlFor="firstName">First Name:</label>
@@ -467,7 +436,7 @@ const AdminPage = () => {
                         onSubmit={(e) => {
                             e.preventDefault();
                             const formData = new FormData(e.target);
-                            const request ={
+                            const request = {
                                 id: formData.get("teacherID"),
                                 studentId: selectedStudent.id,
                             };
@@ -478,8 +447,14 @@ const AdminPage = () => {
                                 });
                         }}
                     >
-                        <label htmlFor="teacherID">Teacher ID:</label>
-                        <input type="number" id="teacherID" name="teacherID"/>
+                        <label htmlFor="teacherID">Teacher Name:</label>
+                        <select id="teacherID" name="teacherID" required>
+                            {teachers.map((teacher) => (
+                                <option key={teacher.id} value={teacher.id}>
+                                    {teacher.user.firstName} {teacher.user.lastName}
+                                </option>
+                            ))}
+                        </select>
                         <button type="submit" className="btn">
                             Assign
                         </button>
@@ -698,6 +673,13 @@ const AdminPage = () => {
                         </button>
                     </div>
                 </Modal>
+            )}
+
+            {isCheckTaskModalOpen && (
+                <CheckTaskModal
+                    onClose={() => setCheckTaskModalOpen(false)}
+                    selectedTask={selectedTask}
+                />
             )}
         </div>
     );

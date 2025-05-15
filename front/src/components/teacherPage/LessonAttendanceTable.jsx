@@ -1,3 +1,5 @@
+import React from 'react';
+
 const LessonAttendanceTable = ({ studentInfoDTOs, setSelectedLesson, selectedLesson, handleSubmitAttendance }) => {
 
     const handleCheckboxChange = (studentId, checked) => {

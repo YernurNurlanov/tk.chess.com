@@ -17,7 +17,7 @@ body {
 
 .container {
     display: flex;
-    width: 100%;
+    min-width: calc(100vw - 20px);
     min-height: 100vh;
 }
 
@@ -100,15 +100,21 @@ nav ul li {
 /* Main Content Styles */
 .main-content {
     flex-grow: 1;
+    display: flex;
     padding: 20px;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.content-wrapper {
     display: flex;
     flex-direction: column;
+    flex: 1;
 }
 
 .header {
     display: flex;
     gap: 10px;
-    margin-bottom: 20px;
 }
 
 .btn {
@@ -200,22 +206,6 @@ nav ul li {
     position: relative; /* Ensure the delete button is positioned correctly */
 }
 
-/* Delete Button Styles */
-.delete-btn {
-    cursor: pointer;
-    font-size: 18px;
-    color: var(--white); /* White color for visibility */
-    transition: color 0.3s;
-    margin-left: 10px; /* Add some spacing between text and button */
-    background: none;
-    border: none;
-    padding: 0;
-}
-
-.delete-btn:hover {
-    color: #ff0000; /* Red color on hover */
-}
-
 .lesson.empty {
     background: var(--gray);
     color: var(--dark-gray);
@@ -256,9 +246,13 @@ nav ul li {
     background-color: white;
     padding: 20px;
     border-radius: 8px;
-    width: 300px;
+    width: 500px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     position: relative; /* Ensure the close button is positioned correctly */
+}
+
+input[type="datetime-local"] {
+    padding-right: 1.5rem; /* чтобы пиктограмма не обрезалась */
 }
 
 .close-btn {
@@ -400,16 +394,16 @@ nav ul li {
     background-color: #bbb; /* Darker gray on hover */
 }
 
-/* Admin Panel Styles */
-/* UsersTable Styles */
 .table {
-    width: 100%;
+    display: table;
+    min-width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    border-color: black;
 }
 
 .table-row {
-    display: flex;
+    display: table-row;
+    min-width: 100%;
     border-bottom: 1px solid var(--gray);
     padding: 10px 0;
 }
@@ -418,18 +412,23 @@ nav ul li {
     font-weight: bold;
     background: var(--primary-color);
     color: var(--white);
+    top: 0;
 }
 
 .table-cell {
+    display: table-cell;
+    min-width: 50px;
     flex: 1;
     padding: 10px;
+    border: 1px solid black;
 }
 
 /* Action Buttons */
 .actions {
     display: flex;
-    gap: 10px; /* Space between buttons */
-    align-items: center; /* Vertically center buttons */
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
 }
 
 .btn-attach {
@@ -465,6 +464,7 @@ nav ul li {
 /* My Students Tab Styles */
 .students-list {
     background: var(--white);
+    margin: 20px;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -472,7 +472,6 @@ nav ul li {
 
 .students-list h1 {
     font-size: 24px;
-    margin-bottom: 20px;
 }
 
 .students-header {
@@ -493,19 +492,6 @@ nav ul li {
 
 .student-row:last-child {
     border-bottom: none;
-}
-
-.delete-btn {
-    background: none;
-    border: none;
-    color: #ff4d4d;
-    cursor: pointer;
-    font-size: 14px;
-    transition: color 0.3s;
-}
-
-.delete-btn:hover {
-    color: #cc0000;
 }
 
 /* My Groups Tab Styles */
@@ -563,6 +549,13 @@ nav ul li {
 .group-students li:last-child {
     border-bottom: none;
 }
+{/*For lesson deletion*/}
+.delete-btn-wrapper {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    z-index: 3;
+}
 
 .delete-btn {
     background: none;
@@ -571,88 +564,10 @@ nav ul li {
     cursor: pointer;
     color: var(--text-color);
     transition: color 0.3s;
-    padding: 0; /* Remove padding to ensure proper alignment */
-    margin: 0; /* Remove margin to ensure proper alignment */
+    padding: 0;
+    margin: 0;
 }
 
 .delete-btn:hover {
     color: #ff4d4d;
-}
-
-/* Login Page Specific Styles */
-.login {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: var(--secondary-color);
-}
-
-.login h2 {
-    font-size: 24px;
-    color: var(--primary-color);
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-#login-form {
-    background: var(--white);
-    padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-}
-
-#login-form label {
-    display: block;
-    margin-bottom: 15px;
-}
-
-#login-form input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid var(--gray);
-    border-radius: 5px;
-    font-size: 16px;
-    margin-top: 5px;
-}
-
-#login-form input:focus {
-    border-color: var(--primary-color);
-    outline: none;
-}
-
-#login-form button {
-    width: 100%;
-    padding: 10px;
-    background-color: var(--primary-color);
-    color: var(--white);
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-#login-form button:hover {
-    background: #007acc;
-}
-
-/* Additional Styles for Aesthetic Enhancements */
-.login .form-footer {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 14px;
-    color: var(--dark-gray);
-}
-
-.login .form-footer a {
-    color: var(--primary-color);
-    text-decoration: none;
-    transition: color 0.3s;
-}
-
-.login .form-footer a:hover {
-    color: #007acc;
 }

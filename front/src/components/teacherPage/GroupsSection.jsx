@@ -1,3 +1,5 @@
+import React from 'react';
+
 const GroupsSection = ({groups, handleGetGroupPage, setSelectedGroup, setDeleteGroupModalOpen }) => {
 
     return (

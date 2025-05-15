@@ -19,12 +19,12 @@ export function handleError(error, contextMessage = 'Ошибка') {
             finalMessage += `:\n${data}`;
         }
         else {
-            finalMessage += `: Неизвестный формат ошибки`;
+            finalMessage += `: Unknown error format`;
         }
     } else {
-        finalMessage += `: ${error.message || 'Неизвестная ошибка'}`;
+        finalMessage += `: ${error.message || 'Unknown error'}`;
     }
 
-    alert(finalMessage);
+    alert(finalMessage, "error");
     console.error(`[${contextMessage}]`, error);
 }

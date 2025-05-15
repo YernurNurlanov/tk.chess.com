@@ -1,4 +1,6 @@
-const LessonTasksTable = ({ tasks }) => (
+import React from 'react';
+
+const LessonTasksTable = ({ tasks, onCheck }) => (
     <div className="table">
         <div className="table-row header">
             <div className="table-cell">ID</div>
@@ -12,7 +14,7 @@ const LessonTasksTable = ({ tasks }) => (
                 <div className="table-cell">{task.level}</div>
                 <div className="table-cell">{task.topic}</div>
                 <div className="table-cell actions">
-                    <button className="btn btn-delete" onClick={() => alert("do not work")}>
+                    <button className="btn btn-delete" onClick={() => onCheck(task)}>
                         <i className="fas fa-trash"></i>Check
                     </button>
                 </div>

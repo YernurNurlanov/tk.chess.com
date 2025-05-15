@@ -1,16 +1,45 @@
-version: "4.32"
+version: '3.8'
 
 services:
   postgres:
     image: postgres:16
+    container_name: postgres
     environment:
       - POSTGRES_DB=tk.chess.com
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=1118793421
+      - POSTGRES_PASSWORD=123
     ports:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+
+  backend:
+    build: ./backend
+    container_name: backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/tk.chess.com
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 123
+    depends_on:
+      - postgres
+
+#  frontend:
+#    build: ./front
+#    container_name: frontend
+#    ports:
+#      - "5173:5173"
+#      - "3001:3001"
+#    stdin_open: true
+#    tty: true
+#    volumes:
+#      - ./front:/app
+#    environment:
+#      - NODE_ENV=production
+#    depends_on:
+#      - backend
 
 volumes:
   db_data:

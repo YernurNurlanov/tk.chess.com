@@ -4,7 +4,7 @@ import { Server } from 'socket.io';
 import ACTIONS from './src/socket/actions.js';
 import {Chess} from "chess.js";
 
-const PORT = process.env.PORT || 3001;
+const PORT = 3001;
 const HOST = process.env.VITE_SERVER_URL || "localhost";
 
 const app = express();

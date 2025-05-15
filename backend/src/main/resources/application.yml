@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tk.chess.com
+    username: postgres
+    password: 123
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8080
+
+token:
+  signing:
+    key: ee4ef586e804e9660287ff112513fd3cb82a0e8ff9775592e812863ef337b076

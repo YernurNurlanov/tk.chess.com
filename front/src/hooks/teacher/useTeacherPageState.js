@@ -8,6 +8,10 @@ const useTeacherPageState = () => {
     const [isAddLessonModalOpen, setAddLessonModalOpen] = useState(false);
     const [isDeleteLessonModalOpen, setDeleteLessonModalOpen] = useState(false);
     const [isUpdateLessonModalOpen, setUpdateLessonModalOpen] = useState(false);
+
+    const [tasks, setTasks] = useState(null);
+    const [selectedTask, setSelectedTask] = useState(null);
+    const [isCheckTaskModalOpen ,setCheckTaskModalOpen] = useState(false);
     const [isAddTaskModalOpen, setAddTaskModalOpen] = useState(false);
 
     const [students, setStudents] = useState([]);
@@ -28,6 +32,9 @@ const useTeacherPageState = () => {
         isAddLessonModalOpen, setAddLessonModalOpen,
         isDeleteLessonModalOpen, setDeleteLessonModalOpen,
         isUpdateLessonModalOpen, setUpdateLessonModalOpen,
+        tasks, setTasks,
+        selectedTask, setSelectedTask,
+        isCheckTaskModalOpen ,setCheckTaskModalOpen,
         isAddTaskModalOpen, setAddTaskModalOpen,
         students, setStudents,
         selectedStudent, setSelectedStudent,

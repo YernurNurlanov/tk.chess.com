@@ -6,7 +6,7 @@ const AdminSidebar = ({ onTabChange, onLogout }) => {
         <aside className="sidebar">
             <div className="sidebar-header">
                 <div className="user-avatar">
-                    <img src="avatar.png" alt="User Avatar" />
+                    <img src="../../public/avatar.jpeg" alt="User Avatar" />
                 </div>
                 <h2 className="username">Profile</h2>
             </div>
@@ -16,7 +16,7 @@ const AdminSidebar = ({ onTabChange, onLogout }) => {
                         <a
                             href="#"
                             className="nav-item"
-                            onClick={() => onTabChange("students")} // Pass "students" to onTabChange
+                            onClick={() => onTabChange("students")}
                         >
                             <i className="fas fa-users"></i>Students
                         </a>
@@ -25,7 +25,7 @@ const AdminSidebar = ({ onTabChange, onLogout }) => {
                         <a
                             href="#"
                             className="nav-item"
-                            onClick={() => onTabChange("teachers")} // Pass "teachers" to onTabChange
+                            onClick={() => onTabChange("teachers")}
                         >
                             <i className="fas fa-chalkboard-teacher"></i>Teachers
                         </a>
