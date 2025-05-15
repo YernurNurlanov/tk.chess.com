@@ -46,7 +46,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> handleRuntimeException(RuntimeException ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage()); // TODO: Потом поменять вывод
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage()); // TODO: Потом поменять
+                                                                                              // вывод
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
