@@ -2,7 +2,7 @@ import React from "react";
 
 
 const UsersTable = ({ data, onUpdate, onDelete, onAttach, onDetach }) => {
-    const isStudent = (row) => row.hasOwnProperty("teacherId");
+    const isStudent = (row) => Object.prototype.hasOwnProperty.call(row, "teacherId");
 
   return (
     <div className="table">

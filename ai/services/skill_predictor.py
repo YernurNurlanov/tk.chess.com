@@ -11,7 +11,7 @@ class SkillPredictor:
         lines = [m["line"] for m in move_analyses]
         avg_line = np.mean(lines)
 
-        # Simple skill level mapping
+        # Simple skill level mappi
         if avg_line < 1.5:
             level = "expert"
         elif avg_line < 2.5:
