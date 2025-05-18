@@ -164,6 +164,11 @@ const TasksSection = ({ studentId, selectedLesson, lessonTasks, setLessonTasks }
                            setLessonTasks={setLessonTasks}
                 />
             ))}
+            {!selectedLesson && !lessonTasks && (
+                <p style={{color: "gray", fontStyle: "italic"}}>
+                    There are no homework yet.
+                </p>
+            )}
         </section>
     );
 };

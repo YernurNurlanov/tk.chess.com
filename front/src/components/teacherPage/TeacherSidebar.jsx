@@ -1,14 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const TeacherSidebar = ({ activeTab, setActiveTab, onLogout }) => {
+const TeacherSidebar = ({ currentUser, activeTab, setActiveTab, onLogout }) => {
     return (
         <aside className="sidebar">
             <div className="sidebar-header">
                 <div className="user-avatar">
                     <img src="../../../public/avatar.jpeg" alt="User Avatar" />
                 </div>
-                <h2 className="username">Profile</h2>
+                {currentUser && <h2 className="username">{currentUser.firstName} {currentUser.lastName}</h2>}
             </div>
             <nav>
                 <ul>

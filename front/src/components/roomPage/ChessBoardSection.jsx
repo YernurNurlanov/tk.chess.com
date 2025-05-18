@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Chessboard } from 'react-chessboard';
-import { Chess } from 'chess.js';
+import React, {useEffect, useState} from 'react';
+import {Chessboard} from 'react-chessboard';
+import {Chess} from 'chess.js';
 import socket from '../../socket';
 import ACTIONS from "../../socket/actions.js";
 
 export default function ChessBoardSection({ roomID }) {
     const [game, setGame] = useState(new Chess());
     const [fen, setFen] = useState('start');
-    const [gameOverMessage, setGameOverMessage] = useState(null);
 
     useEffect(() => {
         const handleMove = ({ fen }) => {
@@ -22,42 +21,39 @@ export default function ChessBoardSection({ roomID }) {
             setFen(fen);
         };
 
+        const handleGameOver = ({ message }) => {
+            alert(message);
+        }
+
         socket.on('chess-move', handleMove);
         socket.on(ACTIONS.CHESS_STATE, handleState);
+        socket.on('chess-game-over', handleGameOver);
 
         return () => {
             socket.off(ACTIONS.CHESS_MOVE, handleMove);
             socket.off(ACTIONS.CHESS_STATE, handleState);
+            socket.off(ACTIONS.CHESS_GAME_OVER, handleGameOver);
         };
     }, []);
 
     const checkGameOver = (gameInstance) => {
+        let message = null;
+
         if (gameInstance.isGameOver()) {
             if (gameInstance.isCheckmate()) {
-                const winner = gameInstance.turn() === 'w' ? 'Чёрные' : 'Белые';
-                setGameOverMessage(`${winner} победили (мат)`);
+                    message = gameInstance.turn() === 'w' ? 'Black wins (checkmate)' : 'White wins (checkmate)';
             } else if (gameInstance.isStalemate()) {
-                setGameOverMessage('Пат (ничья)');
+                message = 'Stalemate (draw)';
             } else if (gameInstance.isDraw()) {
-                setGameOverMessage('Ничья');
+                message = 'Draw';
             } else {
-                setGameOverMessage('Игра окончена');
+                message = 'Game over';
             }
-        } else {
-            setGameOverMessage(null);
+            if (message) {
+                alert(message);
+                socket.emit(ACTIONS.CHESS_GAME_OVER, { roomID, message });
+            }
         }
-    };
-
-    const handleReset = () => {
-        const newGame = new Chess();
-        setGame(newGame);
-        setFen(newGame.fen());
-        setGameOverMessage(null); // убрать надпись о завершении
-
-        socket.emit(ACTIONS.CHESS_RESET, {
-            roomID,
-            fen: newGame.fen(),
-        });
     };
 
     const onDrop = (sourceSquare, targetSquare) => {
@@ -91,49 +87,13 @@ export default function ChessBoardSection({ roomID }) {
     };
 
     return (
-        <div style={{
-            position: 'absolute',
-            left: "4rem",
-            top: 0,
-            width: '50vw',
-            height: '100vh',
-            background: '#f0f0f0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-        }}>
+        <div>
             <Chessboard
                 id="BasicBoard"
                 position={fen}
                 onPieceDrop={onDrop}
                 boardWidth={700}
             />
-            {gameOverMessage && (
-                <div style={{
-                    marginTop: '1rem',
-                    fontSize: '1.5rem',
-                    fontWeight: 'bold',
-                    color: 'red',
-                }}>
-                    {gameOverMessage}
-                </div>
-            )}
-
-            <button
-                onClick={handleReset}
-                style={{
-                    marginTop: '1rem',
-                    padding: '0.5rem 1rem',
-                    fontSize: '1rem',
-                    backgroundColor: '#007bff',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer'
-                }}
-            >
-                Начать заново
-            </button>
         </div>
     );
 }

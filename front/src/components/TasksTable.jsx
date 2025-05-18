@@ -16,7 +16,7 @@ const TasksTable = ({ data, onDelete, onCheck }) => {
     };
 
     const renderHeaderPath = () => {
-        const path = ["Уровни"];
+        const path = ["Levels"];
         if (selectedLevel) path.push(selectedLevel.level);
         if (selectedTopic) path.push(selectedTopic.topic);
         return path.join(" / ");
@@ -31,7 +31,7 @@ const TasksTable = ({ data, onDelete, onCheck }) => {
                         onClick={selectedTopic ? resetToTopics : resetToLevels}
                         style={{ marginRight: '1rem' }}
                     >
-                        ◀ Назад
+                        ◀ Back
                     </button>
                 )}
                 <span className="table-path">{renderHeaderPath()}</span>
@@ -62,7 +62,6 @@ const TasksTable = ({ data, onDelete, onCheck }) => {
                 )}
             </div>
 
-            {/* Уровни */}
             {!selectedLevel &&
                 data.map((levelData) => (
                     <div
@@ -71,11 +70,10 @@ const TasksTable = ({ data, onDelete, onCheck }) => {
                         onClick={() => setSelectedLevel(levelData)}
                     >
                         <div className="table-cell">{levelData.level}</div>
-                        <div className="table-cell">▶ Смотреть темы</div>
+                        <div className="table-cell">▶ Look topics</div>
                     </div>
                 ))}
 
-            {/* Темы */}
             {selectedLevel && !selectedTopic &&
                 selectedLevel.topics.map((topicData) => (
                     <div
@@ -84,11 +82,10 @@ const TasksTable = ({ data, onDelete, onCheck }) => {
                         onClick={() => setSelectedTopic(topicData)}
                     >
                         <div className="table-cell">{topicData.topic}</div>
-                        <div className="table-cell">▶ Смотреть задания</div>
+                        <div className="table-cell">▶ Look tasks</div>
                     </div>
                 ))}
 
-            {/* Задания */}
             {selectedTopic &&
                 selectedTopic.tasks.map((task) => (
                     <div key={task.id} className="table-row">
@@ -101,7 +98,7 @@ const TasksTable = ({ data, onDelete, onCheck }) => {
                             </button>
                             {onDelete && (
                                 <button className="btn btn-delete" onClick={() => onDelete(task)}>
-                                    🗑 Удалить
+                                    🗑 Delete
                                 </button>
                             )}
                         </div>

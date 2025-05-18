@@ -241,7 +241,7 @@ CREATE TABLE public.users (
                               password character varying(255) NOT NULL,
                               phone character varying(255) NOT NULL,
                               role character varying(255) NOT NULL,
-                              CONSTRAINT users_role_check CHECK (((role)::text = ANY ((ARRAY['ROLE_ADMIN'::character varying, 'ROLE_TEACHER'::character varying, 'ROLE_STUDENT'::character varying])::text[])))
+                              CONSTRAINT users_role_check CHECK (((role)::text = ANY (ARRAY[('ROLE_ADMIN'::character varying)::text, ('ROLE_TEACHER'::character varying)::text, ('ROLE_STUDENT'::character varying)::text])))
 );
 
 
@@ -308,6 +308,8 @@ COPY public.lesson_attendance (lesson_id, present_student_id) FROM stdin;
 COPY public.lesson_tasks (lesson_id, task_id) FROM stdin;
 402	1
 402	3
+402	53
+402	103
 \.
 
 
@@ -320,6 +322,7 @@ COPY public.lessons (id, end_time, group_id, start_time, teacher_id) FROM stdin;
 452	2025-05-14 09:30:00	102	2025-05-14 08:30:00	1102
 454	2025-05-15 09:39:00	102	2025-05-15 08:39:00	1102
 455	2025-05-13 20:41:00	102	2025-05-13 19:41:00	1102
+502	2025-05-18 15:00:00	102	2025-05-18 14:00:00	1102
 \.
 
 
@@ -343,6 +346,12 @@ COPY public.tasks (id, level, topic, end_fin, start_fin) FROM stdin;
 52	BEGINNER	Что лучше съесть?	7r/Bp3p1k/6p1/8/8/6P1/5PK1/3R4 b - - 0 1	7r/qp3p1k/6p1/8/3B4/6P1/5PK1/3R4 w - - 0 1
 53	BEGINNER	Что лучше съесть?	1k4Q1/1p6/p7/7p/q7/7P/1P4P1/7K b - - 0 1	1k4n1/1p6/p7/3Q3p/q7/7P/1P4P1/7K w - - 0 1
 103	FOURTH_CATEGORY	Что лучше съесть?	8/1k2B3/8/7P/8/5p2/8/4nK2 b - - 0 1	8/1k2r3/8/7P/1B6/5p2/8/4nK2 w - - 0 1
+152	BEGINNER	Сheckmate with a rook		8/8/4k3/8/8/8/R3K3/8 w - - 0 1
+153	BEGINNER	Сheckmate with a rook		8/8/5k2/8/3R4/8/1K6/8 w - - 0 1
+202	BEGINNER	Сheckmate with a queen		8/8/5k2/8/8/1Q6/8/4K3 w - - 0 1
+203	BEGINNER	Сheckmate with a queen		8/4k3/8/8/8/8/3Q4/K7 w - - 0 1
+204	BEGINNER	Linear checkmate		8/8/8/8/8/6k1/1R6/R5K1 w - - 0 1
+205	BEGINNER	Linear checkmate		8/4k3/8/8/8/1R6/2R5/K7 w - - 0 1
 \.
 
 
@@ -392,14 +401,14 @@ SELECT pg_catalog.setval('public.groups_seq', 251, true);
 -- Name: lessons_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.lessons_seq', 501, true);
+SELECT pg_catalog.setval('public.lessons_seq', 551, true);
 
 
 --
 -- Name: tasks_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tasks_seq', 151, true);
+SELECT pg_catalog.setval('public.tasks_seq', 251, true);
 
 
 --

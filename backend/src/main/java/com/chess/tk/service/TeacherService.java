@@ -1,6 +1,7 @@
 package com.chess.tk.service;
 
 import com.chess.tk.db.entity.*;
+import com.chess.tk.db.enums.TaskLevel;
 import com.chess.tk.db.repository.*;
 import com.chess.tk.dto.*;
 import com.chess.tk.exception.StudentAlreadyInGroupException;
@@ -11,10 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -296,5 +294,30 @@ public class TeacherService {
 
         lesson.setPresentStudentIds(presentStudentIds);
         return new MarkAttendanceRequest(lessonRepo.save(lesson));
+    }
+
+    public List<LevelTasksDTO> getTasksWithoutEndFin() {
+        List<Task> tasks = taskRepo.findTasksWithEmptyEndFin();
+
+        return tasks.stream()
+                .collect(Collectors.groupingBy(Task::getLevel))
+                .entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(entry -> {
+                    TaskLevel level = entry.getKey();
+                    List<Task> levelTasks = entry.getValue();
+
+                    List<TopicTasksDTO> topics = levelTasks.stream()
+                            .collect(Collectors.groupingBy(Task::getTopic))
+                            .entrySet()
+                            .stream()
+                            .sorted(Map.Entry.comparingByKey())
+                            .map(e -> new TopicTasksDTO(e.getKey(), e.getValue()))
+                            .toList();
+
+                    return new LevelTasksDTO(level, topics);
+                })
+                .toList();
     }
 }

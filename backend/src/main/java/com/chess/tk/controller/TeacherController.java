@@ -88,4 +88,9 @@ public class TeacherController {
     public MarkAttendanceRequest markAttendance(@Valid @RequestBody MarkAttendanceRequest request) {
         return teacherService.markAttendance(request.getLessonId(), request.getStudentIds());
     }
+
+    @GetMapping("/tasks")
+    public List<LevelTasksDTO> getTasksWithoutEndFin() {
+        return teacherService.getTasksWithoutEndFin();
+    }
 }

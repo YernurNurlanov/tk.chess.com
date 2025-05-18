@@ -49,35 +49,36 @@ const StudentPage = () => {
     return (
         <div className={"container"}>
             <StudentSidebar
+                currentUser={currentUser}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 onLogout={() =>
                     window.location.href = "/auth"
                 }
             />
-            <main>
-                {activeTab === "lessons" && (
-                    <LessonsSection
-                        lessons={lessons}
-                        onTasks={(lesson) => {
-                            setSelectedLesson(lesson)
-                            handleGetLessonTasks( currentUser.id, lesson.id, setLessonTasks, setActiveTab).then();
-                        }}
-                    />
-                )}
+            <div className="content-wrapper">
+                <main className={"main-content"}>
+                    {activeTab === "lessons" && (
+                        <LessonsSection
+                            lessons={lessons}
+                            onTasks={(lesson) => {
+                                setSelectedLesson(lesson)
+                                handleGetLessonTasks( currentUser.id, lesson.id, setLessonTasks, setActiveTab).then();
+                            }}
+                        />
+                    )}
 
-                {activeTab === "tasks" && (
-                    <TasksSection
-                        studentId={currentUser.id}
-                        selectedLesson={selectedLesson}
-                        lessonTasks={lessonTasks}
-                        setLessonTasks={setLessonTasks}
-                    />
-                )}
-
+                    {activeTab === "tasks" && (
+                        <TasksSection
+                            studentId={currentUser.id}
+                            selectedLesson={selectedLesson}
+                            lessonTasks={lessonTasks}
+                            setLessonTasks={setLessonTasks}
+                        />
+                    )}
+                </main>
                 <Footer />
-            </main>
-
+            </div>
         </div>
 
     )

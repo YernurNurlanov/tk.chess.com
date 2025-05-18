@@ -113,7 +113,12 @@ io.on('connection', socket => {
     socket.on(ACTIONS.CHESS_RESET, ({ roomID, fen }) => {
         const game = new Chess(fen);
         roomStates[roomID] = { game };
-        io.to(roomID).emit(ACTIONS.CHESS_STATE, { fen }); // рассылаем обновлённое состояние
+        io.to(roomID).emit(ACTIONS.CHESS_STATE, { fen });
+    });
+
+    socket.on(ACTIONS.CHESS_GAME_OVER, ({ roomID, message }) => {
+        console.log(`[GAME OVER] Room: ${roomID}, Message: ${message}`);
+        io.to(roomID).emit('chess-game-over', { message });
     });
 });
 

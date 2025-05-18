@@ -1,37 +1,12 @@
-import React from "react";
+import React, {useEffect} from "react";
 import {useLocation, useParams} from 'react-router';
-import useWebRTC from '../hooks/useWebRTC.jsx';
+import useWebRTC from '../hooks/server/useWebRTC.jsx';
 import VideoSection from "../components/roomPage/VideoSection.jsx";
 import ChessBoardSection from "../components/roomPage/ChessBoardSection.jsx";
-
-// function layout(clientsNumber = 1) {
-//     const pairs = Array.from({length: clientsNumber})
-//         .reduce((acc, next, index, arr) => {
-//             if (index % 2 === 0) {
-//                 acc.push(arr.slice(index, index + 2));
-//             }
-//
-//             return acc;
-//         }, []);
-//
-//     const rowsNumber = pairs.length;
-//     const height = `${100 / rowsNumber}%`;
-//
-//     return pairs.map((row, index, arr) => {
-//
-//         if (index === arr.length - 1 && row.length === 1) {
-//             return [{
-//                 width: '100%',
-//                 height,
-//             }];
-//         }
-//
-//         return row.map(() => ({
-//             width: '50%',
-//             height,
-//         }));
-//     }).flat();
-// }
+import styles from "../styles/roomPage.module.css"
+import MaterialsModal from "../components/modals/room/MaterialsModal.jsx";
+import NewPositionModal from "../components/modals/room/NewPositionModal.jsx";
+import axios from "../axiosInstance.js";
 
 export default function Room() {
     const {id: roomID} = useParams();
@@ -42,26 +17,73 @@ export default function Room() {
     const {
         clients, provideMediaRef, toggleAudio, toggleVideo, isMicOn, isCameraOn
     } = useWebRTC(roomID, role);
-    //const videoLayout = layout(clients.length);
+
+    const [tasks, setTasks] = React.useState(null);
+    const [isMaterialsModalOpen, setMaterialsModalOpen] = React.useState(false);
+    const [isNewPositionModalOpen, setNewPositionModalOpen] = React.useState(false);
 
     const mainClientID = clients[0]; // Первый — основной
     const secondaryClients = clients.slice(1);
 
+    useEffect(() => {
+        const fetchTasks = async () => {
+            try {
+                const response = await axios.get(`/teacher/tasks`);
+                setTasks(response.data);
+                console.log("Tasks received")
+            } catch (error) {
+                console.error("Error fetching tasks", error);
+            }
+        };
+
+        fetchTasks().then();
+    }, []);
+
     return (
-        <>
-            <ChessBoardSection
-                roomID={roomID}
-            />
-            <VideoSection
-                mainClientID={mainClientID}
-                secondaryClients={secondaryClients}
-                provideMediaRef={provideMediaRef}
-                toggleAudio={toggleAudio}
-                toggleVideo={toggleVideo}
-                isMicOn={isMicOn}
-                isCameraOn={isCameraOn}
-            />
-        </>
+        <div className={styles["page-container"]}>
+            {role === "ROLE_TEACHER" && (
+                <header className={styles["header"]}>
+                    <button onClick={() => setMaterialsModalOpen(true)}>
+                        Materials
+                    </button>
+                    <button onClick={() => setNewPositionModalOpen(true)}>
+                        Set your position
+                    </button>
+                </header>
+            )}
+            <div className={styles["main-content"]}>
+                <div className={styles["chessboard-section"]}>
+                    <ChessBoardSection
+                        roomID={roomID}
+                    />
+                </div>
+                <div>
+                    <VideoSection
+                        mainClientID={mainClientID}
+                        secondaryClients={secondaryClients}
+                        provideMediaRef={provideMediaRef}
+                        toggleAudio={toggleAudio}
+                        toggleVideo={toggleVideo}
+                        isMicOn={isMicOn}
+                        isCameraOn={isCameraOn}
+                    />
+                </div>
+            </div>
+            {isMaterialsModalOpen && (
+                <MaterialsModal
+                    onClose={() => setMaterialsModalOpen(false)}
+                    materials={tasks}
+                    roomId={roomID}
+                />
+            )}
+
+            {isNewPositionModalOpen && (
+                <NewPositionModal
+                    onClose={() => setNewPositionModalOpen(false)}
+                    roomId={roomID}
+                />
+            )}
+        </div>
 
     );
 }

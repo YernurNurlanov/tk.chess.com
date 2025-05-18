@@ -1,19 +1,17 @@
 import React from "react";
-import { LOCAL_VIDEO } from "../../hooks/useWebRTC.jsx";
+import { LOCAL_VIDEO } from "../../hooks/server/useWebRTC.jsx";
 
 export default function VideoSection({ mainClientID, secondaryClients, provideMediaRef,
                                          toggleAudio, toggleVideo, isMicOn, isCameraOn }) {
     return (
         <div style={{
-            position: 'absolute',
-            top: '1rem',
-            right: '1rem',
-            width: '45%',
+            width: '100vh',
             height: '50%',
             display: 'flex',
             background: '#000',
             padding: '1rem',
-            boxSizing: 'border-box',
+            marginLeft: '80px',
+            marginRight: '20px',
             borderRadius: '8px',
         }}>
             {/* Главное видео слева */}

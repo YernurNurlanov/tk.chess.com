@@ -118,6 +118,7 @@ nav ul li {
 }
 
 .btn {
+    margin: 10px;
     padding: 10px 20px;
     background-color: var(--primary-color);
     color: var(--white);
@@ -128,7 +129,7 @@ nav ul li {
 }
 
 .btn:hover {
-    background: #007acc; /* Darker shade for hover effect */
+    background: #007acc;
 }
 
 /* Schedule Section */
@@ -201,9 +202,9 @@ nav ul li {
     border-radius: 5px;
     margin-left: 10px;
     display: flex;
-    justify-content: space-between; /* Space between text and delete button */
-    align-items: center; /* Vertically center content */
-    position: relative; /* Ensure the delete button is positioned correctly */
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
 }
 
 .lesson.empty {
@@ -212,7 +213,6 @@ nav ul li {
     font-style: italic;
 }
 
-/* Footer Styles */
 .footer {
     text-align: center;
     padding: 20px;
@@ -227,8 +227,6 @@ nav ul li {
     font-size: 14px;
 }
 
-/* Modal Styles */
-/* styles.css */
 .modal {
     display: flex;
     justify-content: center;
@@ -237,9 +235,10 @@ nav ul li {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-    z-index: 1000; /* Ensure the modal is on top of other elements */
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    overflow: auto;
+    height: 100vh;
 }
 
 .modal-content {
@@ -248,11 +247,13 @@ nav ul li {
     border-radius: 8px;
     width: 500px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    position: relative; /* Ensure the close button is positioned correctly */
+    position: relative;
+    max-height: 80vh;
+    overflow: auto;
 }
 
 input[type="datetime-local"] {
-    padding-right: 1.5rem; /* чтобы пиктограмма не обрезалась */
+    padding-right: 1.5rem;
 }
 
 .close-btn {
@@ -264,10 +265,9 @@ input[type="datetime-local"] {
 }
 
 .close-btn:hover {
-    color: var(--primary-color); /* Change color on hover */
+    color: var(--primary-color);
 }
 
-/* Modal Title */
 .modal-content h2 {
     margin-top: 0;
     font-size: 20px;
@@ -275,7 +275,6 @@ input[type="datetime-local"] {
     text-align: center;
 }
 
-/* Form Styles */
 .modal-content form {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -301,11 +300,10 @@ input[type="datetime-local"] {
 
 .modal-content select:focus,
 .modal-content input:focus {
-    border-color: var(--primary-color); /* Highlight on focus */
+    border-color: var(--primary-color);
     outline: none;
 }
 
-/* Save Button */
 .modal-content .btn {
     padding: 10px;
     background-color: var(--primary-color);
@@ -318,30 +316,30 @@ input[type="datetime-local"] {
 }
 
 .modal-content .btn:hover {
-    background: #007acc; /* Darker shade on hover */
+    background: #007acc;
 }
 
-/* Lesson Type Styles */
+
 .lesson.individual {
-    background: #50a6cd; /* Blue for individual lessons */
+    background: #50a6cd;
 }
 
 .lesson.group {
-    background: #4caf50; /* Green for group lessons */
+    background: #4caf50;
 }
 
-/* Confirmation Modal Styles */
+
 #confirmModal {
-    display: none; /* Hidden by default */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    background: rgba(0, 0, 0, 0.5);
     justify-content: center;
     align-items: center;
-    z-index: 1001; /* Ensure it's above other modals */
+    z-index: 1001;
 }
 
 #confirmModal .modal-content {
@@ -377,21 +375,21 @@ input[type="datetime-local"] {
 }
 
 #confirmDeleteBtn {
-    background-color: #ff4d4d; /* Red for delete action */
+    background-color: #ff4d4d;
     color: var(--white);
 }
 
 #confirmDeleteBtn:hover {
-    background-color: #cc0000; /* Darker red on hover */
+    background-color: #cc0000;
 }
 
 #cancelDeleteBtn {
-    background-color: var(--gray); /* Gray for cancel action */
+    background-color: var(--gray);
     color: var(--text-color);
 }
 
 #cancelDeleteBtn:hover {
-    background-color: #bbb; /* Darker gray on hover */
+    background-color: #bbb;
 }
 
 .table {
@@ -423,7 +421,7 @@ input[type="datetime-local"] {
     border: 1px solid black;
 }
 
-/* Action Buttons */
+
 .actions {
     display: flex;
     gap: 10px;
@@ -432,30 +430,30 @@ input[type="datetime-local"] {
 }
 
 .btn-attach {
-    background-color: #4caf50; /* Green for attach action */
+    background-color: #4caf50;
     color: var(--white);
 }
 
 .btn-update {
-    background-color: #50a6cd; /* Blue for update action */
+    background-color: #50a6cd;
     color: var(--white);
 }
 
 .btn-delete {
-    background-color: #ff4d4d; /* Red for delete action */
+    background-color: #ff4d4d;
     color: var(--white);
 }
 
 .btn-attach:hover {
-    background-color: #45a049; /* Darker green on hover */
+    background-color: #45a049;
 }
 
 .btn-update:hover {
-    background-color: #007acc; /* Darker blue on hover */
+    background-color: #007acc;
 }
 
 .btn-delete:hover {
-    background-color: #cc0000; /* Darker red on hover */
+    background-color: #cc0000;
 }
 .nav-item.active {
     background: rgba(255, 255, 255, 0.3);
@@ -466,6 +464,7 @@ input[type="datetime-local"] {
     background: var(--white);
     margin: 20px;
     padding: 20px;
+    min-width: calc(100% - 60px);
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -494,8 +493,6 @@ input[type="datetime-local"] {
     border-bottom: none;
 }
 
-/* My Groups Tab Styles */
-/* My Groups Tab Styles */
 .groups-list {
     padding: 20px;
 }
@@ -503,31 +500,31 @@ input[type="datetime-local"] {
 .group-cards {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px; /* Increase gap between group cards */
+    gap: 20px;
 }
 
 .group-card {
     background: var(--white);
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add stronger shadow */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 20px;
     width: 300px;
     position: relative;
-    border: 2px solid var(--primary-color); /* Use primary color for border */
-    transition: transform 0.3s, box-shadow 0.3s; /* Add hover effect */
+    border: 2px solid var(--primary-color);
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .group-card:hover {
-    transform: translateY(-5px); /* Lift card on hover */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Enhance shadow on hover */
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .group-card h2 {
     margin: 0 0 10px 0;
     font-size: 20px;
     display: flex;
-    justify-content: space-between; /* Align group name and delete button */
-    align-items: center; /* Vertically center the delete button */
+    justify-content: space-between;
+    align-items: center;
 }
 
 .group-level {

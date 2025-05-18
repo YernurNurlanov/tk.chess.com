@@ -11,7 +11,8 @@ const ACTIONS = {
     TEACHER_ONLINE_STATUS: 'teacher-online-status',
     CHESS_MOVE: 'chess_move',
     CHESS_STATE: 'chess_state',
-    CHESS_RESET: 'chess-reset'
+    CHESS_RESET: 'chess-set-position',
+    CHESS_GAME_OVER: 'chess-game-over'
 };
 
 export default ACTIONS;

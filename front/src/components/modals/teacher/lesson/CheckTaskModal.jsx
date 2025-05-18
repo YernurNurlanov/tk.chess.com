@@ -25,10 +25,13 @@ const CheckTaskModal = ({ onClose, selectedTask }) => {
         <Modal onClose={onClose} className="custom-modal">
             <h2>Проверка задачи</h2>
             <Chessboard position={fen} arePiecesDraggable={false} boardWidth={500} />
-            <div className="button-group" style={{marginTop: '1rem'}}>
-                <button onClick={showSolution}>Показать решение</button>
-                <button onClick={resetToStart}>Вернуть в начало</button>
-            </div>
+            {endFen && (
+                <div className="button-group" style={{marginTop: '1rem'}}>
+                    <button onClick={showSolution}>Показать решение</button>
+                    <button onClick={resetToStart}>Вернуть в начало</button>
+                </div>
+            )}
+
         </Modal>
     );
 };

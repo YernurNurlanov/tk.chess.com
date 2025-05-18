@@ -5,6 +5,7 @@ import UsersTable from "../components/UsersTable";
 import TasksTable from "../components/TasksTable";
 import axios from "../axiosInstance.js";
 import CheckTaskModal from "../components/modals/teacher/lesson/CheckTaskModal.jsx";
+import Footer from "../components/Footer.jsx";
 
 const AdminPage = () => {
     const [activeTab, setActiveTab] = useState("students");
@@ -239,83 +240,85 @@ const AdminPage = () => {
                     window.location.href = "/auth"
                 }
             />
-            <main className="main-content">
-                <header className="header">
-                    <h2>
-                        {activeTab === "students" ? "Students"
-                            : activeTab === "teachers" ? "Teachers"
-                                : activeTab === "tasks" ? "Tasks" : ""}
-                    </h2>
+            <div className="content-wrapper">
+                <main className="main-content">
+                    <header className="header">
+                        <h2>
+                            {activeTab === "students" ? "Students"
+                                : activeTab === "teachers" ? "Teachers"
+                                    : activeTab === "tasks" ? "Tasks" : ""}
+                        </h2>
+                        {activeTab === "students" && (
+                            <button className="btn" onClick={() => setAddStudentModalOpen(true)}>
+                            Add Student
+                            </button>
+                        )}
+                        {activeTab === "teachers" && (
+                            <button className="btn" onClick={() => setAddTeacherModalOpen(true)}>
+                                Add Teacher
+                            </button>
+                        )}
+                        {activeTab === "tasks" && (
+                            <button className="btn" onClick={() => setAddTaskModalOpen(true)}>
+                                Add Task
+                            </button>
+                        )}
+                    </header>
+
                     {activeTab === "students" && (
-                        <button className="btn" onClick={() => setAddStudentModalOpen(true)}>
-                        Add Student
-                        </button>
+                        <UsersTable
+                            data={students}
+                            onUpdate={(student) => {
+                                setSelectedStudent(student);
+                                setUpdateStudentModalOpen(true);
+                            }}
+                            onDelete={(student) => {
+                                setSelectedStudent(student);
+                                setDeleteStudentModalOpen(true);
+                            }}
+                            onAttach={(student) => {
+                                setSelectedStudent(student);
+                                setAssignTeacherModalOpen(true);
+                            }}
+                            onDetach={(student) => {
+                                setSelectedStudent(student);
+                                setDetachStudentModalOpen(true);
+                            }}
+                            showAttachButton={true}
+                        />
                     )}
+
                     {activeTab === "teachers" && (
-                        <button className="btn" onClick={() => setAddTeacherModalOpen(true)}>
-                            Add Teacher
-                        </button>
+                        <UsersTable
+                            data={teachers}
+                            onUpdate={(teacher) => {
+                                setSelectedTeacher(teacher);
+                                setUpdateTeacherModalOpen(true);
+                            }}
+                            onDelete={(teacher) => {
+                                setSelectedTeacher(teacher);
+                                setDeleteTeacherModalOpen(true);
+                            }}
+                            showAttachButton={false}
+                        />
                     )}
+
                     {activeTab === "tasks" && (
-                        <button className="btn" onClick={() => setAddTaskModalOpen(true)}>
-                            Add Task
-                        </button>
+                        <TasksTable
+                            data={tasks}
+                            onDelete={(task) => {
+                                setSelectedTask(task)
+                                setDeleteTaskModalOpen(true);
+                            }}
+                            onCheck={(task) => {
+                                setSelectedTask(task)
+                                setCheckTaskModalOpen(true);
+                            }}
+                        />
                     )}
-                </header>
-
-                {activeTab === "students" && (
-                    <UsersTable
-                        data={students}
-                        onUpdate={(student) => {
-                            setSelectedStudent(student);
-                            setUpdateStudentModalOpen(true);
-                        }}
-                        onDelete={(student) => {
-                            setSelectedStudent(student);
-                            setDeleteStudentModalOpen(true);
-                        }}
-                        onAttach={(student) => {
-                            setSelectedStudent(student);
-                            setAssignTeacherModalOpen(true);
-                        }}
-                        onDetach={(student) => {
-                            setSelectedStudent(student);
-                            setDetachStudentModalOpen(true);
-                        }}
-                        showAttachButton={true}
-                    />
-                )}
-
-                {activeTab === "teachers" && (
-                    <UsersTable
-                        data={teachers}
-                        onUpdate={(teacher) => {
-                            setSelectedTeacher(teacher);
-                            setUpdateTeacherModalOpen(true);
-                        }}
-                        onDelete={(teacher) => {
-                            setSelectedTeacher(teacher);
-                            setDeleteTeacherModalOpen(true);
-                        }}
-                        showAttachButton={false}
-                    />
-                )}
-
-                {activeTab === "tasks" && (
-                    <TasksTable
-                        data={tasks}
-                        onDelete={(task) => {
-                            setSelectedTask(task)
-                            setDeleteTaskModalOpen(true);
-                        }}
-                        onCheck={(task) => {
-                            setSelectedTask(task)
-                            setCheckTaskModalOpen(true);
-                        }}
-                    />
-                )}
-            </main>
-
+                </main>
+                <Footer />
+            </div>
             {/* Add Student Modal */}
             {isAddStudentModalOpen && (
                 <Modal onClose={() => setAddStudentModalOpen(false)}>
@@ -612,7 +615,7 @@ const AdminPage = () => {
 
             {isAddTaskModalOpen && (
                 <Modal onClose={() => setAddTaskModalOpen(false)}>
-                    <h2>Add New Student</h2>
+                    <h2>Add new task</h2>
                     <form
                         onSubmit={(e) => {
                             e.preventDefault();
@@ -649,7 +652,7 @@ const AdminPage = () => {
                         <input type="text" id="startFin" name="startFin" required/>
 
                         <label htmlFor="endFin">endFin:</label>
-                        <input type="text" id="endFin" name="endFin" required/>
+                        <input type="text" id="endFin" name="endFin" />
 
                         <button type="submit" className="btn">
                             Save Task

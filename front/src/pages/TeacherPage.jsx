@@ -133,6 +133,7 @@ const TeacherPage = () => {
                 onLogout={() =>
                     window.location.href = "/auth"
                 }
+                currentUser={currentUser}
             />
             <div className="content-wrapper">
                 <main className="main-content">
@@ -206,12 +207,6 @@ const TeacherPage = () => {
                     </header>
 
                     {activeTab === "lessons" && (
-                        // <LessonsSection
-                        //     lessons={lessons}
-                        //     setSelectedLesson={setSelectedLesson}
-                        //     setDeleteLessonModalOpen={setDeleteLessonModalOpen}
-                        //     handleGetLessonPage={(id) => handleGetLessonPage(id, setSelectedLesson, setActiveTab)}
-                        // />
                         <WeeklySchedule
                             scheduleData={lessons}
                             onAddLesson={() => setAddLessonModalOpen(true)}
@@ -329,6 +324,7 @@ const TeacherPage = () => {
                     selectedLesson={selectedLesson}
                     setSelectedLesson={setSelectedLesson}
                     setAddTaskModalOpen={setAddTaskModalOpen}
+                    tasks={tasks}
                 />
             )}
 

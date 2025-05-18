@@ -17,6 +17,8 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "axios": "^1.8.4",
     "chess.js": "^1.2.0",
+    "chessboardjsx": "^2.4.7",
+    "chessground": "^9.2.1",
     "date-fns": "^4.1.0",
     "express": "^5.1.0",
     "freeice": "^2.2.2",

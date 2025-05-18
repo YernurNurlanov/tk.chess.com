@@ -1,8 +1,8 @@
 import {useEffect, useRef, useCallback, useState} from 'react';
 import freeice from 'freeice';
 import useStateWithCallback from './useStateWithCallback.jsx';
-import socket from '../socket';
-import Actions from '../socket/actions.js';
+import socket from '../../socket/index.js';
+import Actions from '../../socket/actions.js';
 
 export const LOCAL_VIDEO = 'LOCAL_VIDEO';
 
