@@ -1,42 +1,47 @@
-import numpy as np
-from typing import List, Dict
+
+from typing import Dict, List
 
 
 class SkillPredictor:
     def assess_skill(self, move_analyses: List[Dict]) -> Dict:
-        """Assess player skill based on move analyses"""
         if not move_analyses:
-            return {"level": "unknown", "strengths": [], "weaknesses": []}
+            return {"level": "unknown", "accuracy_percentage": 0, "weaknesses": []}
 
-        lines = [m["line"] for m in move_analyses]
-        avg_line = np.mean(lines)
-
-        # Simple skill level mappi
-        if avg_line < 1.5:
+        # Weighted accuracy calculation
+        category_weights = {
+            "excellent": 1.0,
+            "good": 0.8,
+            "ok": 0.6,
+            "poor": 0.4,
+            "mistake": 0.2,
+            "blunder": 0.0
+        }
+        
+        total_weight = sum(category_weights[m["category"]] for m in move_analyses)
+        accuracy = total_weight / len(move_analyses)
+        
+        # Skill level thresholds
+        if accuracy >= 0.9:
             level = "expert"
-        elif avg_line < 2.5:
+        elif accuracy >= 0.7:
             level = "advanced"
-        elif avg_line < 3.5:
+        elif accuracy >= 0.5:
             level = "intermediate"
-        elif avg_line < 4.5:
+        elif accuracy >= 0.3:
             level = "beginner"
         else:
             level = "novice"
 
-        # Detect weaknesses
+        # Weakness detection
         weaknesses = []
-        blunders = [m for m in move_analyses if m["category"] in ["mistake", "blunder"]]
-        if blunders:
-            common_pieces = np.unique([m["piece"] for m in blunders if m["piece"]])
-            weaknesses.extend([f"{p} mistakes" for p in common_pieces])
-
+        categories = [m["category"] for m in move_analyses]
+        if categories.count("blunder") > len(move_analyses) * 0.1:
+            weaknesses.append("Critical blunders")
+        if categories.count("mistake") > len(move_analyses) * 0.2:
+            weaknesses.append("Frequent mistakes")
+            
         return {
             "level": level,
-            "average_move_quality": float(avg_line),
-            "weaknesses": weaknesses,
-            "accuracy_percentage": self._calculate_accuracy(move_analyses),
+            "accuracy_percentage": round(accuracy * 100, 1),
+            "weaknesses": weaknesses
         }
-
-    def _calculate_accuracy(self, moves):
-        good_moves = [m for m in moves if m["category"] in ["excellent", "good"]]
-        return round(len(good_moves) / len(moves) * 100, 1) if moves else 0

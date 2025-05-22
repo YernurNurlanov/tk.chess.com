@@ -1,10 +1,13 @@
+import io
 import chess
 import chess.engine
+import chess.pgn 
 import numpy as np
 from typing import Dict, Any, List
 from .feedback_generator import FeedbackGenerator
 from .skill_predictor import SkillPredictor
 from .learning_path import LearningPath
+
 
 
 class ChessAIService:
@@ -21,7 +24,11 @@ class ChessAIService:
         move = chess.Move.from_uci(move_uci)
 
         # Get Stockfish analysis
-        info = self.engine.analyse(board, chess.engine.Limit(time=0.1), multipv=5)
+        info = self.engine.analyse(
+            board,
+            chess.engine.Limit(depth=18),  # Increased depth
+            multipv=5
+        )
 
         # Determine move quality
         player_move_line = self._get_move_rank(info, move)
@@ -63,16 +70,30 @@ class ChessAIService:
             "skill_level": skill_level,
             "explanation": self._get_move_explanation(board, selected_move),
         }
-
     def analyze_game(self, moves: List[str]) -> Dict[str, Any]:
-        """Comprehensive game analysis with skill assessment"""
+      """Comprehensive game analysis with skill assessment"""
+      try:
+        if not moves:
+            return {"error": "No moves provided"}
+            
         board = chess.Board()
         move_analyses = []
 
         for move_uci in moves:
-            analysis = self.analyze_move(board.fen(), move_uci)
-            move_analyses.append(analysis)
-            board.push(chess.Move.from_uci(move_uci))
+            try:
+                move = chess.Move.from_uci(move_uci)
+                if move not in board.legal_moves:
+                    continue
+                    
+                analysis = self.analyze_move(board.fen(), move_uci)
+                move_analyses.append(analysis)
+                board.push(move)
+            except Exception as e:
+                print(f"Error analyzing move {move_uci}: {str(e)}")
+                continue
+
+        if not move_analyses:
+            return {"error": "No valid moves to analyze"}
 
         # Skill assessment
         skill_profile = self.skill_predictor.assess_skill(move_analyses)
@@ -85,6 +106,73 @@ class ChessAIService:
             "recommendations": recommendations,
             "move_analyses": move_analyses,
         }
+      except Exception as e:
+        print(f"Error in analyze_game: {str(e)}")
+        return {"error": "Internal server error during analysis"}
+      
+    def _create_analysis(self, board, move, engine_result):
+      """Helper method to create analysis dictionary"""
+      return {
+        "move": move.uci(),
+        "san": board.san(move),
+        "category": self._categorize_move(self._get_move_rank(engine_result, move)),
+        "piece": str(board.piece_at(move.from_square)).lower(),
+        "eval": engine_result[0]["score"].relative.score() 
+                if not engine_result[0]["score"].is_mate() else None
+    }
+
+    def _finalize_analysis(self, move_analyses):
+      """Final processing of analysis results"""
+      if not move_analyses:
+        return {"error": "No moves analyzed"}
+    
+      skill_profile = self.skill_predictor.assess_skill(move_analyses)
+      recommendations = self.learning_path.get_recommendations(skill_profile)
+    
+      return {
+        "skill_profile": skill_profile,
+        "recommendations": recommendations,
+        "move_analyses": move_analyses,
+        "total_moves": len(move_analyses)
+    }
+
+    def analyze_pgn(self, pgn: str, player_color: str = "white") -> Dict[str, Any]:
+      try:
+        game = chess.pgn.read_game(io.StringIO(pgn))
+        if not game:
+            return {"error": "Could not parse PGN"}
+
+        board = game.board()
+        move_analyses = []
+        
+        for i, move in enumerate(game.mainline_moves()):
+            try:
+                # Adaptive depth based on game phase
+                depth = 14 if i < 20 else (12 if i < 40 else 10)
+                
+                info = self.engine.analyse(
+                    board,
+                    chess.engine.Limit(depth=depth),
+                    multipv=3
+                )
+                
+                analysis = self._create_analysis(board, move, info)
+                move_analyses.append(analysis)
+                board.push(move)
+                
+                # Progress logging
+                if (i+1) % 10 == 0:
+                    print(f"Analyzed {i+1} moves")
+                    
+            except Exception as e:
+                print(f"Error analyzing move {i+1}: {str(e)}")
+                continue
+
+        return self._finalize_analysis(move_analyses)
+        
+      except Exception as e:
+        print(f"Error in analyze_pgn: {str(e)}")
+        return {"error": str(e)}
 
     def _get_move_rank(self, info, move):
         """Determine how good a move is (1=best, 6=worst)"""
@@ -92,17 +180,53 @@ class ChessAIService:
             if move_info["pv"][0] == move:
                 return i + 1
         return 6
-
+    
+    def progressive_analyze(self, pgn: str, callback=None):
+      """Analyze with progress reporting"""
+      game = chess.pgn.read_game(io.StringIO(pgn))
+      board = game.board()
+      analyses = []
+    
+      for i, move in enumerate(game.mainline_moves()):
+        try:
+            # Adjust depth based on game phase
+            depth = 16 if i < 15 else 14  # Deeper for opening/middlegame
+            
+            result = self.engine.analyse(
+                board,
+                chess.engine.Limit(depth=depth),
+                multipv=2
+            )
+            
+            analysis = self._create_analysis(board, move, result)
+            analyses.append(analysis)
+            board.push(move)
+            
+            # Report progress
+            if callback:
+                callback({
+                    'current': i+1,
+                    'total': len(list(game.mainline_moves())),
+                    'fen': board.fen()
+                })
+                
+        except Exception as e:
+            print(f"Move {i+1} error: {str(e)}")
+            continue
+            
+      return self._finalize_analysis(analyses)
+    
     def _categorize_move(self, line):
+        # More realistic categorization
         if line == 1:
             return "excellent"
-        elif line == 2:
+        elif line <= 3:
             return "good"
-        elif line == 3:
+        elif line <= 5:
             return "ok"
-        elif line == 4:
+        elif line <= 8:
             return "poor"
-        elif line == 5:
+        elif line <= 12:
             return "mistake"
         else:
             return "blunder"
