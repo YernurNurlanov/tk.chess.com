@@ -1,39 +1,43 @@
-
 from typing import Dict, List
+
+
 class LearningPath:
     def get_recommendations(self, skill_profile: Dict) -> List[Dict]:
-        recommendations = []
+        recs = []
         weaknesses = skill_profile.get("weaknesses", [])
-        level = skill_profile.get("level", "beginner")
-
-        # Weakness-based recommendations
-        if "Critical blunders" in weaknesses:
-            recommendations.append({
+        
+        # Русские рекомендации
+        if "Критические ошибки в ключевых позициях" in weaknesses:
+            recs.append({
+                "title": "Изучение ключевых позиций",
+                "description": "Пройти 10 упражнений на критические позиции эндшпиля",
                 "type": "training",
-                "format": "Endgame practice",
                 "priority": "high"
             })
-            
-        if "Frequent mistakes" in weaknesses:
-            recommendations.append({
-                "type": "study",
-                "format": "Tactical puzzles",
+        
+        if "Частые тактические просчёты" in weaknesses:
+            recs.append({
+                "title": "Тактические тренировки",
+                "description": "Ежедневно решать 15 комбинаций средней сложности",
+                "type": "puzzles",
                 "priority": "medium"
             })
-
-        # Level-based defaults
-        if not recommendations:
-            if level in ["novice", "beginner"]:
-                recommendations.append({
-                    "type": "lesson",
-                    "format": "Basic Strategy",
-                    "priority": "medium"
-                })
-            else:
-                recommendations.append({
-                    "type": "practice",
-                    "format": "Analyze classic games",
-                    "priority": "low"
-                })
-
-        return recommendations
+        
+        if "Слабый эндшпиль" in weaknesses:
+            recs.append({
+                "title": "Эндшпильные техники",
+                "description": "Изучить 5 классических эндшпильных позиций",
+                "type": "study",
+                "priority": "medium"
+            })
+        
+        # Общие рекомендации
+        if not recs:
+            recs.append({
+                "title": "Анализ классических партий",
+                "description": "Разобрать 3 партии гроссмейстеров в вашем дебюте",
+                "type": "study",
+                "priority": "medium"
+            })
+        
+        return recs

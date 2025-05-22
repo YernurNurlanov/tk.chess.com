@@ -10,7 +10,7 @@ export default function AIChessRoom() {
     const [gameOverMessage, setGameOverMessage] = useState(null);
     const [feedbackMode, setFeedbackMode] = useState('instant');
     const [aiLevel, setAiLevel] = useState(3);
-    const [feedback, setFeedback] = useState(null);
+    const [, setFeedback] = useState(null);
     const [gameAnalysis, setGameAnalysis] = useState(null);
     const [playerColor, setPlayerColor] = useState('white');
     const [isThinking, setIsThinking] = useState(false);
@@ -249,144 +249,196 @@ export default function AIChessRoom() {
     };
 
     return (
-        <div className="ai-chess-room">
-            <div className="chess-and-feedback-container">
-                <div className="chess-section">
-                    <div className="chessboard-wrapper">
-                        <Chessboard
-                            position={fen}
-                            onPieceDrop={onDrop}
-                            boardWidth={600}
-                            boardOrientation={playerColor}
-                            customBoardStyle={{
-                                borderRadius: '4px',
-                                boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)'
-                            }}
-                        />
-                        {isThinking && <div className="thinking-overlay">ИИ думает...</div>}
+    <div className="ai-chess-room">
+        <div className="chess-and-feedback-container">
+            <div className="chess-section">
+                <div className="chessboard-wrapper">
+                    <Chessboard
+                        position={fen}
+                        onPieceDrop={onDrop}
+                        boardWidth={600}
+                        boardOrientation={playerColor}
+                        customBoardStyle={{
+                            borderRadius: '4px',
+                            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)'
+                        }}
+                    />
+                    {isThinking && <div className="thinking-overlay">ИИ думает...</div>}
+                </div>
+                
+                {gameOverMessage && (
+                    <div className="game-over-message">
+                        <h3>{gameOverMessage}</h3>
                     </div>
-                    
-                    {gameOverMessage && (
-                        <div className="game-over-message">
-                            <h3>{gameOverMessage}</h3>
+                )}
+            </div>
+
+            <div className="feedback-section">
+                <div className="controls-and-analysis">
+                    <div className="chess-controls">
+                        <div className="control-group">
+                            <label>
+                                Цвет:
+                                <select 
+                                    value={playerColor}
+                                    onChange={(e) => setPlayerColor(e.target.value)}
+                                    disabled={game.history().length > 0}
+                                >
+                                    <option value="white">Белые</option>
+                                    <option value="black">Чёрные</option>
+                                </select>
+                            </label>
+                        </div>
+                        
+                        <div className="control-group">
+                            <label>
+                                Уровень ИИ:
+                                <select 
+                                    value={aiLevel}
+                                    onChange={(e) => setAiLevel(parseInt(e.target.value))}
+                                >
+                                    {[1, 2, 3, 4, 5, 6].map(level => (
+                                        <option key={level} value={level}>Уровень {level}</option>
+                                    ))}
+                                </select>
+                            </label>
+                        </div>
+                        
+                        <div className="control-group">
+                            <label>
+                                Режим анализа:
+                                <select 
+                                    value={feedbackMode}
+                                    onChange={(e) => setFeedbackMode(e.target.value)}
+                                >
+                                    <option value="instant">Мгновенный</option>
+                                    <option value="end">После игры</option>
+                                    <option value="both">Оба режима</option>
+                                </select>
+                            </label>
+                        </div>
+                        
+                        <button onClick={handleReset} className="control-button">
+                            Новая игра
+                        </button>
+                        
+                        {(feedbackMode === 'end' || feedbackMode === 'both') && game.isGameOver() && (
+                            <button 
+                                onClick={analyzeGame} 
+                                className="control-button"
+                                disabled={isAnalyzing}
+                            >
+                                {isAnalyzing ? 'Анализируем...' : 'Полный анализ игры'}
+                            </button>
+                        )}
+                    </div>
+
+                    {gameAnalysis && (
+                        <div className="analysis-panel">
+                            <h3 className="analysis-title">📊 Подробный анализ партии</h3>
+                            
+                            <div className="analysis-section">
+                                <h4 className="section-header">Общая оценка</h4>
+                                <div className="stats-grid">
+                                    <div className="stat-item">
+                                        <span className="stat-label">Уровень игры</span>
+                                        <span className="stat-value highlight">
+                                            {gameAnalysis.skill_profile.level}
+                                        </span>
+                                    </div>
+                                    <div className="stat-item">
+                                        <span className="stat-label">Общая точность</span>
+                                        <span className="stat-value highlight">
+                                            {gameAnalysis.skill_profile.accuracy_percentage}%
+                                        </span>
+                                    </div>
+                                    <div className="stat-item">
+                                        <span className="stat-label">Дебют</span>
+                                        <span className="stat-value">
+                                            {gameAnalysis.opening?.name || 'Неизвестный дебют'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="analysis-section">
+                                <h4 className="section-header">Фазовый анализ</h4>
+                                <div className="stats-grid">
+                                    <div className="stat-item">
+                                        <span className="stat-label">Дебют</span>
+                                        <span className="stat-value">
+                                            {gameAnalysis.skill_profile.opening_accuracy}%
+                                        </span>
+                                    </div>
+                                    <div className="stat-item">
+                                        <span className="stat-label">Миттельшпиль</span>
+                                        <span className="stat-value">
+                                            {gameAnalysis.skill_profile.middlegame_accuracy}%
+                                        </span>
+                                    </div>
+                                    <div className="stat-item">
+                                        <span className="stat-label">Эндшпиль</span>
+                                        <span className="stat-value">
+                                            {gameAnalysis.skill_profile.endgame_accuracy}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="analysis-section">
+                                <h4 className="section-header">Ключевые моменты</h4>
+                                <div className="key-moments">
+                                    <div className="move-card best-move">
+                                        <div className="move-header">
+                                            <span className="move-icon">🏆</span>
+                                            <h5>Лучший ход</h5>
+                                        </div>
+                                        <p className="move-description">
+                                            {gameAnalysis.best_move.description}
+                                        </p>
+                                        <div className="move-phase">
+                                            Этап: {gameAnalysis.best_move.phase}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="move-card worst-move">
+                                        <div className="move-header">
+                                            <span className="move-icon">⚠️</span>
+                                            <h5>Слабый ход</h5>
+                                        </div>
+                                        <p className="move-description">
+                                            {gameAnalysis.worst_move.description}
+                                        </p>
+                                        <div className="move-phase">
+                                            Этап: {gameAnalysis.worst_move.phase}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="analysis-section">
+                                <h4 className="section-header">Рекомендации</h4>
+                                <div className="recommendations-list">
+                                    {gameAnalysis.recommendations.map((rec, i) => (
+                                        <div key={i} className={`recommendation-card priority-${rec.priority}`}>
+                                            <div className="recommendation-content">
+                                                <h5 className="rec-title">{rec.title}</h5>
+                                                <p className="rec-description">{rec.description}</p>
+                                            </div>
+                                            <span className="rec-priority">
+                                                {rec.priority === 'high' && '🔥 Высокий приоритет'}
+                                                {rec.priority === 'medium' && '⏳ Средний приоритет'}
+                                                {rec.priority === 'low' && '💡 Низкий приоритет'}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
-
-                <div className="feedback-section">
-                    <div className="controls-and-analysis">
-                        <div className="chess-controls">
-                            <div className="control-group">
-                                <label>
-                                    Цвет:
-                                    <select 
-                                        value={playerColor}
-                                        onChange={(e) => setPlayerColor(e.target.value)}
-                                        disabled={game.history().length > 0}
-                                    >
-                                        <option value="white">Белые</option>
-                                        <option value="black">Чёрные</option>
-                                    </select>
-                                </label>
-                            </div>
-                            
-                            <div className="control-group">
-                                <label>
-                                    Уровень ИИ:
-                                    <select 
-                                        value={aiLevel}
-                                        onChange={(e) => setAiLevel(parseInt(e.target.value))}
-                                    >
-                                        {[1, 2, 3, 4, 5, 6].map(level => (
-                                            <option key={level} value={level}>Уровень {level}</option>
-                                        ))}
-                                    </select>
-                                </label>
-                            </div>
-                            
-                            <div className="control-group">
-                                <label>
-                                    Анализ:
-                                    <select 
-                                        value={feedbackMode}
-                                        onChange={(e) => setFeedbackMode(e.target.value)}
-                                    >
-                                        <option value="instant">Мгновенный</option>
-                                        <option value="end">После игры</option>
-                                        <option value="both">Оба варианта</option>
-                                    </select>
-                                </label>
-                            </div>
-                            
-                            <button onClick={handleReset} className="control-button">
-                                Новая игра
-                            </button>
-                            
-                            {(feedbackMode === 'end' || feedbackMode === 'both') && game.isGameOver() && (
-                                <button 
-                                    onClick={analyzeGame} 
-                                    className="control-button"
-                                    disabled={isAnalyzing}
-                                >
-                                    {isAnalyzing ? 'Анализируем...' : 'Анализ игры'}
-                                </button>
-                            )}
-                        </div>
-
-                        {feedback && (feedbackMode === 'instant' || feedbackMode === 'both') && (
-                            <div className="feedback-panel">
-                                <h3>Анализ хода</h3>
-                                <p><strong>Качество:</strong> {feedback.strength}</p>
-                                <p><strong>Рекомендация:</strong> {feedback.suggestion}</p>
-                                {feedback.patternFeedback && feedback.patternFeedback.length > 0 && (
-                                    <div className="patterns">
-                                        <h4>Замечено:</h4>
-                                        <ul>
-                                            {feedback.patternFeedback.map((pattern, i) => (
-                                                <li key={i}>{pattern}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                        
-                        {gameAnalysis && (
-    <div className="analysis-panel">
-        <h3>Анализ игры</h3>
-        <div className="analysis-section">
-            <h4>Уровень:</h4>
-            <p>{gameAnalysis.skill_profile.level}</p>
-        </div>
-        <div className="analysis-section">
-            <h4>Точность:</h4>
-            <p>{gameAnalysis.skill_profile.accuracy_percentage}%</p>
-        </div>
-        {gameAnalysis.skill_profile.weaknesses.length > 0 && (
-            <div className="analysis-section">
-                <h4>Слабые места:</h4>
-                <ul>
-                    {gameAnalysis.skill_profile.weaknesses.map((w, i) => (
-                        <li key={i}>{w}</li>
-                    ))}
-                </ul>
             </div>
-        )}
-        <div className="analysis-section">
-            <h4>Рекомендации:</h4>
-            <ul>
-                {gameAnalysis.recommendations.map((rec, i) => (
-                    <li key={i}>
-                        <strong>{rec.format}</strong> ({rec.type})
-                    </li>
-                ))}
-            </ul>
         </div>
     </div>
-)}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+);
 }

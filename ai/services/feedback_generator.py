@@ -1,46 +1,40 @@
-from typing import List, Dict
+from typing import Dict, List
 
 
 class FeedbackGenerator:
     def get_feedback(self, move_analysis: Dict, history: List[Dict]) -> Dict:
-        """Generate personalized feedback based on move and history"""
-        feedback = {
-            "strength": self._get_strength_description(move_analysis),
-            "suggestion": self._get_suggestion(move_analysis),
-            "pattern_feedback": self._detect_patterns(history),
+        return {
+            "strength": self._get_strength_ru(move_analysis),
+            "suggestion": self._get_suggestion_ru(move_analysis),
+            "pattern_feedback": self._detect_patterns_ru(history),
         }
-        return feedback
 
-    def _get_strength_description(self, move):
+    def _get_strength_ru(self, move):
         descriptions = {
-            "excellent": "Perfect move! You found the best option.",
-            "good": "Good move! Among the top choices.",
-            "ok": "Reasonable move, but there were better options.",
-            "poor": "Inaccurate move. Consider alternatives next time.",
-            "mistake": "Mistake. This weakens your position.",
-            "blunder": "Blunder! This could cost you the game.",
+            "excellent": "Отличный ход! Лучший возможный вариант",
+            "good": "Хороший ход! Один из лучших вариантов",
+            "ok": "Приемлемый ход, но есть лучше варианты", 
+            "poor": "Неточность. Рассмотрите другие варианты",
+            "mistake": "Ошибка! Ухудшает вашу позицию",
+            "blunder": "Грубая ошибка! Может привести к поражению"
         }
-        return descriptions.get(move["category"], "Move analyzed.")
+        return descriptions.get(move["category"], "Анализ хода")
 
-    def _get_suggestion(self, move):
-        if move["category"] in ["excellent", "good"]:
-            return "Keep up the good work!"
-        return f"Consider {move['top_suggestion']} next time for better results."
+    def _get_suggestion_ru(self, move):
+        suggestions = {
+            "excellent": "Продолжайте в том же духе!",
+            "good": "Хороший выбор, продолжайте!",
+            "ok": f"Рассмотрите вариант {move['top_suggestion']} для улучшения позиции",
+            "poor": f"Лучше было {move['top_suggestion']} для сохранения преимущества",
+            "mistake": f"Рекомендуется {move['top_suggestion']} для исправления позиции",
+            "blunder": f"Срочно требуется {move['top_suggestion']} для защиты"
+        }
+        return suggestions.get(move["category"], "Анализ рекомендаций")
 
-    def _detect_patterns(self, history):
-        """Identify recurring weaknesses"""
-        if len(history) < 5:
-            return "Keep playing for more personalized feedback"
-
-        recent_moves = history[-5:]
-        blunders = [m for m in recent_moves if m["category"] in ["mistake", "blunder"]]
-
+    def _detect_patterns_ru(self, history):
         patterns = []
-        if len(blunders) > 2:
-            piece_types = [m["piece"] for m in blunders if m["piece"]]
-            if "p" in piece_types:
-                patterns.append("You're making several pawn structure mistakes")
-            if "n" in piece_types:
-                patterns.append("Your knight placements need improvement")
-
-        return patterns if patterns else "No major patterns detected yet"
+        if len([m for m in history if m["piece"] == "p"]) > 3:
+            patterns.append("Частые ошибки в пешечной структуре")
+        if len([m for m in history if m["piece"] == "k"]) > 2:
+            patterns.append("Слабый контроль центра королём")
+        return patterns if patterns else ["Стабильная игра, продолжайте!"]

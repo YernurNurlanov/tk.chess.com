@@ -137,42 +137,105 @@ class ChessAIService:
     }
 
     def analyze_pgn(self, pgn: str, player_color: str = "white") -> Dict[str, Any]:
-      try:
-        game = chess.pgn.read_game(io.StringIO(pgn))
-        if not game:
-            return {"error": "Could not parse PGN"}
+        try:
+            game = chess.pgn.read_game(io.StringIO(pgn))
+            if not game:
+                return {"error": "Не удалось прочитать PGN"}
 
-        board = game.board()
-        move_analyses = []
-        
-        for i, move in enumerate(game.mainline_moves()):
-            try:
-                # Adaptive depth based on game phase
-                depth = 14 if i < 20 else (12 if i < 40 else 10)
-                
-                info = self.engine.analyse(
-                    board,
-                    chess.engine.Limit(depth=depth),
-                    multipv=3
-                )
-                
-                analysis = self._create_analysis(board, move, info)
-                move_analyses.append(analysis)
-                board.push(move)
-                
-                # Progress logging
-                if (i+1) % 10 == 0:
-                    print(f"Analyzed {i+1} moves")
+            board = game.board()
+            move_analyses = []
+            opening_name = "Неизвестный дебют"
+            
+            for i, move in enumerate(game.mainline_moves()):
+                try:
+                    # Определение фазы игры
+                    phase = "opening" if i < 12 else ("middlegame" if i < 30 else "endgame")
+                    depth = 14 if phase == "opening" else (12 if phase == "middlegame" else 10)
                     
-            except Exception as e:
-                print(f"Error analyzing move {i+1}: {str(e)}")
-                continue
+                    info = self.engine.analyse(
+                        board,
+                        chess.engine.Limit(depth=depth),
+                        multipv=3
+                    )
+                    
+                    analysis = self._create_analysis(board, move, info)
+                    analysis["phase"] = phase
+                    move_analyses.append(analysis)
+                    board.push(move)
+                    
+                    # Определение дебюта
+                    if i == 0:
+                        opening_name = self._identify_opening(board)
+                        
+                except Exception as e:
+                    print(f"Ошибка анализа хода {i+1}: {str(e)}")
+                    continue
 
-        return self._finalize_analysis(move_analyses)
+            result = self._finalize_analysis(move_analyses)
+            result["opening"] = opening_name
+            return result
+            
+        except Exception as e:
+            print(f"Ошибка в analyze_pgn: {str(e)}")
+            return {"error": str(e)}
+
+    def _finalize_analysis(self, move_analyses):
+        if not move_analyses:
+            return {"error": "Нет ходов для анализа"}
         
-      except Exception as e:
-        print(f"Error in analyze_pgn: {str(e)}")
-        return {"error": str(e)}
+        # Add category weights here
+        category_weights = {
+            "excellent": 1.0,
+            "good": 0.8,
+            "ok": 0.6,
+            "poor": 0.4,
+            "mistake": 0.2,
+            "blunder": 0.0
+        }
+
+        skill_profile = self.skill_predictor.assess_skill(move_analyses)
+        recommendations = self.learning_path.get_recommendations(skill_profile)
+        
+        best_move = max(move_analyses, key=lambda x: category_weights[x["category"]])
+        worst_move = min(move_analyses, key=lambda x: category_weights[x["category"]])
+        
+        return {
+            "skill_profile": skill_profile,
+            "recommendations": recommendations,
+            "total_moves": len(move_analyses),
+            "best_move": {
+                "san": best_move["san"],
+                "description": self._get_move_description(best_move, "best")
+            },
+            "worst_move": {
+                "san": worst_move["san"],
+                "description": self._get_move_description(worst_move, "worst")
+            },
+            "mistakes_count": sum(1 for m in move_analyses if m["category"] in ["mistake", "blunder"])
+        }
+
+    def _identify_opening(self, board):
+        # Простая идентификация дебюта
+        eco_codes = {
+            "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR": "Латышский гамбит",
+            "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR": "Славянская защита"
+        }
+        return eco_codes.get(board.fen().split(" ")[0], "Неизвестный дебют")
+
+    def _get_move_description(self, move_analysis, move_type):
+        descriptions = {
+            "best": {
+                "opening": "Отличное развитие фигур в дебюте",
+                "middlegame": "Сильный тактический удар в миттельшпиле",
+                "endgame": "Точная реализация преимущества в эндшпиле"
+            },
+            "worst": {
+                "opening": "Ошибка в дебюте привела к потере темпа",
+                "middlegame": "Тактический просчёт в миттельшпиле",
+                "endgame": "Неточность в эндшпиле упустила победу"
+            }
+        }
+        return descriptions[move_type][move_analysis["phase"]]
 
     def _get_move_rank(self, info, move):
         """Determine how good a move is (1=best, 6=worst)"""
