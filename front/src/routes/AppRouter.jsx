@@ -6,6 +6,7 @@ import TeacherPage from "../pages/TeacherPage.jsx";
 import StudentPage from "../pages/StudentPage.jsx";
 import NotFound from "../pages/NotFound.jsx";
 import Room from "../pages/Room.jsx";
+import AIChessRoom from '../pages/AIChessRoom';
 
 const AppRouter = () => {
     return (
@@ -17,6 +18,7 @@ const AppRouter = () => {
                 <Route path="/student" element={<StudentPage />} />
                 <Route path="*" element={<NotFound />} />
                 <Route path="/room/:id" element={<Room />} />
+                <Route path="/ai-room/:id" element={<AIChessRoom />} />
             </Routes>
         </BrowserRouter>
     );

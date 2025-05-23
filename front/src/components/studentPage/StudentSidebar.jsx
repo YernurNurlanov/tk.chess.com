@@ -1,7 +1,37 @@
-import React from "react";
-import {Link} from "react-router-dom";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import "../../styles/StudentSidebar.css";
 
-const StudentSidebar = ({ currentUser, activeTab, setActiveTab, onLogout}) => {
+const StudentSidebar = ({ currentUser, activeTab, setActiveTab, onLogout, userId }) => {
+    const [isCreatingRoom, setIsCreatingRoom] = useState(false);
+
+    const createAIRoom = async () => {
+        setIsCreatingRoom(true);
+        try {
+            console.log("Attempting to create AI room with userId:", userId);
+            const response = await axios.post(
+                "http://localhost:8080/api/ai-rooms", 
+                {
+                    userId,
+                    aiLevel: 3, // Default level
+                    playerColor: "white" // Default color
+                }, 
+                {
+                    withCredentials: true
+                }
+            );
+
+            // Redirect to the new AI room
+            window.location.href = `/ai-room/${response.data}`;
+        } catch (error) {
+            console.error("Error creating AI room:", error);
+            alert("Failed to create AI room: " + (error.response?.data?.message || error.message));
+        } finally {
+            setIsCreatingRoom(false);
+        }
+    };
+
     return (
         <aside className="sidebar">
             <div className="sidebar-header">
@@ -31,6 +61,17 @@ const StudentSidebar = ({ currentUser, activeTab, setActiveTab, onLogout}) => {
                         </Link>
                     </li>
                     <li>
+                        <Link
+                            to="#"
+                            className={`nav-item ${activeTab === "ai-game" ? "active" : ""}`}
+                            onClick={createAIRoom}
+                            disabled={isCreatingRoom}
+                        >
+                            <i className="fas fa-robot"></i>
+                            {isCreatingRoom ? "Creating Game..." : "Play vs AI"}
+                        </Link>
+                    </li>
+                    <li>
                         <a href="#" className="nav-item" onClick={onLogout}>
                             <i className="fas fa-sign-out-alt"></i>Log Out
                         </a>
@@ -39,6 +80,6 @@ const StudentSidebar = ({ currentUser, activeTab, setActiveTab, onLogout}) => {
             </nav>
         </aside>
     );
-}
+};
 
 export default StudentSidebar;

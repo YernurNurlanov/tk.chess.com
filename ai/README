@@ -1,0 +1,130 @@
+# Chess AI Service Setup Guide
+
+This guide covers installation and setup for macOS and Windows systems.
+
+## Table of Contents
+
+1. [Prerequisites](#prerequisites)
+2. [Installation](#installation)
+   - [macOS](#macos-installation)
+   - [Windows](#windows-installation)
+3. [Running the Service](#running-the-service)
+4. [Troubleshooting](#troubleshooting)
+
+## Prerequisites
+
+- Python 3.8+
+- pip package manager
+- Git (recommended)
+
+## Installation
+
+### macOS Installation
+
+#### 1. Install Stockfish
+
+```bash
+# Install via Homebrew (recommended)
+brew install stockfish
+
+# OR download manually
+mkdir -p ~/Documents/chess_ai/engine
+cd ~/Documents/chess_ai/engine
+curl -OL https://stockfishchess.org/files/stockfish_16.1_mac_x64.zip
+unzip stockfish_16.1_mac_x64.zip
+mv stockfish-16.1-mac stockfish
+chmod +x stockfish
+```
+
+#### 2. Set up Python environment
+
+```bash
+cd ~/Documents/chess_ai
+python3 -m venv venv
+source venv/bin/activate
+pip install flask python-chess numpy requests
+pip install -r ai_requirements.txt
+pip install -U Flask
+```
+
+### Windows Installation
+
+#### 1. Install Stockfish
+
+1. Download from [stockfishchess.org/download](https://stockfishchess.org/download/)
+2. Unzip to `C:\chess_ai\engine`
+3. Rename the `.exe` file to `stockfish.exe`
+
+#### 2. Set up Python environment
+
+```cmd
+cd C:\chess_ai
+python -m venv venv
+venv\Scripts\activate
+pip install flask python-chess numpy requests
+pip install -r ai_requirements.txt
+pip install -U Flask
+```
+
+## Configuration
+
+Update the engine path in `chess_ai_service.py`:
+
+### macOS
+
+```python
+def __init__(self, engine_path: str = '/opt/homebrew/bin/stockfish'):  # Homebrew
+# OR if using local copy:
+# def __init__(self, engine_path: str = './engine/stockfish'):
+```
+
+### Windows
+
+```python
+def __init__(self, engine_path: str = 'C:\\chess_ai\\engine\\stockfish.exe'):
+```
+
+## Running the Service
+
+### Terminal 1: Flask Server
+
+```bash
+# macOS/Linux
+cd ~/Documents/chess_ai
+source venv/bin/activate
+python main.py
+
+# Windows
+cd C:\chess_ai
+venv\Scripts\activate
+python main.py
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Stockfish not found:**
+
+- Verify exact path to executable
+- On macOS: `ls -la /opt/homebrew/bin/stockfish`
+- On Windows: Check `C:\chess_ai\engine` for `stockfish.exe`
+
+**Permission denied:**
+
+```bash
+chmod +x ./engine/stockfish  # macOS/Linux
+```
+
+**Flask not installed:**
+
+```bash
+pip install flask
+```
+
+**Virtual environment issues:**
+
+```bash
+deactivate
+rm -rf venv  # Then recreate
+```

@@ -17,3 +17,6 @@ server:
 token:
   signing:
     key: ee4ef586e804e9660287ff112513fd3cb82a0e8ff9775592e812863ef337b076
+chess:
+  ai:
+    service-url: http://localhost:5001
