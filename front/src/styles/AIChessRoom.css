@@ -1,0 +1,245 @@
+.ai-chess-room {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    height: 100%;
+}
+
+.chess-and-feedback-container {
+    display: flex;
+    gap: 30px;
+    max-width: 1400px;
+    width: 100%;
+}
+
+.chess-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+}
+
+.feedback-section {
+    flex: 1;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.controls-and-analysis {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100%;
+}
+
+.chessboard-wrapper {
+    position: relative;
+    width: 600px;
+    height: 600px;
+}
+
+.thinking-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+}
+
+.game-over-message {
+    background: #f0f0f0;
+    padding: 15px;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.chess-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    background: #f8f8f8;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 150px;
+}
+
+.control-group label {
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.control-group select {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.control-button {
+    padding: 8px 15px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    height: fit-content;
+    align-self: flex-end;
+}
+
+.control-button:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+}
+
+.feedback-panel, .analysis-panel {
+    background: #f8f8f8;
+    padding: 20px;
+    border-radius: 8px;
+    flex-grow: 1;
+    overflow-y: auto;
+    max-height: 500px;
+}
+
+.feedback-panel {
+    border-left: 4px solid #4CAF50;
+}
+
+.analysis-panel {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-top: 20px;
+}
+.error-message {
+    color: #f44336;
+    font-weight: bold;
+}
+
+.analysis-section {
+  margin-bottom: 25px;
+  padding: 15px;
+  background: white;
+  border-radius: 6px;
+}
+
+.analysis-section h4 {
+  color: #2c3e50;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+}
+
+.patterns ul {
+    padding-left: 20px;
+    margin-top: 5px;
+    list-style-type: disc;
+}
+
+@media (max-width: 1200px) {
+    .chess-and-feedback-container {
+        flex-direction: column;
+    }
+    
+    .feedback-section {
+        max-width: 100%;
+    }
+    
+    .chessboard-wrapper {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1/1;
+    }
+}
+
+
+.analysis-section p, .analysis-section ul {
+    margin-top: 0;
+}
+
+.error-message {
+    background-color: #ffebee;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+.feedback-panel h3, .analysis-panel h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 12px;
+  background: #f0f3f5;
+  border-radius: 6px;
+}
+
+.stat-value {
+  font-size: 1.4em;
+  font-weight: 600;
+  color: #2c3e50;
+  display: block;
+  margin-top: 5px;
+}
+
+.key-moments {
+  display: grid;
+  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.move-card {
+  padding: 15px;
+  background: #fff;
+  border-left: 4px solid;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.best-move {
+  border-color: #27ae60;
+}
+
+.worst-move {
+  border-color: #e74c3c;
+}
+
+.recommendations-list {
+  list-style: none;
+  padding: 0;
+}
+
+.recommendation-item {
+  padding: 10px;
+  margin: 8px 0;
+  background: #fff;
+  border-left: 4px solid #3498db;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

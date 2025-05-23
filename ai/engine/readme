@@ -1,0 +1,98 @@
+Stockfish Engine Installation Guide
+This guide explains how to install the Stockfish chess engine for different operating systems to use with your chess AI project.
+
+Prerequisites
+Basic command line knowledge
+
+Unzip utility (usually comes pre-installed)
+
+For Windows: Administrator privileges may be needed
+
+Installation Instructions
+For macOS
+Method 1: Using curl (recommended)
+bash
+# Navigate to your engine directory
+cd your-project/ai/engine
+
+# Download and install Stockfish
+curl -OL https://stockfishchess.org/files/stockfish_15.1_osx_x64.zip
+unzip stockfish_15.1_osx_x64.zip
+chmod +x stockfish_15.1_osx_x64
+mv stockfish_15.1_osx_x64 stockfish
+rm stockfish_15.1_osx_x64.zip
+Method 2: Using Homebrew (alternative)
+bash
+brew install stockfish
+ln -s $(which stockfish) your-project/ai/engine/stockfish
+For Linux
+Standard Installation
+bash
+cd your-project/ai/engine
+wget https://stockfishchess.org/files/stockfish_15.1_linux_x64.zip
+unzip stockfish_15.1_linux_x64.zip
+chmod +x stockfish_15.1_linux_x64
+mv stockfish_15.1_linux_x64 stockfish
+rm stockfish_15.1_linux_x64.zip
+For Windows
+Download the Windows version from:
+https://stockfishchess.org/download/
+
+Unzip the downloaded file into your-project\ai\engine
+
+Rename the executable to stockfish.exe
+(Original name will be similar to stockfish-windows-2022-x86-64-avx2.exe)
+
+Verification
+After installation, verify it works by running:
+
+bash
+cd your-project/ai/engine
+./stockfish  # On Windows: .\stockfish.exe
+You should see the Stockfish command prompt. Type quit to exit.
+
+Configuration
+In your Python code, point to the engine:
+
+python
+# For macOS/Linux
+engine_path = './engine/stockfish'
+
+# For Windows
+engine_path = './engine/stockfish.exe'
+Docker Setup (if applicable)
+Add these lines to your Dockerfile:
+
+dockerfile
+# For Linux/macOS
+COPY ./engine/stockfish /app/engine/stockfish
+RUN chmod +x /app/engine/stockfish
+
+# For Windows
+COPY ./engine/stockfish.exe /app/engine/stockfish.exe
+Troubleshooting
+Permission denied error:
+
+bash
+chmod +x ./engine/stockfish
+Engine not found:
+
+Verify the exact path to the executable
+
+On Windows, ensure you renamed the file correctly
+
+Stockfish version:
+
+Check stockfishchess.org for latest version
+
+Update download URLs accordingly
+
+Notes
+The engine binary should NOT be committed to version control
+
+Add this to your .gitignore:
+
+/ai/engine/stockfish*
+!/ai/engine/README.md
+For more information, visit the official Stockfish website:
+https://stockfishchess.org

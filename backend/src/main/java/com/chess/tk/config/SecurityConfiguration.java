@@ -35,12 +35,13 @@ public class SecurityConfiguration {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.adminService = adminService;
     }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource( e -> {
+                .cors(cors -> cors.configurationSource(e -> {
                     var corsConfiguration = new CorsConfiguration();
-                    corsConfiguration.setAllowedOrigins(List.of("http://192.168.10.4:8080","http://192.168.10.4:5173",
+                    corsConfiguration.setAllowedOrigins(List.of("http://192.168.10.4:8080", "http://192.168.10.4:5173",
                             "http://192.168.10.4:3001", "http://localhost:5173",
                             "http://localhost:8080", "http://localhost:3001"));
                     corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
@@ -68,9 +69,9 @@ public class SecurityConfiguration {
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                             response.setContentType("application/json");
-                            response.getWriter().write("{\"error\": \"You don't have the rights to execute the request.\"}");
-                        })
-                );
+                            response.getWriter()
+                                    .write("{\"error\": \"You don't have the rights to execute the request.\"}");
+                        }));
         return http.build();
     }
 
