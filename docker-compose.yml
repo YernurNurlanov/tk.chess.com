@@ -9,7 +9,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=123
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./init:/docker-entrypoint-initdb.d
@@ -40,6 +40,16 @@ services:
 #      - NODE_ENV=production
 #    depends_on:
 #      - backend
+
+  ai:
+    build: ./ai
+    container_name: ai
+    ports:
+      - "5001:5001"
+    environment:
+      - ENGINE_PATH=/opt/homebrew/bin/stockfish  # Ensures correct path
+    depends_on:
+      - postgres
 
 volumes:
   db_data:
