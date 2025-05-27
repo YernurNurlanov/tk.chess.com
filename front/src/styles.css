@@ -275,11 +275,28 @@ input[type="datetime-local"] {
     text-align: center;
 }
 
-.modal-content form {
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
 }
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+.error-text {
+    color: red;
+    font-size: 0.8rem;
+    margin-top: 0.2rem;
+}
+
 
 .modal-content label {
     font-weight: bold;
@@ -546,7 +563,7 @@ input[type="datetime-local"] {
 .group-students li:last-child {
     border-bottom: none;
 }
-{/*For lesson deletion*/}
+/*For lesson deletion*/
 .delete-btn-wrapper {
     position: absolute;
     top: 4px;

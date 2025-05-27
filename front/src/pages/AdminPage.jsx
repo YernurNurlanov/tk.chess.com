@@ -6,6 +6,7 @@ import TasksTable from "../components/TasksTable";
 import axios from "../axiosInstance.js";
 import CheckTaskModal from "../components/modals/teacher/lesson/CheckTaskModal.jsx";
 import Footer from "../components/Footer.jsx";
+import AddStudentModal from "../components/modals/admin/AddStudentModal.jsx";
 
 const AdminPage = () => {
     const [activeTab, setActiveTab] = useState("students");
@@ -42,13 +43,11 @@ const AdminPage = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        // Обновляем formData
         setFormData((prev) => ({
             ...prev,
             [name]: value
         }));
 
-        // Если поле FEN и что-то введено — проверяем
         if ((name === "startFin" || name === "endFin")) {
             if (value.trim() === '') {
                 setErrors((prev) => ({
@@ -95,7 +94,6 @@ const AdminPage = () => {
     };
 
     useEffect(() => {
-
 
         const fetchStudents = async () => {
             try {
@@ -204,7 +202,6 @@ const AdminPage = () => {
         }
     };
 
-
     const handleDetachStudent = async () => {
         try {
             await axios.put(`/admin/detach/${selectedStudent.id}`);
@@ -299,7 +296,6 @@ const AdminPage = () => {
         }
     };
 
-
     return (
         <div className="container">
             <AdminSidebar
@@ -371,7 +367,6 @@ const AdminPage = () => {
                         />
                     )}
 
-
                     {activeTab === "tasks" && (
                         <TasksTable
                             data={tasks}
@@ -388,54 +383,13 @@ const AdminPage = () => {
                 </main>
                 <Footer />
             </div>
-            {/* Add Student Modal */}
+
             {isAddStudentModalOpen && (
-                <Modal onClose={() => setAddStudentModalOpen(false)}>
-                    <h2>Add New Student</h2>
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            const formData = new FormData(e.target);
-                            const newStudent = {
-                                user: {
-                                    firstName: formData.get("firstName"),
-                                    lastName: formData.get("lastName"),
-                                    email: formData.get("email"),
-                                    phone: formData.get("phone"),
-                                    password: formData.get("password"),
-                                },
-                                student: {
-                                    lastPayment: formData.get("lastPayment")
-                                }
-                            };
-                            handleAddStudent(newStudent).then();
-                        }}
-                    >
-                        <label htmlFor="firstName">First Name:</label>
-                        <input type="text" id="firstName" name="firstName" required/>
-
-                        <label htmlFor="lastName">Last Name:</label>
-                        <input type="text" id="lastName" name="lastName" required/>
-
-                        <label htmlFor="email">Email:</label>
-                        <input type="email" id="email" name="email" required/>
-
-                        <label htmlFor="password">Password:</label>
-                        <input type="password" id="password" name="password" required/>
-
-                        <label htmlFor="phone">Phone:</label>
-                        <input type="text" id="phone" name="phone" required/>
-
-                        <label htmlFor="lastPayment">Last Payment:</label>
-                        <input type="datetime-local" id="lastPayment" name="lastPayment" required/>
-
-                        <button type="submit" className="btn">
-                            Save Student
-                        </button>
-                    </form>
-                </Modal>
+                <AddStudentModal
+                    onClose={() => setAddStudentModalOpen(false)}
+                    onSubmit={(newStudent) => handleAddStudent(newStudent).then()}
+                />
             )}
-
 
             {/* Update Student Modal не сделано*/}
             {isUpdateStudentModalOpen && (
@@ -502,7 +456,6 @@ const AdminPage = () => {
                 </Modal>
             )}
 
-
             {isAssignTeacherModalOpen && (
                 <Modal onClose={() => setAssignTeacherModalOpen(false)}>
                     <h2>Assign Teacher</h2>
@@ -552,7 +505,6 @@ const AdminPage = () => {
                     </div>
                 </Modal>
             )}
-
 
             {isAddTeacherModalOpen && (
                 <Modal onClose={() => setAddTeacherModalOpen(false)}>
@@ -620,7 +572,6 @@ const AdminPage = () => {
                     </form>
                 </Modal>
             )}
-
 
             {/* Update Teacher Modal не сделано*/}
             {isUpdateTeacherModalOpen && (
@@ -706,7 +657,6 @@ const AdminPage = () => {
                                 newErrors.endFin = 'Invalid FEN';
                                 hasError = true;
                             }
-
 
                             if (hasError) {
                                 setErrors(newErrors);
