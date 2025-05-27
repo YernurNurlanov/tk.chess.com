@@ -29,7 +29,73 @@ const AdminPage = () => {
     const [selectedTask, setSelectedTask] = useState(null);
     const [isCheckTaskModalOpen ,setCheckTaskModalOpen] = useState(false);
 
+    const [formData, setFormData] = useState({
+        startFin: '',
+        endFin: ''
+    });
+
+    const [errors, setErrors] = useState({
+        startFin: '',
+        endFin: ''
+    });
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+
+        // Обновляем formData
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value
+        }));
+
+        // Если поле FEN и что-то введено — проверяем
+        if ((name === "startFin" || name === "endFin")) {
+            if (value.trim() === '') {
+                setErrors((prev) => ({
+                    ...prev,
+                    [name]: ''
+                }));
+            } else {
+                const isValid = isValidFEN(value);
+                setErrors((prev) => ({
+                    ...prev,
+                    [name]: isValid ? '' : 'Invalid FEN'
+                }));
+            }
+        }
+    };
+
+    const isValidFEN = (fen) => {
+        if (!fen) return true; // пустая строка допустима
+        const parts = fen.trim().split(/\s+/);
+        if (parts.length !== 6) return false;
+
+        const [placement, turn, castling, ep, halfMove, fullMove] = parts;
+
+        const isValidPlacement = (s) => {
+            const rows = s.split('/');
+            if (rows.length !== 8) return false;
+            return rows.every(row => {
+                let count = 0;
+                for (const ch of row) {
+                    if (/[1-8]/.test(ch)) count += parseInt(ch);
+                    else if (/[prnbqkPRNBQK]/.test(ch)) count += 1;
+                    else return false;
+                }
+                return count === 8;
+            });
+        };
+
+        const isTurn = turn === 'w' || turn === 'b';
+        const isCastling = /^(-|[KQkq]{1,4})$/.test(castling);
+        const isEp = /^(-|[a-h][36])$/.test(ep);
+        const isNumber = (n) => /^\d+$/.test(n);
+
+        return isValidPlacement(placement) && isTurn && isCastling && isEp && isNumber(halfMove) && isNumber(fullMove);
+    };
+
     useEffect(() => {
+
 
         const fetchStudents = async () => {
             try {
@@ -138,6 +204,7 @@ const AdminPage = () => {
         }
     };
 
+
     const handleDetachStudent = async () => {
         try {
             await axios.put(`/admin/detach/${selectedStudent.id}`);
@@ -232,6 +299,7 @@ const AdminPage = () => {
         }
     };
 
+
     return (
         <div className="container">
             <AdminSidebar
@@ -303,6 +371,7 @@ const AdminPage = () => {
                         />
                     )}
 
+
                     {activeTab === "tasks" && (
                         <TasksTable
                             data={tasks}
@@ -366,6 +435,7 @@ const AdminPage = () => {
                     </form>
                 </Modal>
             )}
+
 
             {/* Update Student Modal не сделано*/}
             {isUpdateStudentModalOpen && (
@@ -432,6 +502,7 @@ const AdminPage = () => {
                 </Modal>
             )}
 
+
             {isAssignTeacherModalOpen && (
                 <Modal onClose={() => setAssignTeacherModalOpen(false)}>
                     <h2>Assign Teacher</h2>
@@ -481,6 +552,7 @@ const AdminPage = () => {
                     </div>
                 </Modal>
             )}
+
 
             {isAddTeacherModalOpen && (
                 <Modal onClose={() => setAddTeacherModalOpen(false)}>
@@ -548,6 +620,7 @@ const AdminPage = () => {
                     </form>
                 </Modal>
             )}
+
 
             {/* Update Teacher Modal не сделано*/}
             {isUpdateTeacherModalOpen && (
@@ -620,6 +693,26 @@ const AdminPage = () => {
                         onSubmit={(e) => {
                             e.preventDefault();
                             const formData = new FormData(e.target);
+
+                            let hasError = false;
+                            const newErrors = {...errors};
+
+                            if (!isValidFEN(formData.startFin)) {
+                                newErrors.startFin = 'Invalid FEN';
+                                hasError = true;
+                            }
+
+                            if (formData.endFin && !isValidFEN(formData.endFin)) {
+                                newErrors.endFin = 'Invalid FEN';
+                                hasError = true;
+                            }
+
+
+                            if (hasError) {
+                                setErrors(newErrors);
+                                return;
+                            }
+
                             const newTask = {
                                 level: formData.get("level"),
                                 topic: formData.get("topic"),
@@ -633,28 +726,36 @@ const AdminPage = () => {
                                 });
                         }}
                     >
-                        <label htmlFor="topic">Level:</label>
-                        <select id="level" name="level" required>
-                            <option value="">-- Select level --</option>
-                            <option value="BEGINNER">Beginner</option>
-                            <option value="FOURTH_CATEGORY">Fourth category</option>
-                            <option value="THIRD_CATEGORY">Third category</option>
-                            <option value="SECOND_CATEGORY">Second category</option>
-                            <option value="FIRST_CATEGORY">First category</option>
-                            <option value="CANDIDATE_MASTER">Candidate master</option>
-                            <option value="FIDE_MASTER">Fide master</option>
-                        </select>
+                        <div className="form-grid">
+                            <label htmlFor="topic">Level:</label>
+                            <select id="level" name="level" required>
+                                <option value="">-- Select level --</option>
+                                <option value="BEGINNER">Beginner</option>
+                                <option value="FOURTH_CATEGORY">Fourth category</option>
+                                <option value="THIRD_CATEGORY">Third category</option>
+                                <option value="SECOND_CATEGORY">Second category</option>
+                                <option value="FIRST_CATEGORY">First category</option>
+                                <option value="CANDIDATE_MASTER">Candidate master</option>
+                                <option value="FIDE_MASTER">Fide master</option>
+                            </select>
 
-                        <label htmlFor="topic">Topic:</label>
-                        <input type="text" id="topic" name="topic" required/>
+                            <label htmlFor="topic">Topic:</label>
+                            <input type="text" id="topic" name="topic" required/>
+                            <div className="form-field">
+                                <label htmlFor="startFin">startFin:</label>
+                                <input type="text" id="startFin" name="startFin" value={formData.startFin}
+                                       onChange={handleChange} required/>
+                                {errors.startFin && <p className="error-text">{errors.startFin}</p>}
+                            </div>
 
-                        <label htmlFor="startFin">startFin:</label>
-                        <input type="text" id="startFin" name="startFin" required/>
-
-                        <label htmlFor="endFin">endFin:</label>
-                        <input type="text" id="endFin" name="endFin" />
-
-                        <button type="submit" className="btn">
+                            <div className="form-field">
+                                <label htmlFor="endFin">endFin:</label>
+                                <input type="text" id="endFin" name="endFin" value={formData.endFin}
+                                       onChange={handleChange}/>
+                                {errors.endFin && <p className="error-text">{errors.endFin}</p>}
+                            </div>
+                        </div>
+                        <button type="submit" className="btn" disabled={!!errors.startFin || !!errors.endFin}>
                             Save Task
                         </button>
                     </form>
