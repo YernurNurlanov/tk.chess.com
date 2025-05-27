@@ -7,6 +7,7 @@ import axios from "../axiosInstance.js";
 import CheckTaskModal from "../components/modals/teacher/lesson/CheckTaskModal.jsx";
 import Footer from "../components/Footer.jsx";
 import AddStudentModal from "../components/modals/admin/AddStudentModal.jsx";
+import AddTeacherModal from "../components/modals/admin/AddTeacherModal.jsx";
 
 const AdminPage = () => {
     const [activeTab, setActiveTab] = useState("students");
@@ -143,7 +144,7 @@ const AdminPage = () => {
                 .join('\n');
 
             alert('Validation errors:\n' + message);
-            throw error;
+            console.error(error);
         }
     };
 
@@ -219,6 +220,7 @@ const AdminPage = () => {
         try {
             await axios.post(`/admin/teachers`, newTeacher);
             setTeachers([...teachers, {id: teachers.length + 1, ...newTeacher}]);
+            alert("Teacher added successfully!")
             setAddTeacherModalOpen(false);
         } catch (error) {
                 const validationErrors = error.response.data;
@@ -227,7 +229,6 @@ const AdminPage = () => {
                     .join('\n');
 
                 alert('Validation errors:\n' + message);
-                throw error;
         }
     };
 
@@ -507,70 +508,10 @@ const AdminPage = () => {
             )}
 
             {isAddTeacherModalOpen && (
-                <Modal onClose={() => setAddTeacherModalOpen(false)}>
-                    <h2>Add New Teacher</h2>
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            const formData = new FormData(e.target);
-                            const newTeacherRequest = {
-                                user: {
-                                    firstName: formData.get("firstName"),
-                                    lastName: formData.get("lastName"),
-                                    email: formData.get("email"),
-                                    phone: formData.get("phone"),
-                                    password: formData.get("password"),
-                                },
-                                teacher: {
-                                    hourlyRate: parseInt(String(formData.get("hourlyRate"))),
-                                    schedule: formData.get("schedule"),
-                                    bio: formData.get("bio"),
-                                    experienceYears: parseInt(String(formData.get("experienceYears"))),
-                                    chessRating: parseInt(String(formData.get("chessRating"))),
-                                }
-                            };
-                            handleAddTeacher(newTeacherRequest)
-                                .then(() => alert("Teacher added successfully!"))
-                                .catch((error) => {
-                                    console.error("Failed to add teacher:", error);
-                                });
-                        }}
-                    >
-                        <label htmlFor="firstName">First Name:</label>
-                        <input type="text" id="firstName" name="firstName" required/>
-
-                        <label htmlFor="lastName">Last Name:</label>
-                        <input type="text" id="lastName" name="lastName" required/>
-
-                        <label htmlFor="email">Email:</label>
-                        <input type="email" id="email" name="email" required/>
-
-                        <label htmlFor="password">Password:</label>
-                        <input type="password" id="password" name="password" required/>
-
-                        <label htmlFor="phone">Phone:</label>
-                        <input type="text" id="phone" name="phone" required/>
-
-                        <label htmlFor="hourlyRate">Hourly Rate:</label>
-                        <input type="number" id="hourlyRate" name="hourlyRate" required/>
-
-                        <label htmlFor="schedule">Schedule:</label>
-                        <input type="text" id="schedule" name="schedule" required/>
-
-                        <label htmlFor="bio">Bio:</label>
-                        <textarea id="bio" name="bio" required></textarea>
-
-                        <label htmlFor="experienceYears">Experience Years:</label>
-                        <input type="number" id="experienceYears" name="experienceYears" required/>
-
-                        <label htmlFor="chessRating">Chess Rating:</label>
-                        <input type="number" id="chessRating" name="chessRating" required/>
-
-                        <button type="submit" className="btn">
-                            Save Teacher
-                        </button>
-                    </form>
-                </Modal>
+                <AddTeacherModal
+                    onClose={() => setAddTeacherModalOpen(false)}
+                    onSubmit={(newTeacher) => handleAddTeacher(newTeacher).then()}
+                />
             )}
 
             {/* Update Teacher Modal не сделано*/}
