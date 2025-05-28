@@ -2,6 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/loginPage.module.css';
 import axios from "../axiosInstance.js";
+import {handleError} from "../handlers/handleError.js";
+import GoogleLoginButton from "../components/GoogleLoginButton.jsx";
 
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -28,12 +30,7 @@ const LoginPage = () => {
                     navigate('/');
             }
         } catch (error) {
-            const validationErrors = error.response.data;
-            const message = Object.entries(validationErrors)
-                .map(([field, msg]) => `${field}: ${msg}`)
-                .join('\n');
-
-            alert('Validation errors:\n' + message);
+            handleError(error, "Validation errors");
         }
     };
 
@@ -41,6 +38,7 @@ const LoginPage = () => {
         <div className={styles.loginContainer}>
             <div className={styles.loginBox}>
                 <h2 className={styles.loginTitle}>Log in</h2>
+                <GoogleLoginButton/>
                 <form onSubmit={handleSubmit} className={styles.loginForm}>
                     <div className={styles.formGroup}>
                         <label className={styles.formLabel}>Email</label>
@@ -67,6 +65,9 @@ const LoginPage = () => {
                         log in
                     </button>
                 </form>
+                <button style={{backgroundColor: "white", color: "black"}}>
+                    Забыли пароль?
+                </button>
             </div>
         </div>
     );

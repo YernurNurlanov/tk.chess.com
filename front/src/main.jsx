@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from 'react-dom/client'
 import './index.css'
 import AppRouter from "./routes/AppRouter.jsx";
+import {GoogleOAuthProvider} from "@react-oauth/google";
 
 window.alert = function (message, type = "info") {
     const colors = {
@@ -50,7 +51,9 @@ window.alert = function (message, type = "info") {
 };
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-    <React.StrictMode>
-        <AppRouter />
-    </React.StrictMode>
+    <GoogleOAuthProvider clientId="756752521081-p0du6951j4598agcdbaoumt3dsv6ikup.apps.googleusercontent.com">
+        <React.StrictMode>
+            <AppRouter />
+        </React.StrictMode>
+    </GoogleOAuthProvider>
 );

@@ -6,6 +6,7 @@ import StudentSidebar from "../components/studentPage/StudentSidebar.jsx";
 import useStudentPageState from "../hooks/useStudentPageState.js";
 import {handleGetLessonTasks} from "../handlers/student/lessonHandlers.js";
 import TasksSection from "../components/studentPage/TasksSection.jsx";
+import {handleLogout} from "../handlers/handleLogout.jsx";
 
 const StudentPage = () => {
 
@@ -53,8 +54,9 @@ const StudentPage = () => {
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 onLogout={() =>
-                    window.location.href = "/auth"
+                    handleLogout().then()
                 }
+                userId={currentUser?.id}
             />
             <div className="content-wrapper">
                 <main className={"main-content"}>

@@ -13,7 +13,7 @@ import {
     handleSubmitAttendance,
     handleUpdateLesson
 } from "../handlers/teacher/lessonHandlers.js";
-import {handleDeleteStudentFromGroup, handleGetGroupPage} from "../handlers/teacher/groupHandlers.js";
+import {handleGetGroupPage} from "../handlers/teacher/groupHandlers.js";
 import GroupsSection from "../components/teacherPage/GroupsSection.jsx";
 import GroupDetails from "../components/teacherPage/GroupDetails.jsx";
 import Footer from "../components/Footer.jsx";
@@ -26,6 +26,7 @@ import CheckTaskModal from "../components/modals/teacher/lesson/CheckTaskModal.j
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
 import WeeklySchedule from "../components/teacherPage/WeeklySchedule.jsx";
+import {handleLogout} from "../handlers/handleLogout.jsx";
 
 const TeacherPage = () => {
     const [currentUser, setCurrentUser] = useState(null);
@@ -131,7 +132,7 @@ const TeacherPage = () => {
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 onLogout={() =>
-                    window.location.href = "/auth"
+                    handleLogout().then()
                 }
                 currentUser={currentUser}
             />

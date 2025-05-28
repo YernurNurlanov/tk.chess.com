@@ -8,6 +8,7 @@ import CheckTaskModal from "../components/modals/teacher/lesson/CheckTaskModal.j
 import Footer from "../components/Footer.jsx";
 import AddStudentModal from "../components/modals/admin/AddStudentModal.jsx";
 import AddTeacherModal from "../components/modals/admin/AddTeacherModal.jsx";
+import {handleLogout} from "../handlers/handleLogout.jsx";
 
 const AdminPage = () => {
     const [activeTab, setActiveTab] = useState("students");
@@ -302,7 +303,7 @@ const AdminPage = () => {
             <AdminSidebar
                 onTabChange={(tab) => setActiveTab(tab)}
                 onLogout={() =>
-                    window.location.href = "/auth"
+                    handleLogout().then()
                 }
             />
             <div className="content-wrapper">

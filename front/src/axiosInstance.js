@@ -1,4 +1,5 @@
 import axios from "axios";
+import {handleLogout} from "./handlers/handleLogout.jsx";
 
 const url = import.meta.env.VITE_API_URL;
 
@@ -11,7 +12,7 @@ axiosInstance.interceptors.response.use(
     response => response,
     error => {
         if (error.response && error.response.status === 401) {
-            window.location.href = "/auth";
+            handleLogout().then()
         }
 
         return Promise.reject(error);

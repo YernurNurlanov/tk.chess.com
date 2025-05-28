@@ -268,20 +268,28 @@ public class TeacherService {
 
         taskIds = new ArrayList<>(new HashSet<>(taskIds));
 
-        List<Task> tasks = taskRepo.findAllById(taskIds);
+        List<Long> existingTaskIds = lesson.getTaskIds();
 
-        if (tasks.size() != taskIds.size()) {
+        List<Long> newTaskIds = taskIds.stream()
+                .filter(id -> !existingTaskIds.contains(id))
+                .toList();
+
+        if (newTaskIds.isEmpty()) {
+            throw new IllegalArgumentException("All provided tasks are already added to the lesson");
+        }
+
+        List<Task> tasks = taskRepo.findAllById(newTaskIds);
+        if (tasks.size() != newTaskIds.size()) {
             throw new EntityNotFoundException("Some tasks were not found");
         }
 
-        List<Long> combinedTaskIds = lesson.getTaskIds();
-        combinedTaskIds.addAll(taskIds);
+        existingTaskIds.addAll(newTaskIds);
+        lesson.setTaskIds(new ArrayList<>(new HashSet<>(existingTaskIds)));
 
-        lesson.setTaskIds(new ArrayList<>(new HashSet<>(combinedTaskIds)));
         lessonRepo.save(lesson);
-
         return getLessonById(lesson.getId());
     }
+
 
     @Transactional
     public MarkAttendanceRequest markAttendance(Long lessonId, List<Long> presentStudentIds) {
