@@ -6,16 +6,18 @@ import "../../styles/StudentSidebar.css";
 const StudentSidebar = ({ currentUser, activeTab, setActiveTab, onLogout, userId }) => {
     const [isCreatingRoom, setIsCreatingRoom] = useState(false);
 
+    const url = import.meta.env.VITE_API_URL;
+
     const createAIRoom = async () => {
         setIsCreatingRoom(true);
         try {
             console.log("Attempting to create AI room with userId:", userId);
             const response = await axios.post(
-                "http://localhost:8080/api/ai-rooms", 
+                `${url}/games/`,
                 {
                     userId,
-                    aiLevel: 3, // Default level
-                    playerColor: "white" // Default color
+                    aiLevel: 3,
+                    playerColor: "white"
                 }, 
                 {
                     withCredentials: true
