@@ -70,3 +70,9 @@
 .loginButton:hover {
     background-color: #3f3f46;
 }
+
+.errorText {
+    color: red;
+    font-size: 0.875rem;
+    margin-top: 4px;
+}

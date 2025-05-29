@@ -41,9 +41,13 @@ public class SecurityConfiguration {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(e -> {
                     var corsConfiguration = new CorsConfiguration();
-                    corsConfiguration.setAllowedOrigins(List.of("http://192.168.10.4:8080", "http://192.168.10.4:5173",
-                            "http://192.168.10.4:3001", "http://localhost:5173",
-                            "http://localhost:8080", "http://localhost:3001"));
+                    corsConfiguration.setAllowedOrigins(List.of(
+                            "https://192.168.226.25:8080",
+                            "https://192.168.226.25:5173",
+                            "https://192.168.226.25:3001",
+                            "https://localhost:5173",
+                            "https://localhost:8080",
+                            "https://localhost:3001"));
                     corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                     corsConfiguration.setAllowedHeaders(List.of("*"));
                     corsConfiguration.setAllowCredentials(true);

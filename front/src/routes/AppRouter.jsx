@@ -7,12 +7,16 @@ import StudentPage from "../pages/StudentPage.jsx";
 import NotFound from "../pages/NotFound.jsx";
 import Room from "../pages/Room.jsx";
 import AIChessRoom from '../pages/AIChessRoom';
+import ForgotPasswordPage from "../pages/ForgotPasswordPage.jsx";
+import ResetPasswordPage from "../pages/ResetPasswordPage.jsx";
 
 const AppRouter = () => {
     return (
         <BrowserRouter>
             <Routes>
                 <Route path="/auth" element={<LoginPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="/teacher" element={<TeacherPage />} />
                 <Route path="/student" element={<StudentPage />} />

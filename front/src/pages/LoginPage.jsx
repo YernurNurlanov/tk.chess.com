@@ -65,7 +65,7 @@ const LoginPage = () => {
                         log in
                     </button>
                 </form>
-                <button style={{backgroundColor: "white", color: "black"}}>
+                <button onClick={() => window.location.href = "/forgot-password"} style={{backgroundColor: "white", color: "black"}}>
                     Забыли пароль?
                 </button>
             </div>
