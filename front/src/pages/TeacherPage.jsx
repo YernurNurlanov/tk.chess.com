@@ -27,8 +27,11 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
 import WeeklySchedule from "../components/teacherPage/WeeklySchedule.jsx";
 import {handleLogout} from "../handlers/handleLogout.jsx";
+import {useNavigate} from "react-router-dom";
 
 const TeacherPage = () => {
+    const navigate = useNavigate();
+
     const [currentUser, setCurrentUser] = useState(null);
 
     const onAddLesson = (data, closeModal) =>
@@ -64,6 +67,11 @@ const TeacherPage = () => {
             try {
                 const response = await axios.get(`/me`);
                 setCurrentUser(response.data);
+
+                if (response.data.passwordTemporary) {
+                    navigate("/force-password-change");
+                }
+
                 console.log("Current user received")
             } catch (error) {
                 console.error("Error fetching current user", error);

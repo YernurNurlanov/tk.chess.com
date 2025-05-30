@@ -7,8 +7,10 @@ import useStudentPageState from "../hooks/useStudentPageState.js";
 import {handleGetLessonTasks} from "../handlers/student/lessonHandlers.js";
 import TasksSection from "../components/studentPage/TasksSection.jsx";
 import {handleLogout} from "../handlers/handleLogout.jsx";
+import {useNavigate} from "react-router-dom";
 
 const StudentPage = () => {
+    const navigate = useNavigate();
 
     const {
         activeTab, setActiveTab,
@@ -23,6 +25,11 @@ const StudentPage = () => {
             try {
                 const response = await axios.get("/me");
                 setCurrentUser(response.data);
+
+                if (response.data.passwordTemporary) {
+                    navigate("/force-password-change");
+                }
+
                 console.log("Current user received")
             } catch (error) {
                 console.error("Error fetching current user", error);

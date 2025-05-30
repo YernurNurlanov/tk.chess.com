@@ -13,6 +13,8 @@ import com.chess.tk.dto.LevelTasksDTO;
 import com.chess.tk.dto.TopicTasksDTO;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,11 +30,23 @@ public class GeneralService {
     private final StudentRepository studentRepo;
     private final TeacherRepository teacherRepo;
     private final TaskRepository taskRepo;
+    private final PasswordEncoder passwordEncoder;
 
     public User getCurrentUser(String jwt) {
         String email = jwtService.extractUserName(jwt);
         return userRepo.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User with email " + email + " not found"));
+    }
+
+    public ResponseEntity<?> changePassword(String email, String password) {
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User with email " + email + " not found"));
+
+        user.setPassword(passwordEncoder.encode(password));
+        user.setPasswordTemporary(false);
+        userRepo.save(user);
+
+        return ResponseEntity.ok("Password updated");
     }
 
     public List<Student> getStudentsByTeacherId(Long id) {

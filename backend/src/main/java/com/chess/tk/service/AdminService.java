@@ -22,33 +22,42 @@ public class AdminService {
     private final TeacherRepository teacherRepo;
     private final GroupRepository groupRepo;
     private final TaskRepository taskRepo;
+    private final EmailService emailService;
 
     public AdminService(UserRepository userRepo, PasswordEncoder passwordEncoder, StudentRepository studentRepo,
-                        TeacherRepository teacherRepo, GroupRepository groupRepo, TaskRepository taskRepo) {
+                        TeacherRepository teacherRepo, GroupRepository groupRepo, TaskRepository taskRepo, EmailService emailService) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
         this.studentRepo = studentRepo;
         this.teacherRepo = teacherRepo;
         this.groupRepo = groupRepo;
         this.taskRepo = taskRepo;
+        this.emailService = emailService;
     }
 
     @Transactional
     public Teacher addTeacher(User user, Teacher teacher) {
+        String password = user.getPassword();
         teacher.setUser(setFieldsToUser(user, Role.ROLE_TEACHER));
-        return teacherRepo.save(teacher);
+        Teacher savedTeacher = teacherRepo.save(teacher);
+        emailService.sendCredentialsEmail(user.getEmail(), password);
+        return savedTeacher;
     }
 
     @Transactional
     public Student addStudent(User user, Student student) {
+        String password = user.getPassword();
         student.setUser(setFieldsToUser(user, Role.ROLE_STUDENT));
-        return studentRepo.save(student);
+        Student savedStudent = studentRepo.save(student);
+        emailService.sendCredentialsEmail(user.getEmail(), password);
+        return savedStudent;
     }
 
     private User setFieldsToUser(User user, Role role) {
         user.setCreatedAt(LocalDateTime.now());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole(role);
+        user.setPasswordTemporary(true);
         return userRepo.save(user);
     }
 

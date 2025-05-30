@@ -9,12 +9,14 @@ import Room from "../pages/Room.jsx";
 import AIChessRoom from '../pages/AIChessRoom';
 import ForgotPasswordPage from "../pages/ForgotPasswordPage.jsx";
 import ResetPasswordPage from "../pages/ResetPasswordPage.jsx";
+import ForcePasswordChangePage from "../pages/ForcePasswordChangePage.jsx";
 
 const AppRouter = () => {
     return (
         <BrowserRouter>
             <Routes>
                 <Route path="/auth" element={<LoginPage />} />
+                <Route path={"/force-password-change"} element={<ForcePasswordChangePage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/admin" element={<AdminPage />} />

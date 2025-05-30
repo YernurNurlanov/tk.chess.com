@@ -10,18 +10,21 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    private final JavaMailSender emailSender;
 
     @Value("${spring.email.userName}")
     private String userName;
 
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+    @Value("${spring.front.url}")
+    private String url;
+
+    public EmailService(JavaMailSender emailSender) {
+        this.emailSender = emailSender;
     }
 
     public void sendPasswordResetLink(String email, String link) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessage message = emailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setFrom(userName);
@@ -39,7 +42,38 @@ public class EmailService {
 
             helper.setText(htmlContent, true);
 
-            mailSender.send(message);
+            emailSender.send(message);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendCredentialsEmail(String email, String password) {
+        try {
+            MimeMessage message = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(userName);
+            helper.setTo(email);
+            helper.setSubject("tk.chess.school - Your Account Credentials");
+
+            String htmlContent = """
+        <p>Hello,</p>
+        <p>Your account for <strong>tk.chess.school</strong> has been created.</p>
+        <p>Here are your login credentials:</p>
+        <ul>
+            <li><strong>Login (email):</strong> %s</li>
+            <li><strong>Temporary password:</strong> %s</li>
+        </ul>
+        <p>Please log in and change your password immediately after first login.</p>
+        <p><a href="%s/auth" target="_blank">Log In</a></p>
+        <br>
+        <p>If you have any issues, contact your administrator.</p>
+        """.formatted(email, password, url);
+
+            helper.setText(htmlContent, true);
+
+            emailSender.send(message);
         } catch (MessagingException e) {
             e.printStackTrace();
         }

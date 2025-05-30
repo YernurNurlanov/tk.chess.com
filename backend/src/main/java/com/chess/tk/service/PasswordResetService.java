@@ -18,7 +18,7 @@ public class PasswordResetService {
     private final PasswordEncoder passwordEncoder;
     private final AdminService adminService;
 
-    @Value("${front.reset-url}")
+    @Value("${spring.front.url}")
     private String url;
 
     public PasswordResetService(JwtService jwtService, EmailService emailService,
@@ -35,7 +35,7 @@ public class PasswordResetService {
                 .orElseThrow(() -> new EntityNotFoundException("User with email " + email + " not found"));
 
         String token = jwtService.generateResetToken(user.getEmail());
-        String link = url + "?token=" + token;
+        String link = url + "/reset-password?token=" + token;
 
 
         emailService.sendPasswordResetLink(user.getEmail(), link);
