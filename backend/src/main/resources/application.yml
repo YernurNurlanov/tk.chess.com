@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5434/tk.chess.com
+    url: jdbc:postgresql://localhost:5432/tk.chess.com
     username: postgres
     password: 123
   jpa:
@@ -25,3 +25,13 @@ token:
 
 google:
   client-id: 756752521081-p0du6951j4598agcdbaoumt3dsv6ikup.apps.googleusercontent.com
+<<<<<<< HEAD
+=======
+
+front:
+  reset-url: https://localhost:5173/reset-password
+
+chess:
+  ai:
+    service-url: http://localhost:5001
+>>>>>>> 553fdc6 (feat: mlka)
