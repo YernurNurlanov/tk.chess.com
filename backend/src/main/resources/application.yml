@@ -14,7 +14,7 @@ spring:
     userName: tk.chess.school@gmail.com
     password: .
   front:
-    url: https://localhost:5173
+    url: http://localhost:5173
 
 server:
   port: 8080
