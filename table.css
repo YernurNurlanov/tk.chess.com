@@ -1,0 +1,62 @@
+.table {
+    display: table;
+    min-width: 100%;
+    border-collapse: collapse;
+    border-color: black;
+}
+
+.table-row {
+    display: table-row;
+    min-width: 100%;
+    border-bottom: 1px solid var(--gray);
+    padding: 10px 0;
+}
+
+.table-row.header {
+    font-weight: bold;
+    background: var(--primary-color);
+    color: var(--white);
+    top: 0;
+}
+
+.table-cell {
+    display: table-cell;
+    min-width: 50px;
+    flex: 1;
+    padding: 10px;
+    border: 1px solid black;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.btn-attach {
+    background-color: #4caf50;
+    color: var(--white);
+}
+
+.btn-update {
+    background-color: #50a6cd;
+    color: var(--white);
+}
+
+.btn-delete {
+    background-color: #ff4d4d;
+    color: var(--white);
+}
+
+.btn-attach:hover {
+    background-color: #45a049;
+}
+
+.btn-update:hover {
+    background-color: #007acc;
+}
+
+.btn-delete:hover {
+    background-color: #cc0000;
+}
