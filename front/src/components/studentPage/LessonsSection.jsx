@@ -10,7 +10,7 @@ const LessonsSection = ({ lessons, onTasks }) => (
                 {lessons.map((lesson) => (
                     <div key={lesson.id} className="group-card">
                         <h2>{lesson.groupName}</h2>
-                        <ul className="group-students">
+                        <ul className="group-info">
                             <li>Start: {new Date(lesson.startTime).toLocaleString()}</li>
                             <li>End: {new Date(lesson.endTime).toLocaleString()}</li>
                         </ul>

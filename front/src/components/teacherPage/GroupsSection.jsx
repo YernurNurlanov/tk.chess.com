@@ -14,17 +14,19 @@ const GroupsSection = ({groups, handleGetGroupPage, setSelectedGroup, setDeleteG
                             handleGetGroupPage(group.id)
                         }
                     >
-                        <button
-                            className="delete-btn"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedGroup(group);
-                                setDeleteGroupModalOpen(true);
-                            }}
-                        >
-                            &times;
-                        </button>
                         <h2>{group.groupName}</h2>
+                        <div className="delete-btn-wrapper">
+                            <button
+                                className="delete-btn"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedGroup(group);
+                                    setDeleteGroupModalOpen(true);
+                                }}
+                            >
+                                &times;
+                            </button>
+                        </div>
                     </div>
                 ))}
             </div>

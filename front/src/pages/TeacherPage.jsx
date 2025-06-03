@@ -144,157 +144,155 @@ const TeacherPage = () => {
                 }
                 currentUser={currentUser}
             />
-            <div className="content-wrapper">
-                <main className="main-content">
+            <main className="main-content">
 
-                    <header className="header">
-                        {activeTab === "groups" && (
-                            <button className="btn" onClick={() => setAddGroupModalOpen(true)}>
-                                Add Group
+                <header>
+                    {activeTab === "groups" && (
+                        <button className="btn" onClick={() => setAddGroupModalOpen(true)}>
+                            Add Group
+                        </button>
+                    )}
+
+                    {activeTab === "group" && (
+                        <>
+                            <button onClick={() => setActiveTab("groups")} style={{
+                                backgroundColor: "transparent",
+                                border: "none",
+                                color: "#333",
+                                cursor: "pointer",
+                                fontSize: "1.2rem"
+                            }}>
+                                <FontAwesomeIcon icon={faArrowLeft}/>
                             </button>
-                        )}
-
-                        {activeTab === "group" && (
-                            <>
-                                <button onClick={() => setActiveTab("groups")} style={{
-                                    backgroundColor: "transparent",
-                                    border: "none",
-                                    color: "#333",
-                                    cursor: "pointer",
-                                    fontSize: "1.2rem"
-                                }}>
-                                    <FontAwesomeIcon icon={faArrowLeft}/>
-                                </button>
-                                <h2>
-                                    {selectedGroup.groupName}
-                                </h2>
-                                <button className="btn" onClick={() => setUpdateGroupNameModalOpen(true)}>
-                                    Rename
-                                </button>
-                                <h3>
-                                    All Students
-                                </h3>
-                                <button className="btn" onClick={() => setAddStudentToGroupModalOpen(true)}>
-                                    Add Student
-                                </button>
-                            </>
-                        )}
-
-                        {activeTab === "lesson" && (
-                            <>
-                                <button onClick={() => setActiveTab("lessons")} style={{
-                                    backgroundColor: "transparent",
-                                    border: "none",
-                                    color: "#333",
-                                    cursor: "pointer",
-                                    fontSize: "1.2rem"
-                                }}>
-                                    <FontAwesomeIcon icon={faArrowLeft} />
-                                </button>
-                                <h2>
-                                {selectedLesson.groupName}
-                                    (
-                                    Start: {new Date(selectedLesson.startTime).toLocaleDateString()} {new Date(selectedLesson.startTime).toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                })},
-                                    End: {new Date(selectedLesson.endTime).toLocaleDateString()} {new Date(selectedLesson.endTime).toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                })} )
-                                </h2>
-                                <button className="btn" onClick={() => setUpdateLessonModalOpen(true)}>
-                                    Update lesson
-                                </button>
-                                <button className="btn" onClick={() => getStudyRoom(selectedLesson.id)}>
-                                    Study room
-                                </button>
-
-                            </>
-                        )}
-
-                    </header>
-
-                    {activeTab === "lessons" && (
-                        <WeeklySchedule
-                            scheduleData={lessons}
-                            onAddLesson={() => setAddLessonModalOpen(true)}
-                            setSelectedLesson={setSelectedLesson}
-                            setActiveTab={setActiveTab}
-                            setDeleteLessonModalOpen={setDeleteLessonModalOpen}
-                        />
+                            <h2>
+                                {selectedGroup.groupName}
+                            </h2>
+                            <button className="btn" onClick={() => setUpdateGroupNameModalOpen(true)}>
+                                Rename
+                            </button>
+                            <h3>
+                                All Students
+                            </h3>
+                            <button className="btn" onClick={() => setAddStudentToGroupModalOpen(true)}>
+                                Add Student
+                            </button>
+                        </>
                     )}
 
                     {activeTab === "lesson" && (
                         <>
-                            <div style={{ display: "flex" }}>
-                                <h3>Tasks</h3>
-                                <button className="btn" onClick={() => setAddTaskModalOpen(true)}>
-                                    Add Task
-                                </button>
-                            </div>
+                            <button onClick={() => setActiveTab("lessons")} style={{
+                                backgroundColor: "transparent",
+                                border: "none",
+                                color: "#333",
+                                cursor: "pointer",
+                                fontSize: "1.2rem"
+                            }}>
+                                <FontAwesomeIcon icon={faArrowLeft} />
+                            </button>
+                            <h2>
+                            {selectedLesson.groupName}
+                                (
+                                Start: {new Date(selectedLesson.startTime).toLocaleDateString()} {new Date(selectedLesson.startTime).toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })},
+                                End: {new Date(selectedLesson.endTime).toLocaleDateString()} {new Date(selectedLesson.endTime).toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })} )
+                            </h2>
+                            <button className="btn" onClick={() => setUpdateLessonModalOpen(true)}>
+                                Update lesson
+                            </button>
+                            <button className="btn" onClick={() => getStudyRoom(selectedLesson.id)}>
+                                Study room
+                            </button>
 
-                            <LessonTasksTable
-                                tasks={selectedLesson.tasks}
-                                onCheck={(task) => {
-                                    setSelectedTask(task)
-                                    setCheckTaskModalOpen(true);
-                                }}
-                            />
-
-                            <h3>Attendance</h3>
-                            <LessonAttendanceTable
-                                studentInfoDTOs={selectedLesson.studentInfoDTOs}
-                                selectedLesson={selectedLesson}
-                                setSelectedLesson={setSelectedLesson}
-                                handleSubmitAttendance={handleSubmitAttendance}
-                            />
-
-                            <h3>Performance</h3>
-                            <LessonPerformanceTable studentInfoDTOs={selectedLesson.studentInfoDTOs} />
                         </>
                     )}
 
-                    {activeTab === "students" && (
-                        <section className="students-list">
-                            <h1>All Students</h1>
-                            <Table
-                                data={students}
-                            />
-                        </section>
-                    )}
+                </header>
 
-                    {activeTab === "groups" && (
-                        <GroupsSection
-                            groups={groups}
-                            handleGetGroupPage={(id) =>
-                                handleGetGroupPage(id, setSelectedGroup, setActiveTab)
-                            }
-                            setSelectedGroup={setSelectedGroup}
-                            setDeleteGroupModalOpen={setDeleteGroupModalOpen}
-                        />
-                    )}
+                {activeTab === "lessons" && (
+                    <WeeklySchedule
+                        scheduleData={lessons}
+                        onAddLesson={() => setAddLessonModalOpen(true)}
+                        setSelectedLesson={setSelectedLesson}
+                        setActiveTab={setActiveTab}
+                        setDeleteLessonModalOpen={setDeleteLessonModalOpen}
+                    />
+                )}
 
-                    {activeTab === "group" && (
-                        <GroupDetails
-                            selectedGroup={selectedGroup}
-                            setSelectedStudent={setSelectedStudent}
-                            setDeleteStudentFromGroupModalOpen={setDeleteStudentFromGroupModalOpen}
-                        />
-                    )}
+                {activeTab === "lesson" && (
+                    <>
+                        <div style={{ display: "flex" }}>
+                            <h3>Tasks</h3>
+                            <button className="btn" onClick={() => setAddTaskModalOpen(true)}>
+                                Add Task
+                            </button>
+                        </div>
 
-                    {activeTab === "tasks" && (
-                        <TasksTable
-                            data={tasks}
+                        <LessonTasksTable
+                            tasks={selectedLesson.tasks}
                             onCheck={(task) => {
                                 setSelectedTask(task)
                                 setCheckTaskModalOpen(true);
                             }}
                         />
-                    )}
-                </main>
-                <Footer />
-            </div>
+
+                        <h3>Attendance</h3>
+                        <LessonAttendanceTable
+                            studentInfoDTOs={selectedLesson.studentInfoDTOs}
+                            selectedLesson={selectedLesson}
+                            setSelectedLesson={setSelectedLesson}
+                            handleSubmitAttendance={handleSubmitAttendance}
+                        />
+
+                        <h3>Performance</h3>
+                        <LessonPerformanceTable studentInfoDTOs={selectedLesson.studentInfoDTOs} />
+                    </>
+                )}
+
+                {activeTab === "students" && (
+                    <>
+                        <h1>All Students</h1>
+                        <Table
+                            data={students}
+                        />
+                    </>
+                )}
+
+                {activeTab === "groups" && (
+                    <GroupsSection
+                        groups={groups}
+                        handleGetGroupPage={(id) =>
+                            handleGetGroupPage(id, setSelectedGroup, setActiveTab)
+                        }
+                        setSelectedGroup={setSelectedGroup}
+                        setDeleteGroupModalOpen={setDeleteGroupModalOpen}
+                    />
+                )}
+
+                {activeTab === "group" && (
+                    <GroupDetails
+                        selectedGroup={selectedGroup}
+                        setSelectedStudent={setSelectedStudent}
+                        setDeleteStudentFromGroupModalOpen={setDeleteStudentFromGroupModalOpen}
+                    />
+                )}
+
+                {activeTab === "tasks" && (
+                    <TasksTable
+                        data={tasks}
+                        onCheck={(task) => {
+                            setSelectedTask(task)
+                            setCheckTaskModalOpen(true);
+                        }}
+                    />
+                )}
+            </main>
+            <Footer />
             {isAddLessonModalOpen && (
                 <LessonModal
                     mode="add"

@@ -65,29 +65,27 @@ const StudentPage = () => {
                 }
                 userId={currentUser?.id}
             />
-            <div className="content-wrapper">
-                <main className={"main-content"}>
-                    {activeTab === "lessons" && (
-                        <LessonsSection
-                            lessons={lessons}
-                            onTasks={(lesson) => {
-                                setSelectedLesson(lesson)
-                                handleGetLessonTasks( currentUser.id, lesson.id, setLessonTasks, setActiveTab).then();
-                            }}
-                        />
-                    )}
+            <main className={"main-content"}>
+                {activeTab === "lessons" && (
+                    <LessonsSection
+                        lessons={lessons}
+                        onTasks={(lesson) => {
+                            setSelectedLesson(lesson)
+                            handleGetLessonTasks( currentUser.id, lesson.id, setLessonTasks, setActiveTab).then();
+                        }}
+                    />
+                )}
 
-                    {activeTab === "tasks" && (
-                        <TasksSection
-                            studentId={currentUser.id}
-                            selectedLesson={selectedLesson}
-                            lessonTasks={lessonTasks}
-                            setLessonTasks={setLessonTasks}
-                        />
-                    )}
-                </main>
-                <Footer />
-            </div>
+                {activeTab === "tasks" && (
+                    <TasksSection
+                        studentId={currentUser.id}
+                        selectedLesson={selectedLesson}
+                        lessonTasks={lessonTasks}
+                        setLessonTasks={setLessonTasks}
+                    />
+                )}
+            </main>
+            <Footer />
         </div>
 
     )
