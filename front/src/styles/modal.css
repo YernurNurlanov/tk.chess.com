@@ -1,0 +1,104 @@
+.modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    overflow: auto;
+    height: 100vh;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 500px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    max-height: 80vh;
+    overflow: auto;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.close-btn:hover {
+    color: #ff7c78;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    font-size: 20px;
+    color: var(--text-color);
+    text-align: center;
+}
+
+.modal-content label {
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.modal-content textarea,
+.modal-content select,
+.modal-content input {
+    padding: 10px;
+    border: 1px solid var(--gray);
+    border-radius: 5px;
+    font-size: 14px;
+    color: var(--text-color);
+    background: var(--white);
+    transition: border-color 0.3s;
+}
+
+.modal-content select:focus,
+.modal-content input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.modal-content .btn {
+    padding: 10px;
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.modal-content .btn:hover {
+    background: #007acc;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-actions .btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+
+.error-text {
+    color: red;
+    font-size: 0.8rem;
+    margin-top: 0.2rem;
+}
