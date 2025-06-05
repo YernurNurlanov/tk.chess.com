@@ -10,24 +10,23 @@
 
 .group-card {
     background: var(--white);
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 16px 20px;
     width: 300px;
     position: relative;
-    border: 2px solid var(--primary-color);
-    transition: transform 0.3s, box-shadow 0.3s;
+    border: 1px solid #1e555c;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .group-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .group-card h2 {
     margin: 0 0 10px 0;
     font-size: 20px;
-    display: flex;
     justify-content: space-between;
     align-items: center;
 }
@@ -45,4 +44,28 @@
 
 .group-info li:last-child {
     border-bottom: none;
+}
+
+.lesson-group {
+    background-color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--gray);
+    font-size: clamp(1rem, 1.2vw, 1.1rem);
+    padding: 40px 0;
+    opacity: 0.7;
+}
+
+.empty-icon {
+    color: var(--primary-color);
 }
