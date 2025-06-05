@@ -1,10 +1,11 @@
 import React from 'react';
+import {faUsers} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 const GroupsSection = ({groups, handleGetGroupPage, setSelectedGroup, setDeleteGroupModalOpen }) => {
 
     return (
         <section className="groups-list">
-            <h1>All Groups</h1>
             <div className="group-cards">
                 {groups.map((group) => (
                     <div
@@ -14,7 +15,7 @@ const GroupsSection = ({groups, handleGetGroupPage, setSelectedGroup, setDeleteG
                             handleGetGroupPage(group.id)
                         }
                     >
-                        <h2>{group.groupName}</h2>
+                        <h2><FontAwesomeIcon icon={faUsers} style={{marginRight: "10px"}} />{group.groupName}</h2>
                         <div className="delete-btn-wrapper">
                             <button
                                 className="delete-btn"
