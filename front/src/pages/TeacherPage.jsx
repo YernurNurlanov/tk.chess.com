@@ -161,17 +161,11 @@ const TeacherPage = () => {
                             <button onClick={() => setActiveTab("groups")} className="btn-back">
                                 <FontAwesomeIcon icon={faArrowLeft}/>
                             </button>
-                            <h2>
+                            <h1>
                                 {selectedGroup.groupName}
-                            </h2>
-                            <button className="btn" onClick={() => setUpdateGroupNameModalOpen(true)}>
-                                Rename
-                            </button>
-                            <h3>
-                                All Students
-                            </h3>
-                            <button className="add-btn" onClick={() => setAddStudentToGroupModalOpen(true)}>
-                                <FontAwesomeIcon icon={faPlus} /> Add Student
+                            </h1>
+                            <button className="btn-back" onClick={() => setUpdateGroupNameModalOpen(true)}>
+                                <FontAwesomeIcon icon={faPen}/>
                             </button>
                         </>
                     )}
@@ -270,6 +264,7 @@ const TeacherPage = () => {
                         selectedGroup={selectedGroup}
                         setSelectedStudent={setSelectedStudent}
                         setDeleteStudentFromGroupModalOpen={setDeleteStudentFromGroupModalOpen}
+                        onAddStudent={() => setAddStudentToGroupModalOpen(true)}
                     />
                 )}
 
