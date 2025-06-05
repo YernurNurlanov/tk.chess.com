@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import Modal from "../../../Modal.jsx";
 
 const LessonModal = ({
@@ -16,7 +16,16 @@ const LessonModal = ({
         endTime: "",
     });
 
-    const isFormValid = Object.values(errors).every((err) => err === "");
+    useEffect(() => {
+        setErrors({
+            startTime: validateField("startTime", initialStart, initialEnd),
+            endTime:   validateField("endTime",   initialEnd,  initialStart),
+        });
+    }, []);
+
+    const isFormValid = useMemo(() => {
+        return Object.values(errors).every((err) => err === "");
+    }, [errors]);
 
     function formatDateTimeLocal(date) {
         const offset = date.getTimezoneOffset();
@@ -36,7 +45,6 @@ const LessonModal = ({
         const now = new Date();
         const bufferTime = new Date(now.getTime() + 10 * 60 * 1000);
         const start = name === "startTime" ? new Date(value) : new Date(otherValue);
-        const end = name === "endTime" ? new Date(value) : new Date(otherValue);
 
         switch (name) {
             case "startTime": {
@@ -50,7 +58,7 @@ const LessonModal = ({
                 const val = new Date(value);
                 if (isNaN(val.getTime())) return "Invalid date";
                 if (val <= start) return "End must be after start";
-                if (val.getHours() >= 22 || (val.getHours() === 21 && val.getMinutes() > 0))
+                if (val.getHours() >= 22)
                     return "Must end by 22:00";
                 const duration = (val - start) / 60000;
                 if (duration < 20) return "Minimum duration is 20 minutes";

@@ -13,4 +13,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     @Query("SELECT t FROM Task t WHERE t.endFin = ''")
     List<Task> findTasksWithEmptyEndFin();
+
+    @Query("SELECT t FROM Task t WHERE t.endFin <> ''")
+    List<Task> findTasksWithNonEmptyEndFin();
 }

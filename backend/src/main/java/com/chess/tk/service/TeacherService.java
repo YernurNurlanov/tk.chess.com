@@ -290,7 +290,6 @@ public class TeacherService {
         return getLessonById(lesson.getId());
     }
 
-
     @Transactional
     public MarkAttendanceRequest markAttendance(Long lessonId, List<Long> presentStudentIds) {
         Lesson lesson = lessonRepo.findById(lessonId)
@@ -306,7 +305,15 @@ public class TeacherService {
 
     public List<LevelTasksDTO> getTasksWithoutEndFin() {
         List<Task> tasks = taskRepo.findTasksWithEmptyEndFin();
+        return getLevelTasksDTOS(tasks);
+    }
 
+    public List<LevelTasksDTO> getTasksWithNonEmptyEndFin() {
+        List<Task> tasks = taskRepo.findTasksWithNonEmptyEndFin();
+        return getLevelTasksDTOS(tasks);
+    }
+
+    private List<LevelTasksDTO> getLevelTasksDTOS(List<Task> tasks) {
         return tasks.stream()
                 .collect(Collectors.groupingBy(Task::getLevel))
                 .entrySet()
