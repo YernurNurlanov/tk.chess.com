@@ -1,50 +1,55 @@
 import React from "react";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {
+    faChalkboardTeacher, faChessBoard,
+    faClipboardCheck,
+    faRightFromBracket,
+    faUserGraduate
+} from "@fortawesome/free-solid-svg-icons";
 
-const AdminSidebar = ({ onTabChange, onLogout }) => {
+const AdminSidebar = ({ onTabChange, onLogout, activeTab }) => {
     return (
         <aside className="sidebar">
             <div className="sidebar-header">
-                <div className="user-avatar">
-                    <img src="../../public/avatar.jpeg" alt="User Avatar" />
-                </div>
-                <h2 className="username">Profile</h2>
+                <FontAwesomeIcon className="icon" style={{fontSize: "30px", marginLeft:"10px"}} icon={faChessBoard}/>
+                <h2 className="username">Admin</h2>
             </div>
             <nav>
                 <ul>
                     <li>
                         <a
                             href="#"
-                            className="nav-item"
+                            className={`nav-item ${activeTab === "students" ? "active" : ""}`}
                             onClick={() => onTabChange("students")}
                         >
-                            <i className="fas fa-users"></i>Students
+                            <FontAwesomeIcon className="icon" icon={faUserGraduate}/> Students
                         </a>
                     </li>
                     <li>
                         <a
                             href="#"
-                            className="nav-item"
+                            className={`nav-item ${activeTab === "teachers" ? "active" : ""}`}
                             onClick={() => onTabChange("teachers")}
                         >
-                            <i className="fas fa-chalkboard-teacher"></i>Teachers
+                            <FontAwesomeIcon className="icon" icon={faChalkboardTeacher}/> Teachers
                         </a>
                     </li>
                     <li>
                         <a
                             href="#"
-                            className="nav-item"
+                            className={`nav-item ${activeTab === "tasks" ? "active" : ""}`}
                             onClick={() => onTabChange("tasks")}
                         >
-                            <i className="fas fa-chalkboard-teacher"></i>Tasks
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" className="nav-item" onClick={onLogout}>
-                            <i className="fas fa-sign-out-alt"></i>Log Out
+                            <FontAwesomeIcon className="icon" icon={faClipboardCheck}/> Tasks
                         </a>
                     </li>
                 </ul>
             </nav>
+            <div className="sidebar-footer">
+                <a href="#" className="nav-item logout" onClick={onLogout}>
+                    <FontAwesomeIcon className="icon" icon={faRightFromBracket}/> Log Out
+                </a>
+            </div>
         </aside>
     );
 };
