@@ -108,30 +108,41 @@ export default function AIChessRoom() {
     };
 
     const generateCompletePGN = () => {
-        const headers = [
-            `[Event "Casual Game"]`,
-            `[Site "Chess App"]`,
-            `[Date "${new Date().toISOString().split('T')[0]}"]`,
-            `[Round "-"]`,
-            `[White "${playerColor === 'white' ? 'Player' : 'AI'}"]`,
-            `[Black "${playerColor === 'black' ? 'Player' : 'AI'}"]`,
-            `[Result "*"]`
-        ].join('\n');
+    const headers = [
+        `[Event "Casual Game"]`,
+        `[Site "Chess App"]`,
+        `[Date "${new Date().toISOString().split('T')[0]}"]`,
+        `[Round "-"]`,
+        `[White "${playerColor === 'white' ? 'Player' : 'AI'}"]`,
+        `[Black "${playerColor === 'black' ? 'Player' : 'AI'}"]`,
+        `[Result "*"]`
+    ].join('\n');
 
-        const moves = [];
-        const tempGame = new Chess();
-        
-        moveHistory.forEach(move => {
-            const tempMove = tempGame.move({
+    // Reconstruct the game to get proper SAN moves
+    const tempGame = new Chess();
+    const sanMoves = [];
+    
+    moveHistory.forEach(move => {
+        try {
+            const chessMove = tempGame.move({
                 from: move.from,
                 to: move.to,
-                promotion: 'q'
+                promotion: move.promotion || 'q' // Default to queen promotion
             });
-            moves.push(tempMove ? `${tempGame.history().slice(-1)[0]}` : 'invalid');
-        });
+            if (chessMove) {
+                sanMoves.push(chessMove.san);
+            } else {
+                console.error("Invalid move in history:", move);
+            }
+        } catch (e) {
+            console.error("Error processing move:", move, e);
+        }
+    });
 
-        return `${headers}\n\n${moves.join(' ')} *`;
-    };
+    const pgn = `${headers}\n\n${sanMoves.join(' ')} *`;
+    console.log("Generated PGN:", pgn); // Log the complete PGN
+    return pgn;
+};
 
     const analyzeMove = async (move) => {
         try {
@@ -155,59 +166,65 @@ export default function AIChessRoom() {
     };
 
     const analyzeGame = async () => {
-        const pgn = generateCompletePGN();
-        console.log("Analyzing game with", game.history().length, "moves");
+    const pgn = generateCompletePGN();
+    console.log("===== SENDING TO BACKEND =====");
+    console.log("Full PGN:", pgn);
+    
+    setIsAnalyzing(true);
+    setAnalysisError(null);
+    
+    try {
+        const response = await axios.post('http://localhost:5001/analyze-game', { 
+            pgn: pgn,
+            playerColor,
+            debug: true  // Request detailed processing info
+        }, { timeout: 60000 });
+
+        console.log("Backend response:", response.data);
         
-        setIsAnalyzing(true);
-        setAnalysisError(null);
-        
-        try {
-            const response = await axios.post('http://localhost:5001/analyze-game', { 
-                pgn: pgn,
-                playerColor
-            }, {
-                timeout: 60000
-            });
-            
-            if (response.data.error) {
-                throw new Error(response.data.error);
-            }
-            
-            console.log("Analysis complete for", response.data.total_moves, "moves");
-            
-            // Extract ML insights
-            const mlData = {
-                skillLevel: response.data.ml_skill_level || response.data.skill_profile.level,
-                anomalies: response.data.anomalies || [],
-                opening: response.data.opening || "Unknown"
-            };
-            
-            setMlInsights(mlData);
-            setGameAnalysis({
-                ...response.data,
-                mlData
-            });
-            
-        } catch (error) {
-            console.error('Analysis failed:', error);
-            setAnalysisError(error.message);
-            
-            setGameAnalysis({
-                skill_profile: {
-                    level: "unknown",
-                    accuracy_percentage: 0,
-                    weaknesses: ["Analysis incomplete"],
-                },
-                mlData: {
-                    skillLevel: "unknown",
-                    anomalies: [],
-                    opening: "Unknown"
-                }
-            });
-        } finally {
-            setIsAnalyzing(false);
+        // If opening is unknown, show first moves
+        let opening = response.data.opening;
+        if (opening === "Неизвестный дебют") {
+            const firstMoves = game.history().slice(0, 4).join(" ");
+            opening = `Неизвестный дебют (${firstMoves})`;
         }
-    };
+        
+        setGameAnalysis({
+            ...response.data,
+            opening: opening,
+            mlData: {
+                skillLevel: response.data.skill_profile?.level || "unknown",
+                anomalies: response.data.anomalies || [],
+                opening: opening
+            }
+        });
+        
+    } catch (error) {
+        console.error('Analysis failed:', error);
+        setAnalysisError(error.message);
+        
+        // Create detailed error analysis
+        const sanHistory = game.history();
+        const firstMoves = sanHistory.slice(0, 4).join(" ");
+        
+        setGameAnalysis({
+            skill_profile: {
+                level: "unknown",
+                accuracy_percentage: 0,
+                weaknesses: ["Анализ не завершен"],
+            },
+            opening: `Неизвестный дебют (ошибка: ${firstMoves})`,
+            mlData: {
+                skillLevel: "unknown",
+                anomalies: [],
+                opening: `Неизвестный дебют (ошибка: ${firstMoves})`
+            }
+        });
+    } finally {
+        setIsAnalyzing(false);
+        console.log("===== ANALYSIS COMPLETE =====");
+    }
+};
 
     const handleReset = () => {
         const newGame = new Chess();
@@ -275,28 +292,25 @@ export default function AIChessRoom() {
                 <h4 className="section-header">ML Insights</h4>
                 <div className="ml-insights-grid">
                     <div className="ml-insight-card">
-                        <h5>Skill Level</h5>
-                        <div className="ml-value">{mlInsights.skillLevel}</div>
-                        <div className="ml-description">Predicted by neural network</div>
+                        <h5>Уровень игры</h5>
+                        <div className="ml-value">{gameAnalysis.skill_profile.level}</div>
                     </div>
                     
                     <div className="ml-insight-card">
-                        <h5>Opening</h5>
-                        <div className="ml-value">{mlInsights.opening}</div>
-                        <div className="ml-description">Identified from position</div>
+                        <h5>Дебют</h5>
+                        <div className="ml-value">{gameAnalysis.opening}</div>
                     </div>
                     
-                    {mlInsights.anomalies.length > 0 && (
+                    {gameAnalysis.skill_profile.weaknesses?.length > 0 && (
                         <div className="ml-insight-card">
-                            <h5>Unusual Moves</h5>
-                            <div className="anomalies-list">
-                                {mlInsights.anomalies.map((idx, i) => (
-                                    <div key={i} className="anomaly-item">
-                                        Move #{idx + 1}: {moveHistory[idx]?.san || 'Unknown'}
+                            <h5>Основные слабости</h5>
+                            <div className="weaknesses-list">
+                                {gameAnalysis.skill_profile.weaknesses.map((weakness, i) => (
+                                    <div key={i} className="weakness-item">
+                                        {weakness}
                                     </div>
                                 ))}
                             </div>
-                            <div className="ml-description">Detected by anomaly detection</div>
                         </div>
                     )}
                 </div>
@@ -304,7 +318,7 @@ export default function AIChessRoom() {
         );
     };
 
-    // Render analysis source badges
+  
     const renderSourceBadge = (source) => {
         return (
             <span className={`source-badge source-${source.toLowerCase()}`}>
@@ -312,6 +326,8 @@ export default function AIChessRoom() {
             </span>
         );
     };
+    
+
 
     return (
         <div className="ai-chess-room">
@@ -396,6 +412,8 @@ export default function AIChessRoom() {
                                     {isAnalyzing ? 'Анализируем...' : 'Полный анализ игры'}
                                 </button>
                             )}
+
+       
                         </div>
 
                         {/* Instant Move Feedback */}
@@ -430,7 +448,7 @@ export default function AIChessRoom() {
                             </div>
                         )}
 
-                        {/* Game Analysis */}
+                    {/* Game Analysis */}
                         {gameAnalysis && (
                             <div className="analysis-panel">
                                 <h3 className="analysis-title">📊 Подробный анализ партии</h3>
@@ -453,17 +471,18 @@ export default function AIChessRoom() {
                                             </span>
                                         </div>
                                         <div className="stat-item">
-                                            <span className="stat-label">Дебют</span>
-                                            <span className="stat-value">
-                                                {gameAnalysis.opening || 'Неизвестный дебют'}
-                                                {renderSourceBadge("System")}
-                                            </span>
-                                        </div>
+                                <span className="stat-label">Дебют</span>
+                                <span className="stat-value">
+                                    {gameAnalysis.opening || 'Неизвестный дебют'}
+                                    {renderSourceBadge("System")}
+                                </span>
+                            </div>
                                     </div>
                                 </div>
 
                                 {/* ML Insights Section */}
                                 {renderMLInsights()}
+                                {/* {renderPieceAccuracy} */}
 
                                 <div className="analysis-section">
                                     <h4 className="section-header">Ключевые моменты</h4>
