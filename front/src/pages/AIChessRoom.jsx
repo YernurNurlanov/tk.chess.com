@@ -177,7 +177,7 @@ export default function AIChessRoom() {
         const response = await axios.post('http://localhost:5001/analyze-game', { 
             pgn: pgn,
             playerColor,
-            debug: true  // Request detailed processing info
+            // debug: true  // Request detailed processing info
         }, { timeout: 60000 });
 
         console.log("Backend response:", response.data);
@@ -293,7 +293,8 @@ export default function AIChessRoom() {
                 <div className="ml-insights-grid">
                     <div className="ml-insight-card">
                         <h5>Уровень игры</h5>
-                        <div className="ml-value">{gameAnalysis.skill_profile.level}</div>
+                        <div className="ml-value">{gameAnalysis.skill_profile?.level || 'unknown'
+}</div>
                     </div>
                     
                     <div className="ml-insight-card">
@@ -305,7 +306,7 @@ export default function AIChessRoom() {
                         <div className="ml-insight-card">
                             <h5>Основные слабости</h5>
                             <div className="weaknesses-list">
-                                {gameAnalysis.skill_profile.weaknesses.map((weakness, i) => (
+                                {gameAnalysis.skill_profile?.weaknesses?.map((weakness, i) => (
                                     <div key={i} className="weakness-item">
                                         {weakness}
                                     </div>
@@ -459,14 +460,14 @@ export default function AIChessRoom() {
                                         <div className="stat-item">
                                             <span className="stat-label">Уровень игры</span>
                                             <span className="stat-value highlight">
-                                                {gameAnalysis.skill_profile.level}
+                                                {gameAnalysis.skill_profile?.level || 'unknown'}
                                                 {renderSourceBadge("Stockfish")}
                                             </span>
                                         </div>
                                         <div className="stat-item">
                                             <span className="stat-label">Точность</span>
                                             <span className="stat-value highlight">
-                                                {gameAnalysis.skill_profile.accuracy_percentage}%
+                                                {gameAnalysis.skill_profile?.accuracy_percentage ?? 0}%
                                                 {renderSourceBadge("Stockfish")}
                                             </span>
                                         </div>

@@ -1,5 +1,6 @@
 import io
 import re
+import traceback
 import chess
 import chess.engine
 import chess.pgn
@@ -7,7 +8,7 @@ import numpy as np
 import random
 from typing import Counter, Dict, Any, List
 from .learning_path import LearningPath
-from .feedback_service import FeedbackService as FeedbackGenerator
+from .feedback_generator import FeedbackGenerator
 from .ml_service import SkillPredictor
 
 
@@ -32,7 +33,7 @@ class ChessAIService:
         # Get Stockfish analysis
         info = self.engine.analyse(
             board,
-            chess.engine.Limit(depth=18),
+            chess.engine.Limit(depth=10),
             multipv=5,
         )
 
@@ -61,7 +62,7 @@ class ChessAIService:
         # Add ML-powered feedback if enabled
         if self.use_ml_feedback:
             try:
-                ml_feedback = self.feedback_service.generate_feedback(
+                ml_feedback = self.feedback_gen.get_feedback(
                     analysis, self.player_history
                 )
                 analysis["ml_feedback"] = ml_feedback
@@ -197,17 +198,14 @@ class ChessAIService:
             print(pgn)
 
             # Create a clean PGN by removing result markers and special characters
-            clean_pgn = re.sub(r"\s*\*\s*$", "", pgn)  # Remove trailing *
-            clean_pgn = re.sub(r"\s*\.\.\.\s*", " ", clean_pgn)  # Remove ellipsis
-            clean_pgn = re.sub(r"\d+\.\s*", "", clean_pgn)  # Remove move numbers
-            clean_pgn = re.sub(r"\s+", " ", clean_pgn).strip()  # Normalize whitespace
+            # clean_pgn = re.sub(r"\s*\*\s*$", "", pgn)  # Remove trailing *
+            # clean_pgn = re.sub(r"\s*\.\.\.\s*", " ", clean_pgn)  # Remove ellipsis
+            # clean_pgn = re.sub(r"\d+\.\s*", "", clean_pgn)  # Remove move numbers
+            # clean_pgn = re.sub(r"\s+", " ", clean_pgn).strip()  # Normalize whitespace
 
-            print("Cleaned PGN moves:", clean_pgn)
+            # print("Cleaned PGN moves:", clean_pgn)
 
             game = chess.pgn.read_game(io.StringIO(pgn))
-            if not game:
-                print("Failed to parse PGN, trying fallback method")
-                return self._fallback_pgn_analysis(clean_pgn)
 
             board = game.board()
             print("Initial position:", board.fen())
@@ -244,34 +242,55 @@ class ChessAIService:
                     continue
 
             print("Fallback UCI moves:", moves)
-            return self.analyze_game(moves)
+            return self._analyze_move_sequence_from_uci(moves)
 
         except Exception as e:
             print(f"Fallback analysis failed: {str(e)}")
             return {"error": "Could not analyze PGN"}
 
-    def _analyze_move_sequence(self, san_moves: List[str]) -> Dict[str, Any]:
-        """Analyze game from SAN move sequence"""
+    def _analyze_move_sequence_from_uci(self, uci_moves: List[str]) -> Dict[str, Any]:
         board = chess.Board()
         move_analyses = []
 
-        for i, san_move in enumerate(san_moves):
+        for uci in uci_moves:
             try:
-                move = board.parse_san(san_move)
+                move = chess.Move.from_uci(uci)
                 analysis = self.analyze_move(board.fen(), move.uci())
                 move_analyses.append(analysis)
                 board.push(move)
             except Exception as e:
-                print(f"Error analyzing move {i + 1} ({san_move}): {str(e)}")
+                print(f"Error analyzing move {uci}: {str(e)}")
                 continue
 
         if not move_analyses:
             return {"error": "No valid moves to analyze"}
 
-        # Skill assessment
         skill_profile = self.skill_predictor.assess_skill(move_analyses)
+        opening = self._identify_opening(
+            [board.move_stack[i] for i in range(min(6, len(board.move_stack)))]
+        )
 
-        # Get opening from first few moves
+        return {
+            "skill_profile": skill_profile,
+            "opening": opening,
+            "move_analyses": move_analyses,
+        }
+
+    def _analyze_move_sequence(self, san_moves: List[str]) -> Dict[str, Any]:
+        """Strict move analysis with no skipping"""
+        board = chess.Board()
+        move_analyses = []
+
+        for i, san_move in enumerate(san_moves):
+            move = board.parse_san(san_move)  # не в try/catch
+            analysis = self.analyze_move(board.fen(), move.uci())
+            move_analyses.append(analysis)
+            board.push(move)
+
+        if not move_analyses:
+            return {"error": "No valid moves to analyze"}
+
+        skill_profile = self.skill_predictor.assess_skill(move_analyses)
         opening = self._identify_opening(
             [board.move_stack[i] for i in range(min(6, len(board.move_stack)))]
         )

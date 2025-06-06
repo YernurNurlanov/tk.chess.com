@@ -1,6 +1,11 @@
 flask==2.0.3
-werkzeug==2.0.3
 flask-cors==3.0.10
-python-chess==1.999
-numpy 
 requests==2.26.0
+numpy
+transformers
+scikit-learn
+torch 
+joblib
+werkzeug==2.0.3
+python-chess
+

@@ -28,21 +28,25 @@ def get_ai_move():
 def analyze_game():
     try:
         data = request.json
+
         if not data or "pgn" not in data:
             return jsonify({"error": "Invalid request data"}), 400
 
-        result = ai_service.analyze_pgn(data["pgn"], data.get("playerColor", "white"))
+        print("\n===== ANALYZING GAME FROM PGN =====")
+        print(data["pgn"])
 
-        if "error" in result:
-            return jsonify(result), 400
+        result = ai_service.analyze_pgn(data["pgn"])
 
         return jsonify(result)
 
     except Exception as e:
-        print(f"Error in analyze_game endpoint: {str(e)}")
+        import traceback
+
+        print(f"[FLASK ERROR] analyze_game: {str(e)}")
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=5001)

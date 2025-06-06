@@ -145,5 +145,13 @@ class SkillPredictor:
         return weaknesses
 
     def _rule_based_assessment(self, move_analyses):
-        """Fallback rule-based assessment"""
-        # ... (keep your existing rule-based implementation) ...
+        print("[SkillPredictor] Rule-based fallback triggered")
+        return {
+            "level": "unknown",
+            "accuracy_percentage": 0,
+            "weaknesses": [],
+            "opening_accuracy": 0,
+            "middlegame_accuracy": 0,
+            "endgame_accuracy": 0,
+            "piece_accuracy": {},
+        }

@@ -13,7 +13,7 @@ const StudentSidebar = ({ currentUser, activeTab, setActiveTab, onLogout, userId
         try {
             console.log("Attempting to create AI room with userId:", userId);
             const response = await axios.post(
-                `${url}/games/`,
+                `${url}/api/ai-rooms`,
                 {
                     userId,
                     aiLevel: 3,
