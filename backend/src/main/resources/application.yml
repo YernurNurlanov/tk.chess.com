@@ -13,8 +13,6 @@ spring:
   email:
     userName: tk.chess.school@gmail.com
     password: .
-  front:
-    url: https://localhost:5173
 
 server:
   port: 8080
@@ -25,3 +23,6 @@ token:
 
 google:
   client-id: 756752521081-p0du6951j4598agcdbaoumt3dsv6ikup.apps.googleusercontent.com
+
+front:
+  reset-url: https://localhost:5173/reset-password

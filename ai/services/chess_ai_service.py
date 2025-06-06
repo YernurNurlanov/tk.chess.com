@@ -1,33 +1,38 @@
 import io
+import re
 import chess
 import chess.engine
 import chess.pgn
 import numpy as np
-from typing import Dict, Any, List
-from .feedback_generator import FeedbackGenerator
-from .skill_predictor import SkillPredictor
+import random
+from typing import Counter, Dict, Any, List
 from .learning_path import LearningPath
+from .feedback_service import FeedbackService as FeedbackGenerator
+from .ml_service import SkillPredictor
 
 
 class ChessAIService:
     def __init__(
-        self, engine_path: str = "/opt/homebrew/bin/stockfish"
-    ):  # Меняйтк на свой
+        self,
+        engine_path: str = "/opt/homebrew/bin/stockfish",
+        use_ml_feedback: bool = True,
+    ):
         self.engine = chess.engine.SimpleEngine.popen_uci(engine_path)
         self.feedback_gen = FeedbackGenerator()
+        # self.feedback_service = FeedbackService()
         self.skill_predictor = SkillPredictor()
         self.learning_path = LearningPath()
         self.player_history = []
+        self.use_ml_feedback = use_ml_feedback
 
     def analyze_move(self, fen: str, move_uci: str) -> Dict[str, Any]:
-        """Enhanced move analysis with personalized feedback"""
         board = chess.Board(fen)
         move = chess.Move.from_uci(move_uci)
 
         # Get Stockfish analysis
         info = self.engine.analyse(
             board,
-            chess.engine.Limit(depth=18),  # Increased depth
+            chess.engine.Limit(depth=18),
             multipv=5,
         )
 
@@ -42,6 +47,8 @@ class ChessAIService:
             "san_move": board.san(move),
             "category": self._categorize_move(player_move_line),
             "top_suggestion": info[0]["pv"][0].uci() if info else None,
+            "fen": fen,
+            "move": move_uci,
         }
 
         # Store for skill assessment
@@ -50,6 +57,17 @@ class ChessAIService:
         # Get personalized feedback
         feedback = self.feedback_gen.get_feedback(analysis, self.player_history)
         analysis.update(feedback)
+
+        # Add ML-powered feedback if enabled
+        if self.use_ml_feedback:
+            try:
+                ml_feedback = self.feedback_service.generate_feedback(
+                    analysis, self.player_history
+                )
+                analysis["ml_feedback"] = ml_feedback
+            except Exception as e:
+                print(f"ML feedback error: {e}")
+                analysis["ml_feedback"] = "ML analysis unavailable"
 
         return analysis
 
@@ -72,51 +90,13 @@ class ChessAIService:
             "explanation": self._get_move_explanation(board, selected_move),
         }
 
-    def analyze_game(self, moves: List[str]) -> Dict[str, Any]:
-        """Comprehensive game analysis with skill assessment"""
-        try:
-            if not moves:
-                return {"error": "No moves provided"}
-
-            board = chess.Board()
-            move_analyses = []
-
-            for move_uci in moves:
-                try:
-                    move = chess.Move.from_uci(move_uci)
-                    if move not in board.legal_moves:
-                        continue
-
-                    analysis = self.analyze_move(board.fen(), move_uci)
-                    move_analyses.append(analysis)
-                    board.push(move)
-                except Exception as e:
-                    print(f"Error analyzing move {move_uci}: {str(e)}")
-                    continue
-
-            if not move_analyses:
-                return {"error": "No valid moves to analyze"}
-
-            # Skill assessment
-            skill_profile = self.skill_predictor.assess_skill(move_analyses)
-
-            # Learning recommendations
-            recommendations = self.learning_path.get_recommendations(skill_profile)
-
-            return {
-                "skill_profile": skill_profile,
-                "recommendations": recommendations,
-                "move_analyses": move_analyses,
-            }
-        except Exception as e:
-            print(f"Error in analyze_game: {str(e)}")
-            return {"error": "Internal server error during analysis"}
-
     def _create_analysis(self, board, move, engine_result):
         """Helper method to create analysis dictionary"""
+        phase = self._determine_game_phase(board)
         return {
             "move": move.uci(),
             "san": board.san(move),
+            "phase": phase,
             "category": self._categorize_move(self._get_move_rank(engine_result, move)),
             "piece": str(board.piece_at(move.from_square)).lower(),
             "eval": engine_result[0]["score"].relative.score()
@@ -124,73 +104,188 @@ class ChessAIService:
             else None,
         }
 
-    def _finalize_analysis(self, move_analyses):
-        """Final processing of analysis results"""
-        if not move_analyses:
-            return {"error": "No moves analyzed"}
+    def _identify_opening(self, moves):
+        """Comprehensive opening detection with English Opening support"""
+        if not moves or len(moves) < 2:
+            return "Неизвестный дебют"
 
+        move_sequence = [m.uci() for m in moves[:6]]  # First 6 moves
+
+        print("\n==== OPENING DETECTION =====")
+        print("Move sequence:", move_sequence)
+
+        # ===== English Opening (c4) =====
+        if move_sequence[0] == "c2c4":
+            # Symmetrical Variation
+            if move_sequence[1] == "c7c5":
+                return "Английское начало (Симметричный вариант)"
+            # Reversed Sicilian
+            if move_sequence[1] == "e7e5":
+                return "Английское начало (Обратная Сицилианская)"
+            # Standard
+            return "Английское начало"
+
+        # ===== Queen's Gambit (d4 d5 c4) =====
+        if (
+            len(move_sequence) >= 3
+            and move_sequence[0] == "d2d4"
+            and move_sequence[1] == "d7d5"
+            and move_sequence[2] == "c2c4"
+        ):
+            # Slav Defense
+            if len(move_sequence) > 3 and move_sequence[3] == "c7c6":
+                return "Славянская защита"
+            # Orthodox
+            return "Ферзевый гамбит"
+
+        # ===== King's Pawn Openings =====
+        if move_sequence[0] == "e2e4":
+            if move_sequence[1] == "e7e5":
+                return "Открытая партия"
+            if move_sequence[1] == "c7c5":
+                return "Сицилианская защита"
+            if move_sequence[1] == "e7e6":
+                return "Французская защита"
+            if move_sequence[1] == "d7d6":
+                return "Защита Пирца"
+
+        # ===== Other openings =====
+        if move_sequence[0] == "d2d4" and move_sequence[1] == "g8f6":
+            return "Индийская защита"
+        if move_sequence[0] == "g1f3":
+            return "Дебют Рети"
+        if move_sequence[0] == "f2f4":
+            return "Дебют Берда"
+
+        print("No known opening pattern matched")
+        return "Неизвестный дебют"
+
+    def _determine_game_phase(self, board):
+        """Robust game phase detection with move number consideration"""
+        # Always opening for first 10 full moves
+        if board.fullmove_number <= 10:
+            return "opening"
+
+        # Count material
+        queens = len(board.pieces(chess.QUEEN, chess.WHITE)) + len(
+            board.pieces(chess.QUEEN, chess.BLACK)
+        )
+        minors = (
+            len(board.pieces(chess.BISHOP, chess.WHITE))
+            + len(board.pieces(chess.KNIGHT, chess.WHITE))
+            + len(board.pieces(chess.BISHOP, chess.BLACK))
+            + len(board.pieces(chess.KNIGHT, chess.BLACK))
+        )
+        pawns = len(board.pieces(chess.PAWN, chess.WHITE)) + len(
+            board.pieces(chess.PAWN, chess.BLACK)
+        )
+        rooks = len(board.pieces(chess.ROOK, chess.WHITE)) + len(
+            board.pieces(chess.ROOK, chess.BLACK)
+        )
+
+        # Endgame detection
+        if queens == 0 or (queens <= 1 and pawns <= 6 and minors + rooks <= 4):
+            return "endgame"
+
+        # Middlegame by default
+        return "middlegame"
+
+    def analyze_pgn(self, pgn: str) -> Dict[str, Any]:
+        try:
+            print("\n===== ANALYZING PGN =====")
+            print("Raw PGN received:")
+            print(pgn)
+
+            # Create a clean PGN by removing result markers and special characters
+            clean_pgn = re.sub(r"\s*\*\s*$", "", pgn)  # Remove trailing *
+            clean_pgn = re.sub(r"\s*\.\.\.\s*", " ", clean_pgn)  # Remove ellipsis
+            clean_pgn = re.sub(r"\d+\.\s*", "", clean_pgn)  # Remove move numbers
+            clean_pgn = re.sub(r"\s+", " ", clean_pgn).strip()  # Normalize whitespace
+
+            print("Cleaned PGN moves:", clean_pgn)
+
+            game = chess.pgn.read_game(io.StringIO(pgn))
+            if not game:
+                print("Failed to parse PGN, trying fallback method")
+                return self._fallback_pgn_analysis(clean_pgn)
+
+            board = game.board()
+            print("Initial position:", board.fen())
+
+            # Extract all moves in SAN notation
+            san_moves = []
+            node = game
+            while node.variations:
+                next_node = node.variation(0)
+                san_moves.append(node.board().san(next_node.move))
+                node = next_node
+
+            print("SAN moves extracted:", san_moves)
+            return self._analyze_move_sequence(san_moves)
+
+        except Exception as e:
+            print(f"Error in analyze_pgn: {str(e)}")
+            return {"error": str(e)}
+
+    def _fallback_pgn_analysis(self, move_string: str) -> Dict[str, Any]:
+        """Fallback when PGN parsing fails"""
+        print("Using fallback PGN analysis")
+        try:
+            # Split moves and convert to UCI
+            moves = []
+            board = chess.Board()
+            for san in move_string.split():
+                try:
+                    move = board.parse_san(san)
+                    moves.append(move.uci())
+                    board.push(move)
+                except:
+                    # Skip invalid moves
+                    continue
+
+            print("Fallback UCI moves:", moves)
+            return self.analyze_game(moves)
+
+        except Exception as e:
+            print(f"Fallback analysis failed: {str(e)}")
+            return {"error": "Could not analyze PGN"}
+
+    def _analyze_move_sequence(self, san_moves: List[str]) -> Dict[str, Any]:
+        """Analyze game from SAN move sequence"""
+        board = chess.Board()
+        move_analyses = []
+
+        for i, san_move in enumerate(san_moves):
+            try:
+                move = board.parse_san(san_move)
+                analysis = self.analyze_move(board.fen(), move.uci())
+                move_analyses.append(analysis)
+                board.push(move)
+            except Exception as e:
+                print(f"Error analyzing move {i + 1} ({san_move}): {str(e)}")
+                continue
+
+        if not move_analyses:
+            return {"error": "No valid moves to analyze"}
+
+        # Skill assessment
         skill_profile = self.skill_predictor.assess_skill(move_analyses)
-        recommendations = self.learning_path.get_recommendations(skill_profile)
+
+        # Get opening from first few moves
+        opening = self._identify_opening(
+            [board.move_stack[i] for i in range(min(6, len(board.move_stack)))]
+        )
 
         return {
             "skill_profile": skill_profile,
-            "recommendations": recommendations,
+            "opening": opening,
             "move_analyses": move_analyses,
-            "total_moves": len(move_analyses),
         }
 
-    def analyze_pgn(self, pgn: str, player_color: str = "white") -> Dict[str, Any]:
-        try:
-            game = chess.pgn.read_game(io.StringIO(pgn))
-            if not game:
-                return {"error": "Не удалось прочитать PGN"}
-
-            board = game.board()
-            move_analyses = []
-            opening_name = "Неизвестный дебют"
-
-            for i, move in enumerate(game.mainline_moves()):
-                try:
-                    # Определение фазы игры
-                    phase = (
-                        "opening" if i < 12 else ("middlegame" if i < 30 else "endgame")
-                    )
-                    depth = (
-                        14
-                        if phase == "opening"
-                        else (12 if phase == "middlegame" else 10)
-                    )
-
-                    info = self.engine.analyse(
-                        board, chess.engine.Limit(depth=depth), multipv=3
-                    )
-
-                    analysis = self._create_analysis(board, move, info)
-                    analysis["phase"] = phase
-                    move_analyses.append(analysis)
-                    board.push(move)
-
-                    # Определение дебюта
-                    if i == 0:
-                        opening_name = self._identify_opening(board)
-
-                except Exception as e:
-                    print(f"Ошибка анализа хода {i + 1}: {str(e)}")
-                    continue
-
-            result = self._finalize_analysis(move_analyses)
-            result["opening"] = opening_name
-            return result
-
-        except Exception as e:
-            print(f"Ошибка в analyze_pgn: {str(e)}")
-            return {"error": str(e)}
-
-    def _finalize_analysis(self, move_analyses):
+    def _finalize_analysis(self, move_analyses, embeddings=[]):
         if not move_analyses:
             return {"error": "Нет ходов для анализа"}
 
-        # Add category weights here
         category_weights = {
             "excellent": 1.0,
             "good": 0.8,
@@ -201,7 +296,9 @@ class ChessAIService:
         }
 
         skill_profile = self.skill_predictor.assess_skill(move_analyses)
-        recommendations = self.learning_path.get_recommendations(skill_profile)
+        recommendations = self.learning_path.get_recommendations(
+            skill_profile, embeddings
+        )
 
         best_move = max(move_analyses, key=lambda x: category_weights[x["category"]])
         worst_move = min(move_analyses, key=lambda x: category_weights[x["category"]])
@@ -212,10 +309,12 @@ class ChessAIService:
             "total_moves": len(move_analyses),
             "best_move": {
                 "san": best_move["san"],
+                "phase": best_move["phase"],
                 "description": self._get_move_description(best_move, "best"),
             },
             "worst_move": {
                 "san": worst_move["san"],
+                "phase": worst_move["phase"],
                 "description": self._get_move_description(worst_move, "worst"),
             },
             "mistakes_count": sum(
@@ -223,15 +322,9 @@ class ChessAIService:
             ),
         }
 
-    def _identify_opening(self, board):
-        # Простая идентификация дебюта
-        eco_codes = {
-            "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR": "Латышский гамбит",
-            "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR": "Славянская защита",
-        }
-        return eco_codes.get(board.fen().split(" ")[0], "Неизвестный дебют")
-
     def _get_move_description(self, move_analysis, move_type):
+        phase = move_analysis.get("phase", "middlegame")
+
         descriptions = {
             "best": {
                 "opening": "Отличное развитие фигур в дебюте",
@@ -244,7 +337,8 @@ class ChessAIService:
                 "endgame": "Неточность в эндшпиле упустила победу",
             },
         }
-        return descriptions[move_type][move_analysis["phase"]]
+
+        return descriptions[move_type].get(phase, "Важный ход в игре")
 
     def _get_move_rank(self, info, move):
         """Determine how good a move is (1=best, 6=worst)"""
