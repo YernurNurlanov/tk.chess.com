@@ -3,6 +3,9 @@ package com.chess.tk.service;
 import com.chess.tk.db.entity.*;
 import com.chess.tk.db.enums.Role;
 import com.chess.tk.db.repository.*;
+import com.chess.tk.dto.updateUser.StudentDTO;
+import com.chess.tk.dto.updateUser.TeacherDTO;
+import com.chess.tk.dto.updateUser.UserDTO;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
@@ -77,21 +80,41 @@ public class AdminService {
         return ResponseEntity.status(HttpStatus.OK).body("User with ID " + id + " was deleted");
     }
 
-    public ResponseEntity<String> updateUser(User user) { // TODO переделать метод
-//        Optional<User> userOptional = userRepo.findById(user.getId());
-//        if (userOptional.isEmpty()) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with ID " + user.getId() + " not found");
-//        }
-//        User userToUpdate = userOptional.get();
-//        userToUpdate.setFullName(user.getFullName());
-//        userToUpdate.setEmail(user.getEmail());
-//        userToUpdate.setPhone(user.getPhone());
-//        userToUpdate.setPassword(passwordEncoder.encode(user.getPassword()));
-//        userToUpdate.setLastPayment(user.getLastPayment());
-//        userToUpdate.setHourlyRate(user.getHourlyRate());
-//        userToUpdate.setRole(user.getRole());
-//        userRepo.save(userToUpdate);
-        return ResponseEntity.ok("User with id " + user.getId() + " updated successfully");
+    @Transactional
+    public Student updateStudent(UserDTO updatedUser, StudentDTO updatedStudent) {
+        Student student = studentRepo.findById(updatedUser.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Student with id " + updatedUser.getId() + " not found"));
+
+        User user = userRepo.save(setFieldsToUpdatedUser(student.getUser(), updatedUser));
+
+        student.setUser(user);
+        student.setLastPayment(updatedStudent.getLastPayment());
+
+        return studentRepo.save(student);
+    }
+
+    @Transactional
+    public Teacher updateTeacher(UserDTO updatedUser, TeacherDTO updatedTeacher) {
+        Teacher teacher = teacherRepo.findById(updatedUser.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Teacher with id " + updatedUser.getId() + " not found"));
+
+        User user = userRepo.save(setFieldsToUpdatedUser(teacher.getUser(), updatedUser));
+
+        teacher.setUser(user);
+        teacher.setHourlyRate(updatedTeacher.getHourlyRate());
+        teacher.setSchedule(updatedTeacher.getSchedule());
+        teacher.setBio(updatedTeacher.getBio());
+        teacher.setExperienceYears(updatedTeacher.getExperienceYears());
+        teacher.setChessRating(updatedTeacher.getChessRating());
+        return teacherRepo.save(teacher);
+    }
+
+    private User setFieldsToUpdatedUser(User user, UserDTO updatedUser) {
+        user.setFirstName(updatedUser.getFirstName());
+        user.setLastName(updatedUser.getLastName());
+        user.setEmail(updatedUser.getEmail());
+        user.setPhone(updatedUser.getPhone());
+        return user;
     }
 
     public Student attachStudentToTeacher(Long id, Long studentId) {

@@ -9,6 +9,11 @@ import Footer from "../components/Footer.jsx";
 import AddStudentModal from "../components/modals/admin/AddStudentModal.jsx";
 import AddTeacherModal from "../components/modals/admin/AddTeacherModal.jsx";
 import {handleLogout} from "../handlers/handleLogout.jsx";
+import {faPlus} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {handleError} from "../handlers/handleError.js";
+import UpdateStudentModal from "../components/modals/admin/UpdateStudentModal.jsx";
+import UpdateTeacherModal from "../components/modals/admin/UpdateTeacherModal.jsx";
 
 const AdminPage = () => {
     const [activeTab, setActiveTab] = useState("students");
@@ -41,6 +46,8 @@ const AdminPage = () => {
         startFin: '',
         endFin: ''
     });
+
+    const [searchTerm, setSearchTerm] = useState("");
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -134,45 +141,29 @@ const AdminPage = () => {
 
     const handleAddStudent = async (newStudent) => {
         try {
-            await axios.post(`/admin/students`, newStudent);
-            setStudents([...students, {id: students.length + 1, ...newStudent}]);
+            const res = await axios.post(`/admin/students`, newStudent);
+            const savedStudent = res.data;
+            setStudents([...students, savedStudent]);
             alert("Student added successfully!")
             setAddStudentModalOpen(false);
         } catch (error) {
-            const validationErrors = error.response.data;
-            const message = Object.entries(validationErrors)
-                .map(([field, msg]) => `${field}: ${msg}`)
-                .join('\n');
-
-            alert('Validation errors:\n' + message);
-            console.error(error);
+            handleError(error, "Error adding student");
         }
     };
 
     const handleUpdateStudent = async (updatedStudent) => {
         try {
-            await axios.put(`http://localhost:8080/admin/`, updatedStudent, {
-                withCredentials: true,
-            });
-            // After successful deletion, update the state to remove the teacher from the list
+            const res = await axios.put(`/admin/students`, updatedStudent);
+            const savedStudent = res.data;
+            alert("Student updated successfully")
             setStudents(
                 students.map((student) =>
-                    student.id === updatedStudent.id ? updatedStudent : student
+                    student.id === savedStudent.id ? savedStudent : student
                 )
             );
             setUpdateStudentModalOpen(false);
         } catch (error) {
-            if (error.response) {
-                // Ошибка от сервера
-                console.error('Server responded with error:', error.response.data);
-                alert('Validation errors: ' + error.response.data.join(', ')); // Печать ошибок
-            } else if (error.request) {
-                // Ошибка запроса (например, отсутствие соединения)
-                console.error('Request error:', error.request);
-            } else {
-                // Ошибка, возникшая при настройке запроса
-                console.error('Error', error.message);
-            }
+            handleError(error, "Error updating student");
         }
     };
 
@@ -219,44 +210,30 @@ const AdminPage = () => {
 
     const handleAddTeacher = async (newTeacher) => {
         try {
-            await axios.post(`/admin/teachers`, newTeacher);
-            setTeachers([...teachers, {id: teachers.length + 1, ...newTeacher}]);
+            const res = await axios.post(`/admin/teachers`, newTeacher);
+            const savedTeacher = res.data;
+            setTeachers([...teachers, savedTeacher]);
+
             alert("Teacher added successfully!")
             setAddTeacherModalOpen(false);
         } catch (error) {
-                const validationErrors = error.response.data;
-                const message = Object.entries(validationErrors)
-                    .map(([field, msg]) => `${field}: ${msg}`)
-                    .join('\n');
-
-                alert('Validation errors:\n' + message);
+            handleError(error, "Error adding teacher");
         }
     };
 
     const handleUpdateTeacher = async (updatedTeacher) => {
         try {
-            await axios.put(`http://localhost:8080/admin/`, updatedTeacher,{
-                withCredentials: true,
-            });
-            // After successful deletion, update the state to remove the teacher from the list
+            const res = await axios.put(`/admin/teachers`, updatedTeacher);
+            const savedTeacher = res.data;
+            alert("Teacher updated successfully")
             setTeachers(
                 teachers.map((teacher) =>
-                    teacher.id === updatedTeacher.id ? updatedTeacher : teacher
+                    teacher.id === savedTeacher.id ? savedTeacher : teacher
                 )
             );
             setUpdateTeacherModalOpen(false);
         } catch (error) {
-            if (error.response) {
-                // Ошибка от сервера
-                console.error('Server responded with error:', error.response.data);
-                alert('Validation errors: ' + error.response.data.join(', ')); // Печать ошибок
-            } else if (error.request) {
-                // Ошибка запроса (например, отсутствие соединения)
-                console.error('Request error:', error.request);
-            } else {
-                // Ошибка, возникшая при настройке запроса
-                console.error('Error', error.message);
-            }
+            handleError(error, "Error updating teacher");
         }
     };
 
@@ -271,30 +248,74 @@ const AdminPage = () => {
         }
     };
 
+    const [selectedLevelName, setSelectedLevelName] = useState(null);
+    const [selectedTopicName, setSelectedTopicName] = useState(null);
+
     const handleDeleteTask = async () => {
         try {
             const response = await axios.delete(`/admin/tasks/${selectedTask.id}`);
             alert(response.data);
-            setTasks(tasks.filter((task) => task.id !== selectedTask.id));
+
+            const updatedTasks = tasks.map((level) => {
+                if (level.level !== selectedLevelName) return level;
+
+                return {
+                    ...level,
+                    topics: level.topics.map((topic) => {
+                        if (topic.topic !== selectedTopicName) return topic;
+
+                        return {
+                            ...topic,
+                            tasks: topic.tasks.filter((task) => task.id !== selectedTask.id),
+                        };
+                    }),
+                };
+            });
+            setTasks(updatedTasks);
+
+            const updatedLevel = updatedTasks.find(l => l.level === selectedLevelName);
+            const updatedTopic = updatedLevel?.topics.find(t => t.topic === selectedTopicName);
+
+            setSelectedLevelName(updatedLevel ? updatedLevel.level : null);
+            setSelectedTopicName(updatedTopic ? updatedTopic.topic : null);
+
             setDeleteTaskModalOpen(false);
         } catch (error) {
-            console.error("Error deleting task", error);
+            handleError(error, "Error deleting task");
         }
     };
 
     const handleAddTask = async (newTask) => {
         try {
-            await axios.post(`/admin/tasks`, newTask);
-            setTasks([...tasks, {id: tasks.length + 1, ...newTask}]);
+            const response = await axios.post(`/admin/tasks`, newTask);
+            const savedTask = response.data;
+            alert("Task added successfully");
+
+            const updatedTasks = tasks.map((level) => {
+                if (level.level !== savedTask.level) return level;
+
+                return {
+                    ...level,
+                    topics: level.topics.map((topic) => {
+                        if (topic.topic !== savedTask.topic) return topic;
+
+                        return {
+                            ...topic,
+                            tasks: [...topic.tasks, savedTask],
+                        };
+                    }),
+                };
+            });
+            setTasks(updatedTasks);
+
+            if (selectedLevelName === savedTask.level && selectedTopicName === savedTask.topic) {
+                setSelectedLevelName(savedTask.level);
+                setSelectedTopicName(savedTask.topic);
+            }
+
             setAddTaskModalOpen(false);
         } catch (error) {
-            const validationErrors = error.response.data;
-            const message = Object.entries(validationErrors)
-                .map(([field, msg]) => `${field}: ${msg}`)
-                .join('\n');
-
-            alert('Validation errors:\n' + message);
-            throw error;
+            handleError(error, "Error adding task");
         }
     };
 
@@ -305,6 +326,7 @@ const AdminPage = () => {
                 onLogout={() =>
                     handleLogout().then()
                 }
+                activeTab={activeTab}
             />
             <main className="main-content">
                 <header className="header">
@@ -315,62 +337,86 @@ const AdminPage = () => {
                     </h1>
                     {activeTab === "students" && (
                         <button className="btn" onClick={() => setAddStudentModalOpen(true)}>
-                        Add Student
+                            <FontAwesomeIcon icon={faPlus} /> Add Student
                         </button>
                     )}
                     {activeTab === "teachers" && (
                         <button className="btn" onClick={() => setAddTeacherModalOpen(true)}>
-                            Add Teacher
+                            <FontAwesomeIcon icon={faPlus} /> Add Teacher
                         </button>
                     )}
                     {activeTab === "tasks" && (
                         <button className="btn" onClick={() => setAddTaskModalOpen(true)}>
-                            Add Task
+                            <FontAwesomeIcon icon={faPlus} /> Add Task
                         </button>
                     )}
                 </header>
 
                 {activeTab === "students" && (
-                    <UsersTable
-                        data={students}
-                        onUpdate={(student) => {
-                            setSelectedStudent(student);
-                            setUpdateStudentModalOpen(true);
-                        }}
-                        onDelete={(student) => {
-                            setSelectedStudent(student);
-                            setDeleteStudentModalOpen(true);
-                        }}
-                        onAttach={(student) => {
-                            setSelectedStudent(student);
-                            setAssignTeacherModalOpen(true);
-                        }}
-                        onDetach={(student) => {
-                            setSelectedStudent(student);
-                            setDetachStudentModalOpen(true);
-                        }}
-                        showAttachButton={true}
-                    />
+                    <>
+                        <input
+                            type="text"
+                            placeholder="Search by name or email"
+                            className="search-input"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <UsersTable
+                            data={students}
+                            searchTerm={searchTerm}
+                            onUpdate={(student) => {
+                                setSelectedStudent(student);
+                                setUpdateStudentModalOpen(true);
+                            }}
+                            onDelete={(student) => {
+                                setSelectedStudent(student);
+                                setDeleteStudentModalOpen(true);
+                            }}
+                            onAttach={(student) => {
+                                setSelectedStudent(student);
+                                setAssignTeacherModalOpen(true);
+                            }}
+                            onDetach={(student) => {
+                                setSelectedStudent(student);
+                                setDetachStudentModalOpen(true);
+                            }}
+                            showAttachButton={true}
+                        />
+                    </>
                 )}
 
                 {activeTab === "teachers" && (
-                    <UsersTable
-                        data={teachers}
-                        onUpdate={(teacher) => {
-                            setSelectedTeacher(teacher);
-                            setUpdateTeacherModalOpen(true);
-                        }}
-                        onDelete={(teacher) => {
-                            setSelectedTeacher(teacher);
-                            setDeleteTeacherModalOpen(true);
-                        }}
-                        showAttachButton={false}
-                    />
+                    <>
+                        <input
+                            type="text"
+                            placeholder="Search by name or email"
+                            className="search-input"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <UsersTable
+                            data={teachers}
+                            searchTerm={searchTerm}
+                            onUpdate={(teacher) => {
+                                setSelectedTeacher(teacher);
+                                setUpdateTeacherModalOpen(true);
+                            }}
+                            onDelete={(teacher) => {
+                                setSelectedTeacher(teacher);
+                                setDeleteTeacherModalOpen(true);
+                            }}
+                            showAttachButton={false}
+                        />
+                    </>
                 )}
 
                 {activeTab === "tasks" && (
                     <TasksTable
                         data={tasks}
+                        selectedLevelName={selectedLevelName}
+                        setSelectedLevelName={(level) => setSelectedLevelName(level)}
+                        selectedTopicName={selectedTopicName}
+                        setSelectedTopicName={(topic) => setSelectedTopicName(topic)}
                         onDelete={(task) => {
                             setSelectedTask(task)
                             setDeleteTaskModalOpen(true);
@@ -393,50 +439,58 @@ const AdminPage = () => {
 
             {/* Update Student Modal не сделано*/}
             {isUpdateStudentModalOpen && (
-                <Modal onClose={() => setUpdateStudentModalOpen(false)}>
-                    <h2>Update Student</h2>
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            const formData = new FormData(e.target);
-                            const updatedStudent = {
-                                id: selectedStudent.id,
-                                email: formData.get("updateEmail"),
-                                fullName: formData.get("updateFullName"),
-                                phone: formData.get("updatePhone"),
-                                hourlyRate: selectedStudent.hourlyRate,
-                                lastPayment: formData.get("updateLastPayment")
-                            };
-                            handleUpdateStudent(updatedStudent).then();
-                        }}
-                    >
-                        <label htmlFor="updateFullName">Full Name:</label>
-                        <input
-                            type="text"
-                            id="updateFullName"
-                            name="updateFullName"
-                            defaultValue={selectedStudent.fullName}
-                            required
-                        />
-                        <label htmlFor="updateEmail">Email:</label>
-                        <input
-                            type="email"
-                            id="updateEmail"
-                            name="updateEmail"
-                            defaultValue={selectedStudent.email}
-                            required
-                        />
-                        <label htmlFor="updatePhone">Phone:</label>
-                        <input type="phone" id="updatePhone" name="updatePhone" defaultValue={selectedStudent.phone}
-                               required/>
-                        <label htmlFor="updateLastPayment">Last payment:</label>
-                        <input id="updateLastPayment" name="updateLastPayment"
-                               defaultValue={selectedStudent.lastPayment} required/>
-                        <button type="submit" className="btn">
-                            Save Changes
-                        </button>
-                    </form>
-                </Modal>
+                <UpdateStudentModal
+                    onClose={() => setUpdateStudentModalOpen(false)}
+                    onSubmit={(updatedStudent) => handleUpdateStudent(updatedStudent)}
+                    initialData={selectedStudent}
+                />
+                // <Modal onClose={() => setUpdateStudentModalOpen(false)}>
+                //     <h2>Update Student</h2>
+                //     <form
+                //         onSubmit={(e) => {
+                //             e.preventDefault();
+                //             const formData = new FormData(e.target);
+                //             const updatedStudent = {
+                //                 id: selectedStudent.id,
+                //                 email: formData.get("updateEmail"),
+                //                 fullName: formData.get("updateFullName"),
+                //                 phone: formData.get("updatePhone"),
+                //                 hourlyRate: selectedStudent.hourlyRate,
+                //                 lastPayment: formData.get("updateLastPayment")
+                //             };
+                //             handleUpdateStudent(updatedStudent).then();
+                //         }}
+                //     >
+                //         <div className="form-grid">
+                //             <label htmlFor="updateFirstName">First Name:</label>
+                //             <input
+                //                 type="text"
+                //                 id="updateFirstName"
+                //                 name="updateFirstName"
+                //                 defaultValue={selectedStudent.user.firstName}
+                //                 required
+                //             />
+                //             <label htmlFor="updateEmail">Email:</label>
+                //             <input
+                //                 type="email"
+                //                 id="updateEmail"
+                //                 name="updateEmail"
+                //                 defaultValue={selectedStudent.email}
+                //                 required
+                //             />
+                //             <label htmlFor="updatePhone">Phone:</label>
+                //             <input type="phone" id="updatePhone" name="updatePhone" defaultValue={selectedStudent.phone}
+                //                    required/>
+                //             <label htmlFor="updateLastPayment">Last payment:</label>
+                //             <input id="updateLastPayment" name="updateLastPayment" type="datetime-local"
+                //                    defaultValue={selectedStudent.lastPayment} required/>
+                //         </div>
+                //
+                //         <button type="submit" className="btn btn-center">
+                //             Save Changes
+                //         </button>
+                //     </form>
+                // </Modal>
             )}
 
             {isDeleteStudentModalOpen && (
@@ -474,15 +528,17 @@ const AdminPage = () => {
                                 });
                         }}
                     >
-                        <label htmlFor="teacherID">Teacher Name:</label>
-                        <select id="teacherID" name="teacherID" required>
-                            {teachers.map((teacher) => (
-                                <option key={teacher.id} value={teacher.id}>
-                                    {teacher.user.firstName} {teacher.user.lastName}
-                                </option>
-                            ))}
-                        </select>
-                        <button type="submit" className="btn">
+                        <div className="form-grid">
+                            <label htmlFor="teacherID">Teacher Name:</label>
+                            <select id="teacherID" name="teacherID" required>
+                                {teachers.map((teacher) => (
+                                    <option key={teacher.id} value={teacher.id}>
+                                        {teacher.user.firstName} {teacher.user.lastName}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <button type="submit" className="btn btn-center">
                             Assign
                         </button>
                     </form>
@@ -515,49 +571,54 @@ const AdminPage = () => {
 
             {/* Update Teacher Modal не сделано*/}
             {isUpdateTeacherModalOpen && (
-                <Modal onClose={() => setUpdateTeacherModalOpen(false)}>
-                    <h2>Update Teacher</h2>
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            const formData = new FormData(e.target);
-                            const updatedTeacher = {
-                                id: selectedTeacher.id,
-                                fullName: formData.get("updateFullName"),
-                                email: formData.get("updateEmail"),
-                                phone: formData.get("updatePhone"),
-                                hourlyRate: formData.get("updateHourlyRate"),
-                                lastPayment: selectedTeacher.lastPayment
-                            };
-                            handleUpdateTeacher(updatedTeacher).then();
-                        }}
-                    >
-                        <label htmlFor="updateFullName">Full Name:</label>
-                        <input
-                            type="text"
-                            id="updateFullName"
-                            name="updateFullName"
-                            defaultValue={selectedTeacher.fullName}
-                            required
-                        />
-                        <label htmlFor="updateEmail">Email:</label>
-                        <input
-                            type="email"
-                            id="updateEmail"
-                            name="updateEmail"
-                            defaultValue={selectedTeacher.email}
-                            required
-                        />
-                        <label htmlFor="updatePhone">Phone:</label>
-                        <input type="phone" id="updatePhone" name="updatePhone" defaultValue={selectedTeacher.phone}
-                               required/>
-                        <label htmlFor="updateHourlyRate">Hourly rate:</label>
-                        <input id="updateHourlyRate" name="updateHourlyRate" defaultValue={selectedTeacher.hourlyRate} required/>
-                        <button type="submit" className="btn">
-                            Save Changes
-                        </button>
-                    </form>
-                </Modal>
+                <UpdateTeacherModal
+                    onClose={() => setUpdateTeacherModalOpen(false)}
+                    onSubmit={(updatedTeacher) => handleUpdateTeacher(updatedTeacher)}
+                    initialData={selectedTeacher}
+                />
+                // <Modal onClose={() => setUpdateTeacherModalOpen(false)}>
+                //     <h2>Update Teacher</h2>
+                //     <form
+                //         onSubmit={(e) => {
+                //             e.preventDefault();
+                //             const formData = new FormData(e.target);
+                //             const updatedTeacher = {
+                //                 id: selectedTeacher.id,
+                //                 fullName: formData.get("updateFullName"),
+                //                 email: formData.get("updateEmail"),
+                //                 phone: formData.get("updatePhone"),
+                //                 hourlyRate: formData.get("updateHourlyRate"),
+                //                 lastPayment: selectedTeacher.lastPayment
+                //             };
+                //             handleUpdateTeacher(updatedTeacher).then();
+                //         }}
+                //     >
+                //         <label htmlFor="updateFullName">Full Name:</label>
+                //         <input
+                //             type="text"
+                //             id="updateFullName"
+                //             name="updateFullName"
+                //             defaultValue={selectedTeacher.fullName}
+                //             required
+                //         />
+                //         <label htmlFor="updateEmail">Email:</label>
+                //         <input
+                //             type="email"
+                //             id="updateEmail"
+                //             name="updateEmail"
+                //             defaultValue={selectedTeacher.email}
+                //             required
+                //         />
+                //         <label htmlFor="updatePhone">Phone:</label>
+                //         <input type="phone" id="updatePhone" name="updatePhone" defaultValue={selectedTeacher.phone}
+                //                required/>
+                //         <label htmlFor="updateHourlyRate">Hourly rate:</label>
+                //         <input id="updateHourlyRate" name="updateHourlyRate" defaultValue={selectedTeacher.hourlyRate} required/>
+                //         <button type="submit" className="btn">
+                //             Save Changes
+                //         </button>
+                //     </form>
+                // </Modal>
             )}
 
             {isDeleteTeacherModalOpen && (
@@ -609,11 +670,7 @@ const AdminPage = () => {
                                 startFin: formData.get("startFin"),
                                 endFin: formData.get("endFin")
                             };
-                            handleAddTask(newTask)
-                                .then(() => alert("Task added successfully!"))
-                                .catch((error) => {
-                                    console.error("Failed to add task:", error);
-                                });
+                            handleAddTask(newTask).then();
                         }}
                     >
                         <div className="form-grid">
@@ -645,7 +702,7 @@ const AdminPage = () => {
                                 {errors.endFin && <p className="error-text">{errors.endFin}</p>}
                             </div>
                         </div>
-                        <button type="submit" className="btn" disabled={!!errors.startFin || !!errors.endFin}>
+                        <button type="submit" className="btn btn-center" disabled={!!errors.startFin || !!errors.endFin}>
                             Save Task
                         </button>
                     </form>

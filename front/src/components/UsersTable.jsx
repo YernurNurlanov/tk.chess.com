@@ -43,7 +43,7 @@ const UsersTable = ({ data, searchTerm, onUpdate, onDelete, onAttach, onDetach }
                                       </button>
                                   )}
                                   {onDetach && row.teacherId !== null && (
-                                      <button className="btn btn-delete" onClick={() => onDetach(row)}>
+                                      <button className="btn btn-detach" onClick={() => onDetach(row)}>
                                           <FontAwesomeIcon icon={faUnlink} /> Detach
                                       </button>
                                   )}

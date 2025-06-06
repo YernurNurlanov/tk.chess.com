@@ -152,7 +152,7 @@ const AddTeacherModal = ({ onClose, onSubmit }) => {
                         </div>
                     ))}
                 </div>
-                <button type="submit" className="btn" disabled={!isFormValid}>
+                <button type="submit" className="btn btn-center" disabled={!isFormValid}>
                     Save Teacher
                 </button>
             </form>

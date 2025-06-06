@@ -6,6 +6,8 @@ import com.chess.tk.db.repository.TeacherRepository;
 import com.chess.tk.dto.AddStudentRequest;
 import com.chess.tk.dto.AddTeacherRequest;
 import com.chess.tk.dto.AttachStudentRequest;
+import com.chess.tk.dto.updateUser.UpdateStudentRequest;
+import com.chess.tk.dto.updateUser.UpdateTeacherRequest;
 import com.chess.tk.service.AdminService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -43,9 +45,14 @@ public class AdminController {
         return adminService.deleteUser(id);
     }
 
-    @PutMapping("/")
-    public ResponseEntity<String> updateUser(@RequestBody @Valid User user) {
-        return adminService.updateUser(user);
+    @PutMapping("/students")
+    public Student updateStudent(@RequestBody @Valid UpdateStudentRequest request) {
+        return adminService.updateStudent(request.getUser(), request.getStudent());
+    }
+
+    @PutMapping("/teachers")
+    public Teacher updateTeacher(@RequestBody @Valid UpdateTeacherRequest request) {
+        return adminService.updateTeacher(request.getUser(), request.getTeacher());
     }
 
     @GetMapping("/teachers")

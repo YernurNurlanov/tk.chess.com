@@ -129,7 +129,7 @@ const AddStudentModal = ({ onClose, onSubmit }) => {
                         {errors.lastPayment && <span className="error-text">{errors.lastPayment}</span>}
                     </div>
                 </div>
-                <button type="submit" className="btn" disabled={!isFormValid}>
+                <button type="submit" className="btn btn-center" disabled={!isFormValid}>
                     Save Student
                 </button>
             </form>

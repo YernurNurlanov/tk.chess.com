@@ -3,8 +3,7 @@ import React from "react";
 const Footer = () => {
     return (
         <footer>
-            Terms of Service | Privacy Policy | Contacts<br/>
-            © 2025 ChessMaster. All rights reserved.
+            Contacts: <a target="_blank" href="https://mail.google.com/mail/?view=cm&to=tk.chess.school@gmail.com">tk.chess.school@gmail.com</a> | © 2025 ChessMaster
         </footer>
     );
 };
