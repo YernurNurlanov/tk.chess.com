@@ -12,7 +12,10 @@ axiosInstance.interceptors.response.use(
     response => response,
     error => {
         if (error.response && error.response.status === 401) {
-            handleLogout().then()
+            const isAuthRequest = error.config?.url?.includes('/auth');
+            if (!isAuthRequest) {
+                handleLogout().then()
+            }
         }
 
         return Promise.reject(error);

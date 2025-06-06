@@ -58,6 +58,7 @@ const AddTaskModal = ({
                     <div className="space-y-4">
                         <button
                             type="button"
+                            className="btn-back"
                             onClick={() => setSelectedLevel(null)}
                         >
                             ← Levels
@@ -65,11 +66,11 @@ const AddTaskModal = ({
                         <div>
                             <h3>Select topic:</h3>
                             <ol className="space-y-2 list-decimal list-inside">
-                                {selectedLevelData.topics.map((topicGroup, index) => (
+                                {selectedLevelData.topics.map((topicGroup) => (
                                     <li key={topicGroup.topic}>
                                         <button
                                             type="button"
-                                            className="btn w-full text-left"
+                                            className="btn"
                                             onClick={() => setSelectedTopic(topicGroup.topic)}
                                         >
                                             {topicGroup.topic}
@@ -86,18 +87,18 @@ const AddTaskModal = ({
                         <div className="mb-4">
                             <button
                                 type="button"
+                                className="btn-back"
                                 onClick={() => setSelectedTopic(null)}
                             >
                                 ← Topics
                             </button>
-
                             {selectedTopicData.tasks.map((task) => {
                                 const isPreview = previewTaskId === task.id;
                                 const position = isPreview ? task.endFin : task.startFin;
 
                                 return (
                                     <div key={task.id}>
-                                        <div>
+                                        <div style={{margin: "10px"}}>
                                             <span>ID: {task.id}</span>
                                             <button
                                                 type="button"
@@ -132,7 +133,7 @@ const AddTaskModal = ({
                             })}
                             <button
                                 type="submit"
-                                className="btn"
+                                className="btn btn-center"
                             >
                                 Save task
                             </button>

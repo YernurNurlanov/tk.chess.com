@@ -44,8 +44,7 @@ const WeeklySchedule = ({ onAddLesson, scheduleData = [], setSelectedLesson, set
     return (
         <div className={styles.weeklySchedule}>
             <div className={styles.scheduleHeader}>
-                <h2 className={styles.scheduleTitle}>Schedule</h2>
-
+                <h1 className={styles.scheduleTitle}>Schedule</h1>
                 <div className={styles.weekNavigation}>
                     <button onClick={handlePrevWeek} className={styles.navButton}>
                         <FontAwesomeIcon icon={faArrowLeft} />
@@ -60,7 +59,7 @@ const WeeklySchedule = ({ onAddLesson, scheduleData = [], setSelectedLesson, set
                     </button>
                 </div>
 
-                <button onClick={onAddLesson} className={styles.addLessonButton}>
+                <button onClick={onAddLesson} className="btn">
                     <FontAwesomeIcon icon={faPlus} /> Add Lesson
                 </button>
             </div>

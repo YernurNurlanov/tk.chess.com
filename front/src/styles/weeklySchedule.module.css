@@ -1,32 +1,11 @@
 .weeklySchedule {
     width: 100%;
     box-sizing: border-box;
-    padding-left: 20px;
-    padding-right: 20px;
     font-family: Arial, sans-serif;
 }
 
-.scheduleHeader h2 {
-    font-size: 24px;
-}
-
-.weekNavigation {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.weekRange {
-    font-size: 16px;
-    font-weight: bold;
-}
-
-.navButton {
-    padding: 5px 10px;
-    background: #f0f0f0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    cursor: pointer;
+.scheduleHeader h1 {
+    font-size: clamp(1.5rem, 2vw, 2rem);
 }
 
 .scheduleGrid {
@@ -57,7 +36,7 @@
     position: sticky;
     left: 0;
     z-index: 2;
-    font-size: 17px;
+    font-size: clamp(1.2rem, 1.4vw, 1.3rem);
 }
 
 .dayHeader {
@@ -85,8 +64,8 @@
     left: 0;
     right: 0;
     padding-top: 5px;
-    background: #b5dbff;
-    border-left: 3px solid #2196f3;
+    background: #3AAFA9;
+    border-left: 3px solid #2B7A78;
     border-radius: 3px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     overflow: hidden;
@@ -100,6 +79,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin-bottom: 2px;
+    padding-left: 10px;
+    font-size: clamp(1rem, 1.2vw, 1.1rem);
 }
 
 .lessonTime {
@@ -108,25 +89,8 @@
 }
 
 .today {
-    background-color: #e8f4fd;
+    background-color: #DEF2F1;
 }
-
-/* Адаптация для мобильных */
-@media (max-width: 768px) {
-    .scheduleGrid {
-        grid-template-columns: 60px repeat(7, minmax(80px, 1fr));
-    }
-
-    .timeColumn,
-    .dayHeader,
-    .timeCell,
-    .timeSlot {
-        padding: 6px 8px;
-        font-size: 13px;
-    }
-}
-
-
 
 .scheduleHeader {
     display: flex;
@@ -152,7 +116,7 @@
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 16px;
+    font-size: clamp(1.3rem, 1.5vw, 1.7rem);
     padding: 5px 10px;
     display: flex;
     align-items: center;
@@ -160,23 +124,21 @@
 }
 
 .weekRange {
-    font-size: 16px;
+    font-size: clamp(1rem, 1.2vw, 1.1rem);
     min-width: 200px;
     text-align: center;
 }
 
-.addLessonButton {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
+@media (max-width: 768px) {
+    .scheduleGrid {
+        grid-template-columns: 60px repeat(7, minmax(80px, 1fr));
+    }
 
-.addLessonButton:hover {
-    background-color: #45a049;
+    .timeColumn,
+    .dayHeader,
+    .timeCell,
+    .timeSlot {
+        padding: 6px 8px;
+        font-size: 13px;
+    }
 }

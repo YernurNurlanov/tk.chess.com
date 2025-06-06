@@ -3,12 +3,12 @@ from services.chess_ai_service import ChessAIService
 import os
 from flask_cors import CORS
 
-
 app = Flask(__name__)
 CORS(app)
 ai_service = ChessAIService()
 
 
+# Existing endpoints
 @app.route("/analyze-move", methods=["POST"])
 def analyze_move():
     data = request.json

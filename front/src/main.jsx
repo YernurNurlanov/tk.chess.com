@@ -1,6 +1,10 @@
 import React from "react";
 import ReactDOM from 'react-dom/client'
-import './index.css'
+import './styles.css'
+import './styles/sidebar.css'
+import './styles/modal.css'
+import './styles/table.css'
+import './styles/groups.css'
 import AppRouter from "./routes/AppRouter.jsx";
 import {GoogleOAuthProvider} from "@react-oauth/google";
 

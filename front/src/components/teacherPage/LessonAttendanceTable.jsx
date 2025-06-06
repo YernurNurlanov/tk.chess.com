@@ -23,10 +23,14 @@ const LessonAttendanceTable = ({ studentInfoDTOs, setSelectedLesson, selectedLes
     };
 
     return (
-        <>
+        <div className="card">
+            <div className="header">
+                <h2>Attendance</h2>
+                <button className="btn" onClick={handleSubmit}>Submit Attendance</button>
+            </div>
             <div className="table">
                 <div className="table-row header">
-                    <div className="table-cell">Student</div>
+                <div className="table-cell">Student</div>
                     <div className="table-cell">Attended</div>
                 </div>
                 {studentInfoDTOs?.map((student) => (
@@ -42,8 +46,7 @@ const LessonAttendanceTable = ({ studentInfoDTOs, setSelectedLesson, selectedLes
                     </div>
                 ))}
             </div>
-            <button className="btn" onClick={handleSubmit}>Submit Attendance</button>
-        </>
+        </div>
     );
 };
 

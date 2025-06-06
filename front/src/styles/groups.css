@@ -1,0 +1,71 @@
+.groups-list {
+    padding: 20px;
+}
+
+.group-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.group-card {
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 16px 20px;
+    width: 300px;
+    position: relative;
+    border: 1px solid #1e555c;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.group-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.group-card h2 {
+    margin: 0 0 10px 0;
+    font-size: 20px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.group-info {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.group-info li {
+    padding: 5px 0;
+    border-bottom: 1px solid var(--gray);
+}
+
+.group-info li:last-child {
+    border-bottom: none;
+}
+
+.lesson-group {
+    background-color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--gray);
+    font-size: clamp(1rem, 1.2vw, 1.1rem);
+    padding: 40px 0;
+    opacity: 0.7;
+}
+
+.empty-icon {
+    color: var(--primary-color);
+}

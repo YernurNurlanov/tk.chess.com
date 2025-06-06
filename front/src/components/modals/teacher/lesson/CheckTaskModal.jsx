@@ -6,30 +6,34 @@ const CheckTaskModal = ({ onClose, selectedTask }) => {
     const [fen, setFen] = useState(selectedTask.startFin);
     const [startFen, setStartFen] = useState(selectedTask.startFin);
     const [endFen, setEndFen] = useState(selectedTask.endFin);
+    const [showingSolution, setShowingSolution] = useState(false);
 
     useEffect(() => {
         setFen(selectedTask.startFin);
         setStartFen(selectedTask.startFin);
         setEndFen(selectedTask.endFin);
+        setShowingSolution(false);
     }, [selectedTask]);
 
-    const showSolution = () => {
-        if (endFen) setFen(endFen);
-    };
+    const toggleSolution = () => {
+        if (!endFen) return;
 
-    const resetToStart = () => {
-        setFen(startFen);
+        if (showingSolution) {
+            setFen(startFen);
+        } else {
+            setFen(endFen);
+        }
+        setShowingSolution(!showingSolution);
     };
 
     return (
         <Modal onClose={onClose} className="custom-modal">
-            <h2>Проверка задачи</h2>
-            <Chessboard position={fen} arePiecesDraggable={false} boardWidth={500} />
+            <h2>Viewing a Task</h2>
+            <Chessboard position={fen} arePiecesDraggable={false} customBoardStyle={{borderRadius: 6}} />
             {endFen && (
-                <div className="button-group" style={{marginTop: '1rem'}}>
-                    <button onClick={showSolution}>Показать решение</button>
-                    <button onClick={resetToStart}>Вернуть в начало</button>
-                </div>
+                <button onClick={toggleSolution} className="btn btn-center">
+                    {showingSolution ? "Hide answer" : "View answer"}
+                </button>
             )}
 
         </Modal>

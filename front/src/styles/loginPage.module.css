@@ -1,7 +1,7 @@
 .loginContainer {
     width: 100vw;
     height: 100vh;
-    background-color: rgb(110, 204, 255);
+    background-color: #DEF2F1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -41,6 +41,7 @@
     font-weight: 700;
     color: #1f2937;
     margin-bottom: 0.25rem;
+    font-size: clamp(1rem, 1.2vw, 1.1rem);
 }
 
 .formInput {
@@ -65,6 +66,7 @@
     border-radius: 0.375rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    font-size: clamp(1rem, 1.2vw, 1.1rem);
 }
 
 .loginButton:hover {

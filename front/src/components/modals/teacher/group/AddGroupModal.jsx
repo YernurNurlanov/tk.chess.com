@@ -19,9 +19,11 @@ const AddGroupModal = ({ onClose, currentUser, setGroups, setAddGroupModalOpen }
                     handleAddGroup(newGroup, setGroups, setAddGroupModalOpen).then();
                 }}
             >
-                <label htmlFor="groupName">Group Name:</label>
-                <input type="text" id="groupName" name="groupName" required />
-                <button type="submit" className="btn">Save Group</button>
+                <div className="form-grid">
+                    <label htmlFor="groupName">Group Name:</label>
+                    <input type="text" id="groupName" name="groupName" required/>
+                </div>
+                <button type="submit" className="btn btn-center">Save Group</button>
             </form>
         </Modal>
     );

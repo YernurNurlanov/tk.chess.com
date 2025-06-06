@@ -24,7 +24,7 @@ import TasksTable from "../components/TasksTable.jsx";
 import CheckTaskModal from "../components/modals/teacher/lesson/CheckTaskModal.jsx";
 
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
+import {faArrowLeft, faPen, faPlus} from "@fortawesome/free-solid-svg-icons";
 import WeeklySchedule from "../components/teacherPage/WeeklySchedule.jsx";
 import {handleLogout} from "../handlers/handleLogout.jsx";
 import {useNavigate} from "react-router-dom";
@@ -33,6 +33,8 @@ const TeacherPage = () => {
     const navigate = useNavigate();
 
     const [currentUser, setCurrentUser] = useState(null);
+
+    const [searchTerm, setSearchTerm] = useState("");
 
     const onAddLesson = (data, closeModal) =>
         handleAddLesson(data, setLessons, closeModal);
@@ -116,7 +118,7 @@ const TeacherPage = () => {
 
         const fetchTasks = async () => {
             try {
-                const response = await axios.get(`/tasks`);
+                const response = await axios.get(`/teacher/tasks`);
                 setTasks(response.data);
                 console.log("Tasks received");
             }  catch(error) {
@@ -144,157 +146,149 @@ const TeacherPage = () => {
                 }
                 currentUser={currentUser}
             />
-            <div className="content-wrapper">
-                <main className="main-content">
+            <main className="main-content">
 
-                    <header className="header">
-                        {activeTab === "groups" && (
+                <header className="header">
+                    {activeTab === "groups" && (
+                        <>
+                            <h1>All Groups</h1>
                             <button className="btn" onClick={() => setAddGroupModalOpen(true)}>
-                                Add Group
+                                <FontAwesomeIcon icon={faPlus} /> Add Group
                             </button>
-                        )}
+                        </>
+                    )}
 
-                        {activeTab === "group" && (
-                            <>
-                                <button onClick={() => setActiveTab("groups")} style={{
-                                    backgroundColor: "transparent",
-                                    border: "none",
-                                    color: "#333",
-                                    cursor: "pointer",
-                                    fontSize: "1.2rem"
-                                }}>
-                                    <FontAwesomeIcon icon={faArrowLeft}/>
-                                </button>
-                                <h2>
-                                    {selectedGroup.groupName}
-                                </h2>
-                                <button className="btn" onClick={() => setUpdateGroupNameModalOpen(true)}>
-                                    Rename
-                                </button>
-                                <h3>
-                                    All Students
-                                </h3>
-                                <button className="btn" onClick={() => setAddStudentToGroupModalOpen(true)}>
-                                    Add Student
-                                </button>
-                            </>
-                        )}
-
-                        {activeTab === "lesson" && (
-                            <>
-                                <button onClick={() => setActiveTab("lessons")} style={{
-                                    backgroundColor: "transparent",
-                                    border: "none",
-                                    color: "#333",
-                                    cursor: "pointer",
-                                    fontSize: "1.2rem"
-                                }}>
-                                    <FontAwesomeIcon icon={faArrowLeft} />
-                                </button>
-                                <h2>
-                                {selectedLesson.groupName}
-                                    (
-                                    Start: {new Date(selectedLesson.startTime).toLocaleDateString()} {new Date(selectedLesson.startTime).toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                })},
-                                    End: {new Date(selectedLesson.endTime).toLocaleDateString()} {new Date(selectedLesson.endTime).toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                })} )
-                                </h2>
-                                <button className="btn" onClick={() => setUpdateLessonModalOpen(true)}>
-                                    Update lesson
-                                </button>
-                                <button className="btn" onClick={() => getStudyRoom(selectedLesson.id)}>
-                                    Study room
-                                </button>
-
-                            </>
-                        )}
-
-                    </header>
-
-                    {activeTab === "lessons" && (
-                        <WeeklySchedule
-                            scheduleData={lessons}
-                            onAddLesson={() => setAddLessonModalOpen(true)}
-                            setSelectedLesson={setSelectedLesson}
-                            setActiveTab={setActiveTab}
-                            setDeleteLessonModalOpen={setDeleteLessonModalOpen}
-                        />
+                    {activeTab === "group" && (
+                        <>
+                            <button onClick={() => setActiveTab("groups")} className="btn-back">
+                                <FontAwesomeIcon icon={faArrowLeft}/>
+                            </button>
+                            <h1>
+                                {selectedGroup.groupName}
+                            </h1>
+                            <button className="btn-back" onClick={() => setUpdateGroupNameModalOpen(true)}>
+                                <FontAwesomeIcon icon={faPen}/>
+                            </button>
+                        </>
                     )}
 
                     {activeTab === "lesson" && (
                         <>
-                            <div style={{ display: "flex" }}>
-                                <h3>Tasks</h3>
-                                <button className="btn" onClick={() => setAddTaskModalOpen(true)}>
-                                    Add Task
-                                </button>
-                            </div>
-
-                            <LessonTasksTable
-                                tasks={selectedLesson.tasks}
-                                onCheck={(task) => {
-                                    setSelectedTask(task)
-                                    setCheckTaskModalOpen(true);
-                                }}
-                            />
-
-                            <h3>Attendance</h3>
-                            <LessonAttendanceTable
-                                studentInfoDTOs={selectedLesson.studentInfoDTOs}
-                                selectedLesson={selectedLesson}
-                                setSelectedLesson={setSelectedLesson}
-                                handleSubmitAttendance={handleSubmitAttendance}
-                            />
-
-                            <h3>Performance</h3>
-                            <LessonPerformanceTable studentInfoDTOs={selectedLesson.studentInfoDTOs} />
+                            <button onClick={() => setActiveTab("lessons")} className="btn-back">
+                                <FontAwesomeIcon icon={faArrowLeft} />
+                            </button>
+                            <button className="btn" onClick={() => getStudyRoom(selectedLesson.id)}>
+                                Study room
+                            </button>
                         </>
                     )}
 
-                    {activeTab === "students" && (
-                        <section className="students-list">
-                            <h1>All Students</h1>
-                            <Table
-                                data={students}
-                            />
-                        </section>
-                    )}
-
-                    {activeTab === "groups" && (
-                        <GroupsSection
-                            groups={groups}
-                            handleGetGroupPage={(id) =>
-                                handleGetGroupPage(id, setSelectedGroup, setActiveTab)
-                            }
-                            setSelectedGroup={setSelectedGroup}
-                            setDeleteGroupModalOpen={setDeleteGroupModalOpen}
-                        />
-                    )}
-
-                    {activeTab === "group" && (
-                        <GroupDetails
-                            selectedGroup={selectedGroup}
-                            setSelectedStudent={setSelectedStudent}
-                            setDeleteStudentFromGroupModalOpen={setDeleteStudentFromGroupModalOpen}
-                        />
-                    )}
-
                     {activeTab === "tasks" && (
-                        <TasksTable
-                            data={tasks}
+                        <h1>All Tasks</h1>
+                    )}
+
+                </header>
+
+                {activeTab === "lessons" && (
+                    <WeeklySchedule
+                        scheduleData={lessons}
+                        onAddLesson={() => setAddLessonModalOpen(true)}
+                        setSelectedLesson={setSelectedLesson}
+                        setActiveTab={setActiveTab}
+                        setDeleteLessonModalOpen={setDeleteLessonModalOpen}
+                    />
+                )}
+
+                {activeTab === "lesson" && (
+                    <>
+                        <div className="header">
+                            <h2>
+                                {selectedLesson.groupName} (
+                                {new Date(selectedLesson.startTime).toLocaleDateString()}&nbsp;
+                                {new Date(selectedLesson.startTime).toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
+                                &mdash;
+                                {new Date(selectedLesson.endTime).toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
+                                )
+                            </h2>
+                            <button className="btn-back" onClick={() => setUpdateLessonModalOpen(true)}>
+                                <FontAwesomeIcon icon={faPen}/>
+                            </button>
+                        </div>
+
+                        <LessonTasksTable
+                            tasks={selectedLesson.tasks}
                             onCheck={(task) => {
                                 setSelectedTask(task)
                                 setCheckTaskModalOpen(true);
                             }}
+                            onAddTask={() => setAddTaskModalOpen(true)}
                         />
-                    )}
-                </main>
-                <Footer />
-            </div>
+
+                        <LessonAttendanceTable
+                            studentInfoDTOs={selectedLesson.studentInfoDTOs}
+                            selectedLesson={selectedLesson}
+                            setSelectedLesson={setSelectedLesson}
+                            handleSubmitAttendance={handleSubmitAttendance}
+                        />
+
+                        <LessonPerformanceTable studentInfoDTOs={selectedLesson.studentInfoDTOs} />
+                    </>
+                )}
+
+                {activeTab === "students" && (
+                    <>
+                        <h1>All Students</h1>
+                        <input
+                            type="text"
+                            placeholder="Search by name or email"
+                            className="search-input"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <Table
+                            data={students}
+                            searchTerm={searchTerm}
+                        />
+                    </>
+                )}
+
+                {activeTab === "groups" && (
+                    <GroupsSection
+                        groups={groups}
+                        handleGetGroupPage={(id) =>
+                            handleGetGroupPage(id, setSelectedGroup, setActiveTab)
+                        }
+                        setSelectedGroup={setSelectedGroup}
+                        setDeleteGroupModalOpen={setDeleteGroupModalOpen}
+                    />
+                )}
+
+                {activeTab === "group" && (
+                    <GroupDetails
+                        selectedGroup={selectedGroup}
+                        setSelectedStudent={setSelectedStudent}
+                        setDeleteStudentFromGroupModalOpen={setDeleteStudentFromGroupModalOpen}
+                        onAddStudent={() => setAddStudentToGroupModalOpen(true)}
+                    />
+                )}
+
+                {activeTab === "tasks" && (
+                    <TasksTable
+                        data={tasks}
+                        onCheck={(task) => {
+                            setSelectedTask(task)
+                            setCheckTaskModalOpen(true);
+                        }}
+                    />
+                )}
+            </main>
+            <Footer />
             {isAddLessonModalOpen && (
                 <LessonModal
                     mode="add"
