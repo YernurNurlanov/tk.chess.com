@@ -34,6 +34,8 @@ const TeacherPage = () => {
 
     const [currentUser, setCurrentUser] = useState(null);
 
+    const [searchTerm, setSearchTerm] = useState("");
+
     const onAddLesson = (data, closeModal) =>
         handleAddLesson(data, setLessons, closeModal);
 
@@ -242,8 +244,16 @@ const TeacherPage = () => {
                 {activeTab === "students" && (
                     <>
                         <h1>All Students</h1>
+                        <input
+                            type="text"
+                            placeholder="Search by name or email"
+                            className="search-input"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                         <Table
                             data={students}
+                            searchTerm={searchTerm}
                         />
                     </>
                 )}
