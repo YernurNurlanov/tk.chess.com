@@ -26,25 +26,23 @@ def get_ai_move():
 
 @app.route("/analyze-game", methods=["POST"])
 def analyze_game():
-    try:
-        data = request.json
+    data = request.get_json()
+    player_color = data.get("playerColor", "white")
 
-        if not data or "pgn" not in data:
-            return jsonify({"error": "Invalid request data"}), 400
+    result = ai_service.analyze_pgn(data["pgn"], player_color)
 
-        print("\n===== ANALYZING GAME FROM PGN =====")
-        print(data["pgn"])
+    move_analyses = result.get("move_analyses")
+    if isinstance(move_analyses, dict) and "move_analyses" in move_analyses:
+        move_analyses = move_analyses["move_analyses"]  # ✅ fix nested
 
-        result = ai_service.analyze_pgn(data["pgn"])
+    if not isinstance(move_analyses, list):
+        return jsonify({"error": "Invalid move_analyses format"}), 500
 
-        return jsonify(result)
+    finalized = ai_service._finalize_analysis(move_analyses)
+    finalized["opening"] = result.get("opening", "Неизвестный дебют")
+    finalized["skill_profile"] = result.get("skill_profile", {})
 
-    except Exception as e:
-        import traceback
-
-        print(f"[FLASK ERROR] analyze_game: {str(e)}")
-        traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
+    return jsonify(finalized)
 
 
 if __name__ == "__main__":

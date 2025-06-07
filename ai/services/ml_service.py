@@ -1,30 +1,50 @@
+import os
 from typing import List, Dict
 import joblib
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
 from ml_pipeline.vectorization.chess_vectorizer import ChessVectorizer
 
 
 class SkillPredictor:
     def __init__(self):
-        # Load pre-trained model
         try:
-            self.model = joblib.load("ml_models/skill_predictor.pkl")
+            base_dir = os.path.dirname(os.path.abspath(__file__))  # путь до ml_service/
+            model_path = os.path.join(base_dir, "../ml_models/skill_predictor.pkl")
+            self.model = joblib.load(model_path)
             self.vectorizer = ChessVectorizer()
             self.levels = ["Новичок", "Начинающий", "Средний", "Продвинутый", "Эксперт"]
-        except:
+            print(f"✅ SkillPredictor initialized: {type(self.model)}")
+        except Exception as e:
             self.model = None
-            print("Skill level model not found, using fallback method")
+            print("❌ Model load failed, fallback to rule-based:", e)
 
     def assess_skill(self, move_analyses: List[Dict]) -> Dict:
-        # Use ML model if available
-        if self.model:
-            # Create feature vector from move analyses
-            features = self._create_feature_vector(move_analyses)
-            prediction = self.model.predict([features])[0]
-            skill_level = self.levels[prediction]
+        if not self.model:
+            print("⚠️ No model loaded. Using rule-based fallback.")
+            return self._rule_based_assessment(move_analyses)
 
-            # Calculate accuracy percentages for reporting
+        try:
+            features = self.vectorizer.transform(move_analyses)
+
+            print("📐 Feature vector shape:", features.shape)
+            print("🔍 First 10 features:", features[:10])
+
+            if features.shape[0] != 896:
+                print(
+                    "❌ Feature vector must be of length 896. Got:", features.shape[0]
+                )
+                return self._rule_based_assessment(move_analyses)
+
+            prediction = self.model.predict([features])[0]
+            print("🧠 Predicted level index:", prediction)
+
+            if prediction >= len(self.levels):
+                print("❌ Prediction index out of range:", prediction)
+                return self._rule_based_assessment(move_analyses)
+
+            skill_level = self.levels[prediction]
+            print("✅ Skill level:", skill_level)
+
             accuracies = self._calculate_accuracies(move_analyses)
 
             piece_accuracy = {
@@ -42,51 +62,27 @@ class SkillPredictor:
                     weight = self._move_weight(move["category"])
                     piece_accuracy[piece_type].append(weight)
 
-            # Calculate piece-specific accuracies
-            piece_stats = {}
-            for piece, scores in piece_accuracy.items():
-                if scores:
-                    piece_stats[f"{piece}_accuracy"] = round(np.mean(scores) * 100, 1)
+            piece_stats = {
+                f"{piece}_accuracy": round(np.mean(scores) * 100, 1)
+                for piece, scores in piece_accuracy.items()
+                if scores
+            }
 
             return {
                 "piece_accuracy": piece_stats,
                 "weaknesses": self._detect_weaknesses(accuracies, piece_stats),
                 "level": skill_level,
                 "accuracy_percentage": accuracies["overall"],
-                # "weaknesses": self._detect_weaknesses(accuracies),
                 "opening_accuracy": accuracies["opening"],
                 "middlegame_accuracy": accuracies["middlegame"],
                 "endgame_accuracy": accuracies["endgame"],
             }
-        else:
-            # Fallback to rule-based method
+
+        except Exception as e:
+            print("❌ Exception during ML prediction:", e)
             return self._rule_based_assessment(move_analyses)
 
-    def _create_feature_vector(self, move_analyses):
-        """Create feature vector from move analyses"""
-        features = []
-
-        # Accuracy by phase
-        for phase in ["opening", "middlegame", "endgame"]:
-            phase_moves = [m for m in move_analyses if m.get("phase") == phase]
-            if phase_moves:
-                accuracy = np.mean(
-                    [self._move_weight(m["category"]) for m in phase_moves]
-                )
-                features.append(accuracy)
-            else:
-                features.append(0)
-
-        # Add additional features
-        features.append(len(move_analyses))  # total moves
-        features.append(
-            sum(1 for m in move_analyses if m["category"] in ["mistake", "blunder"])
-        )  # mistakes
-
-        return features
-
     def _move_weight(self, category):
-        """Weight for move categories"""
         weights = {
             "excellent": 1.0,
             "good": 0.8,
@@ -98,7 +94,6 @@ class SkillPredictor:
         return weights.get(category, 0.5)
 
     def _calculate_accuracies(self, move_analyses):
-        """Calculate accuracy percentages for reporting"""
         phases = ["opening", "middlegame", "endgame"]
         accuracies = {phase: [] for phase in phases}
 
@@ -109,43 +104,41 @@ class SkillPredictor:
 
         results = {}
         for phase in phases:
-            if accuracies[phase]:
-                results[phase] = round(np.mean(accuracies[phase]) * 100, 1)
-            else:
-                results[phase] = 0
+            results[phase] = (
+                round(np.mean(accuracies[phase]) * 100, 1) if accuracies[phase] else 0
+            )
 
         all_weights = [self._move_weight(m["category"]) for m in move_analyses]
         results["overall"] = round(np.mean(all_weights) * 100, 1) if all_weights else 0
-
         return results
 
     def _detect_weaknesses(self, accuracies, piece_stats):
-        """More nuanced weakness detection"""
         weaknesses = []
 
         if accuracies["opening"] < 60:
             weaknesses.append("Дебютные ошибки")
-
         if accuracies["endgame"] < 50:
             weaknesses.append("Слабый эндшпиль")
 
-        # Piece-specific weaknesses
+        piece_names = {
+            "pawn": "пешками",
+            "knight": "конями",
+            "bishop": "слонами",
+            "rook": "ладьями",
+            "queen": "ферзём",
+            "king": "королём",
+        }
+
         for piece, acc in piece_stats.items():
             if acc < 55:
-                piece_name = {
-                    "pawn": "пешками",
-                    "knight": "конями",
-                    "bishop": "слонами",
-                    "rook": "ладьями",
-                    "queen": "ферзём",
-                    "king": "королём",
-                }.get(piece.split("_")[0], "")
-                weaknesses.append(f"Ошибки с {piece_name}")
+                base = piece.split("_")[0]
+                if base in piece_names:
+                    weaknesses.append(f"Ошибки с {piece_names[base]}")
 
         return weaknesses
 
     def _rule_based_assessment(self, move_analyses):
-        print("[SkillPredictor] Rule-based fallback triggered")
+        print("[SkillPredictor] 🔁 Rule-based fallback used")
         return {
             "level": "unknown",
             "accuracy_percentage": 0,

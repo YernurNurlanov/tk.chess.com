@@ -8,4 +8,4 @@ torch
 joblib
 werkzeug==2.0.3
 python-chess
-
+xgboost

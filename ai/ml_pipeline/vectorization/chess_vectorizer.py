@@ -1,46 +1,66 @@
-import chess
 import numpy as np
 
 
 class ChessVectorizer:
-    def board_to_vector(self, board):
-        """Convert chess board to feature vector"""
-        vector = []
+    def transform(self, move_analyses: list) -> np.ndarray:
+        """
+        Convert move_analyses into a 896-dim fixed vector: 32 moves × 28 features
+        Supports any number of moves with truncation/padding
+        """
+        max_moves = 32
+        features_per_move = 28
 
-        # Piece-centric features
-        for piece_type in [
-            chess.PAWN,
-            chess.KNIGHT,
-            chess.BISHOP,
-            chess.ROOK,
-            chess.QUEEN,
-            chess.KING,
-        ]:
-            for color in [chess.WHITE, chess.BLACK]:
-                # Count of pieces
-                vector.append(len(board.pieces(piece_type, color)))
+        def move_to_vec(move):
+            vec = []
 
-                # Positional features (center control, etc.)
-                if piece_type != chess.KING:
-                    center_squares = [chess.D4, chess.D5, chess.E4, chess.E5]
-                    center_count = sum(
-                        1
-                        for sq in center_squares
-                        if board.piece_at(sq)
-                        and board.piece_at(sq).piece_type == piece_type
-                        and board.piece_at(sq).color == color
-                    )
-                    vector.append(center_count)
+            piece_map = {
+                "pawn": [1, 0, 0, 0, 0, 0],
+                "knight": [0, 1, 0, 0, 0, 0],
+                "bishop": [0, 0, 1, 0, 0, 0],
+                "rook": [0, 0, 0, 1, 0, 0],
+                "queen": [0, 0, 0, 0, 1, 0],
+                "king": [0, 0, 0, 0, 0, 1],
+            }
+            vec.extend(piece_map.get(move.get("piece", ""), [0] * 6))
 
-        # Game state features
-        vector.append(1 if board.turn == chess.WHITE else 0)
-        vector.append(len(board.move_stack))  # move count
-        vector.append(1 if board.is_check() else 0)
+            category_score = {
+                "excellent": 1.0,
+                "good": 0.8,
+                "ok": 0.6,
+                "poor": 0.4,
+                "mistake": 0.2,
+                "blunder": 0.0,
+            }
+            vec.append(category_score.get(move.get("category", ""), 0.5))
 
-        # Castling rights
-        vector.append(1 if board.has_kingside_castling_rights(chess.WHITE) else 0)
-        vector.append(1 if board.has_queenside_castling_rights(chess.WHITE) else 0)
-        vector.append(1 if board.has_kingside_castling_rights(chess.BLACK) else 0)
-        vector.append(1 if board.has_queenside_castling_rights(chess.BLACK) else 0)
+            phase_map = {
+                "opening": [1, 0, 0],
+                "middlegame": [0, 1, 0],
+                "endgame": [0, 0, 1],
+            }
+            vec.extend(phase_map.get(move.get("phase", ""), [0] * 3))
 
-        return np.array(vector)
+            eval_score = move.get("eval", 0)
+            if eval_score is None:
+                eval_score = 0
+            vec.append(np.clip(eval_score, -1000, 1000) / 1000)
+
+            # Padding to 28 features
+            while len(vec) < features_per_move:
+                vec.append(0.0)
+
+            return vec
+
+        # Apply to all moves
+        feature_vectors = [move_to_vec(m) for m in move_analyses]
+
+        # If more than max_moves, truncate
+        if len(feature_vectors) > max_moves:
+            feature_vectors = feature_vectors[:max_moves]
+
+        # If fewer, pad with zeros
+        while len(feature_vectors) < max_moves:
+            feature_vectors.append([0.0] * features_per_move)
+
+        # Flatten
+        return np.array(feature_vectors).flatten()

@@ -1,0 +1,6 @@
+import joblib
+
+model = joblib.load(
+    "/Users/karimabismeldinova/Documents/3kurs/chessml/tk.chess.com/ai/ml_models/skill_predictor.pkl"
+)
+print(type(model))

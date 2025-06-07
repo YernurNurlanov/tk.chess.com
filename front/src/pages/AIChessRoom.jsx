@@ -144,6 +144,8 @@ export default function AIChessRoom() {
     return pgn;
 };
 
+
+
     const analyzeMove = async (move) => {
         try {
             const response = await axios.post("http://localhost:5001/analyze-move", { 
@@ -169,44 +171,46 @@ export default function AIChessRoom() {
     const pgn = generateCompletePGN();
     console.log("===== SENDING TO BACKEND =====");
     console.log("Full PGN:", pgn);
-    
+
     setIsAnalyzing(true);
     setAnalysisError(null);
-    
+
     try {
         const response = await axios.post('http://localhost:5001/analyze-game', { 
             pgn: pgn,
-            playerColor,
-            // debug: true  // Request detailed processing info
+            debug: true
         }, { timeout: 60000 });
 
         console.log("Backend response:", response.data);
-        
-        // If opening is unknown, show first moves
-        let opening = response.data.opening;
+
+        // Extract actual analysis from nested structure
+        const raw = response.data;
+        const data = raw.move_analyses || raw;
+
+        // Fallback for opening name
+        let opening = data.opening;
         if (opening === "Неизвестный дебют") {
             const firstMoves = game.history().slice(0, 4).join(" ");
             opening = `Неизвестный дебют (${firstMoves})`;
         }
-        
+
         setGameAnalysis({
-            ...response.data,
+            ...data,
             opening: opening,
             mlData: {
-                skillLevel: response.data.skill_profile?.level || "unknown",
-                anomalies: response.data.anomalies || [],
+                skillLevel: data.skill_profile?.level || "unknown",
+                anomalies: data.anomalies || [],
                 opening: opening
             }
         });
-        
+
     } catch (error) {
         console.error('Analysis failed:', error);
         setAnalysisError(error.message);
-        
-        // Create detailed error analysis
+
         const sanHistory = game.history();
         const firstMoves = sanHistory.slice(0, 4).join(" ");
-        
+
         setGameAnalysis({
             skill_profile: {
                 level: "unknown",
@@ -225,6 +229,7 @@ export default function AIChessRoom() {
         console.log("===== ANALYSIS COMPLETE =====");
     }
 };
+
 
     const handleReset = () => {
         const newGame = new Chess();
