@@ -64,6 +64,9 @@ const TeacherPage = () => {
         isUpdateGroupNameModalOpen, setUpdateGroupNameModalOpen
     } = useTeacherPageState();
 
+    const [selectedLevelName, setSelectedLevelName] = useState(null);
+    const [selectedTopicName, setSelectedTopicName] = useState(null);
+
     useEffect(() => {
         const fetchCurrentUser = async () => {
             try {
@@ -281,6 +284,10 @@ const TeacherPage = () => {
                 {activeTab === "tasks" && (
                     <TasksTable
                         data={tasks}
+                        selectedTopicName={selectedTopicName}
+                        selectedLevelName={selectedLevelName}
+                        setSelectedLevelName={(level) => setSelectedLevelName(level)}
+                        setSelectedTopicName={(topic) => setSelectedTopicName(topic)}
                         onCheck={(task) => {
                             setSelectedTask(task)
                             setCheckTaskModalOpen(true);

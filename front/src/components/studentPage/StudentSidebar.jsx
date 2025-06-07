@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import "../../styles/StudentSidebar.css";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faChessBoard, faRightFromBracket} from "@fortawesome/free-solid-svg-icons";
 
 const StudentSidebar = ({ currentUser, activeTab, setActiveTab, onLogout, userId }) => {
     const [isCreatingRoom, setIsCreatingRoom] = useState(false);
@@ -37,9 +39,7 @@ const StudentSidebar = ({ currentUser, activeTab, setActiveTab, onLogout, userId
     return (
         <aside className="sidebar">
             <div className="sidebar-header">
-                <div className="user-avatar">
-                    <img src="../../../public/avatar.jpeg" alt="User Avatar" />
-                </div>
+                <FontAwesomeIcon className="icon" style={{fontSize: "30px", marginLeft: "10px"}} icon={faChessBoard}/>
                 {currentUser && <h2 className="username">{currentUser.firstName} {currentUser.lastName}</h2>}
             </div>
             <nav>
@@ -73,13 +73,13 @@ const StudentSidebar = ({ currentUser, activeTab, setActiveTab, onLogout, userId
                             {isCreatingRoom ? "Creating Game..." : "Play vs AI"}
                         </Link>
                     </li>
-                    <li>
-                        <a href="#" className="nav-item" onClick={onLogout}>
-                            <i className="fas fa-sign-out-alt"></i>Log Out
-                        </a>
-                    </li>
                 </ul>
             </nav>
+            <div className="sidebar-footer">
+                <a href="#" className="nav-item logout" onClick={onLogout}>
+                    <FontAwesomeIcon className="icon" icon={faRightFromBracket}/> Log Out
+                </a>
+            </div>
         </aside>
     );
 };

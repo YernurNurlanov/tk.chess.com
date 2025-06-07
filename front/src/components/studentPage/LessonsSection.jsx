@@ -14,16 +14,12 @@ const LessonsSection = ({ lessons, onTasks }) => (
                             <li>Start: {new Date(lesson.startTime).toLocaleString()}</li>
                             <li>End: {new Date(lesson.endTime).toLocaleString()}</li>
                         </ul>
-                        <button onClick={() => handleGetLessonRoom(lesson.id)}>
+                        <button className="btn" onClick={() => handleGetLessonRoom(lesson.id)}>
                             Go to lesson
                         </button>
                         <button
-                            style={{
-                                background: "yellow",
-                                color: "black",
-                                marginLeft: "1rem",
-                                borderColor: "black",
-                            }}
+                            className="btn btn-update"
+                            style={{marginLeft: "10px"}}
                             onClick={() => onTasks(lesson)}
                         >
                             Tasks

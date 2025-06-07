@@ -48,7 +48,7 @@ const MaterialsModal = ({ onClose, materials, roomId }) => {
 
                 {selectedLevel && !selectedTopic && (
                     <div className="space-y-4">
-                        <button type="button" onClick={() => setSelectedLevel(null)}>
+                        <button type="button" className="btn-back" onClick={() => setSelectedLevel(null)}>
                             ← Levels
                         </button>
                         <div>
@@ -72,7 +72,7 @@ const MaterialsModal = ({ onClose, materials, roomId }) => {
 
                 {selectedLevel && selectedTopic && (
                     <div className="space-y-4">
-                        <button type="button" onClick={() => setSelectedTopic(null)}>
+                        <button type="button" className="btn-back" onClick={() => setSelectedTopic(null)}>
                             ← Topics
                         </button>
                         <ul className="space-y-2">

@@ -8,32 +8,30 @@
 }
 
 .header {
-    background-color: white;
+    background-color: #17252A;
     padding: 10px 20px;
     border-bottom: 1px solid #ccc;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 10px;
 }
 
-/* Главная область: шахматы и видео */
 .main-content {
     display: flex;
     flex: 1;
     overflow: hidden;
+    margin-top: 10px;
 }
 
-/* Левая часть — шахматная доска */
 .chessboard-section {
     flex: 1;
-    background-color: #eee;
-    padding: 20px;
     display: flex;
+    height: 80%;
     justify-content: center;
     align-items: center;
 }
 
-/* Правая часть — видеосвязь */
 .video-section {
     width: 35%;
     background-color: #91a1b3;

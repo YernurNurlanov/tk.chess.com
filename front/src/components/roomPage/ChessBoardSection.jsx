@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Chessboard} from 'react-chessboard';
 import {Chess} from 'chess.js';
 import socket from '../../socket';
@@ -7,6 +7,23 @@ import ACTIONS from "../../socket/actions.js";
 export default function ChessBoardSection({ roomID }) {
     const [game, setGame] = useState(new Chess());
     const [fen, setFen] = useState('start');
+
+    const containerRef = useRef(null);
+    const [boardWidth, setBoardWidth] = useState(300); // начальное значение
+
+    useEffect(() => {
+        const updateSize = () => {
+            if (containerRef.current) {
+                const width = containerRef.current.offsetWidth;
+                setBoardWidth(width);
+            }
+        };
+
+        updateSize(); // вызов при монтировании
+        window.addEventListener("resize", updateSize); // обновление при ресайзе
+
+        return () => window.removeEventListener("resize", updateSize);
+    }, []);
 
     useEffect(() => {
         const handleMove = ({ fen }) => {
@@ -87,12 +104,12 @@ export default function ChessBoardSection({ roomID }) {
     };
 
     return (
-        <div>
+        <div ref={containerRef} style={{ width: "40vw" }}>
             <Chessboard
                 id="BasicBoard"
                 position={fen}
                 onPieceDrop={onDrop}
-                boardWidth={700}
+                boardWidth={boardWidth}
             />
         </div>
     );

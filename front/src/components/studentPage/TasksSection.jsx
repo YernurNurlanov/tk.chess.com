@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import {handleCheckTask} from "../../handlers/student/lessonHandlers.js";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faCircleInfo} from "@fortawesome/free-solid-svg-icons";
 
 const TaskBoard = ({ task, studentId, setLessonTasks }) => {
     const [game, setGame] = useState(new Chess());
@@ -76,17 +78,6 @@ const TaskBoard = ({ task, studentId, setLessonTasks }) => {
         return true;
     };
 
-    const resetBoard = () => {
-        const newGame = new Chess();
-        try {
-            newGame.load(task.startFin);
-        } catch {
-            newGame.reset();
-        }
-        setGame(newGame);
-        setPosition(newGame.fen());
-    };
-
     return (
         <div style={{
             display: "flex",
@@ -115,22 +106,18 @@ const TaskBoard = ({ task, studentId, setLessonTasks }) => {
                     {task.completedAt ? new Date(task.completedAt).toLocaleString() : "—"}
                 </p>
 
-                <button onClick={resetBoard} style={buttonStyle}>
-                    🔁 Сбросить позицию
-                </button>
-
                 {isBlocked && (
                     <button
                         onClick={() => setShowAnswer(prev => !prev)}
                         style={{...buttonStyle, backgroundColor: "#f88"}}
                     >
-                        {showAnswer ? "🙈 Скрыть ответ" : "👁 Показать ответ"}
+                        {showAnswer ? "🙈 Hide answer" : "👁 Show answer"}
                     </button>
                 )}
 
                 {showAnswer && (
                     <div style={{marginTop: "1rem"}}>
-                        <strong>Ответ (финальная позиция):</strong>
+                        <strong>Answer (final position):</strong>
                         <Chessboard position={task.endFin} boardWidth={200} arePiecesDraggable={false}/>
                     </div>
                 )}
@@ -153,21 +140,39 @@ const TasksSection = ({ studentId, selectedLesson, lessonTasks, setLessonTasks }
         <section style={{ padding: "2rem" }}>
             {selectedLesson && (
                 <h2 style={{ marginBottom: "2rem" }}>
-                    Lesson: {selectedLesson.groupName} | {new Date(selectedLesson.startTime).toLocaleString()} — {new Date(selectedLesson.endTime).toLocaleString()}
+                    Lesson: {selectedLesson.groupName} |
+                    {new Date(selectedLesson.startTime).toLocaleDateString()}&nbsp;
+                    {new Date(selectedLesson.startTime).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}
+                    &mdash;
+                    {new Date(selectedLesson.endTime).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}
                 </h2>
             )}
-
-            {lessonTasks?.map(task => (
-                <TaskBoard key={task.taskId}
-                           task={task}
-                           studentId={studentId}
-                           setLessonTasks={setLessonTasks}
-                />
-            ))}
-            {!selectedLesson && !lessonTasks && (
-                <p style={{color: "gray", fontStyle: "italic"}}>
-                    There are no homework yet.
-                </p>
+            {lessonTasks?.length === 0 ? (
+                <div className="empty-state">
+                    <FontAwesomeIcon icon={faCircleInfo} className="empty-icon" />
+                    <span>There are no tasks yet.</span>
+                </div>
+            ) : (
+                <>
+                    {lessonTasks?.map(task => (
+                        <TaskBoard key={task.taskId}
+                                   task={task}
+                                   studentId={studentId}
+                                   setLessonTasks={setLessonTasks}
+                        />
+                    ))}
+                    {!selectedLesson && !lessonTasks && (
+                        <p style={{color: "gray", fontStyle: "italic"}}>
+                            To view homework, select a lesson in the lessons section.
+                        </p>
+                    )}
+                </>
             )}
         </section>
     );

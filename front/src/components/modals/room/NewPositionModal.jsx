@@ -141,7 +141,7 @@ export default function NewPositionModal({ onClose, roomId }) {
                 </div>
 
                 <div style={{textAlign: "center", marginTop: 12}}>
-                    <button onClick={sendPosition} style={{padding: "8px 16px", fontSize: "16px"}}>
+                    <button onClick={sendPosition} className="btn">
                         Save position
                     </button>
                 </div>

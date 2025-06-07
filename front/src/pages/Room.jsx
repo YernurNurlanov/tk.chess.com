@@ -22,13 +22,13 @@ export default function Room() {
     const [isMaterialsModalOpen, setMaterialsModalOpen] = React.useState(false);
     const [isNewPositionModalOpen, setNewPositionModalOpen] = React.useState(false);
 
-    const mainClientID = clients[0]; // Первый — основной
+    const mainClientID = clients[0];
     const secondaryClients = clients.slice(1);
 
     useEffect(() => {
         const fetchTasks = async () => {
             try {
-                const response = await axios.get(`/teacher/tasks`);
+                const response = await axios.get(`/teacher/lessons/tasks`);
                 setTasks(response.data);
                 console.log("Tasks received")
             } catch (error) {
@@ -43,10 +43,10 @@ export default function Room() {
         <div className={styles["page-container"]}>
             {role === "ROLE_TEACHER" && (
                 <header className={styles["header"]}>
-                    <button onClick={() => setMaterialsModalOpen(true)}>
+                    <button className="btn" onClick={() => setMaterialsModalOpen(true)}>
                         Materials
                     </button>
-                    <button onClick={() => setNewPositionModalOpen(true)}>
+                    <button className="btn" onClick={() => setNewPositionModalOpen(true)}>
                         Set your position
                     </button>
                 </header>

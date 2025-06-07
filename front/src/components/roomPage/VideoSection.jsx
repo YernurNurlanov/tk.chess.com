@@ -14,7 +14,6 @@ export default function VideoSection({ mainClientID, secondaryClients, provideMe
             marginRight: '20px',
             borderRadius: '8px',
         }}>
-            {/* Главное видео слева */}
             <div style={{
                 flex: 1,
                 height: '100%',
@@ -36,18 +35,15 @@ export default function VideoSection({ mainClientID, secondaryClients, provideMe
                         />
                     </div>
                 )}
-                {/* 🔘 Кнопки под главным видео */}
-                <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
-                    <button onClick={toggleAudio}>
+                <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem' }}>
+                    <button className="btn" onClick={toggleAudio}>
                         {isMicOn ? '🔇 Выкл. микрофон' : '🎤 Вкл. микрофон'}
                     </button>
-                    <button onClick={toggleVideo}>
+                    <button className="btn" onClick={toggleVideo}>
                         {isCameraOn ? '📷 Выкл. камеру' : '🎥 Вкл. камеру'}
                     </button>
                 </div>
             </div>
-
-            {/* Второстепенные видео */}
             <div style={{
                 width: '160px',
                 height: '100%',

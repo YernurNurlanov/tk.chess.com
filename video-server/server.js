@@ -1,17 +1,20 @@
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import ACTIONS from './src/socket/actions.js';
+import ACTIONS from './actions.js';
 import {Chess} from "chess.js";
+import dotenv from 'dotenv';
+dotenv.config();
 
 const PORT = 3001;
-const HOST = process.env.VITE_SERVER_URL || "localhost";
+const URL = process.env.FRONT_URL || "https://localhost:5173";
+console.log(`Frontend URL allowed via CORS: ${URL}`);
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: `http://${HOST}:5173`,
+        origin: URL,
         methods: ["GET", "POST"]
     }
 });
