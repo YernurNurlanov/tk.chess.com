@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5434/tk.chess.com
+    url: jdbc:postgresql://ep-noisy-hat-a2ufyuso-pooler.eu-central-1.aws.neon.tech/tk.chess.com?sslmode=require
     username: postgres
-    password: 123
+    password: npg_gM8mAszltEO7
   jpa:
     open-in-view: false
     hibernate:
@@ -14,7 +14,7 @@ spring:
     userName: tk.chess.school@gmail.com
     password: .
   front:
-    url: http://localhost:3000
+    url: https://tk-chess-com-i4rw.onrender.com
 
 server:
   port: 8080
@@ -25,6 +25,3 @@ token:
 
 google:
   client-id: 756752521081-p0du6951j4598agcdbaoumt3dsv6ikup.apps.googleusercontent.com
-
-front:
-  reset-url: http://localhost:5173/reset-password
