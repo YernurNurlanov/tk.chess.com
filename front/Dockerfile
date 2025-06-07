@@ -1,7 +1,12 @@
+FROM node:20 as builder
+WORKDIR /app
+COPY package*.json .
+RUN npm install
+COPY . .
+RUN npm run build
+
 FROM node:20
 WORKDIR /app
-COPY . .
-RUN npm install
-RUN npm run build
-EXPOSE 5173
-CMD ["npm", "run", "dev"]
+COPY --from=builder /app/dist ./dist
+RUN npm install -g serve
+CMD ["serve", "-s", "dist", "-l", "tcp://0.0.0.0:${PORT}"]
