@@ -42,6 +42,7 @@ public class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(e -> {
                     var corsConfiguration = new CorsConfiguration();
                     corsConfiguration.setAllowedOrigins(List.of(
+                            "https://tk-chess-com-i4rw.onrender.com",
                             "http://192.168.226.25:8080",
                             "http://192.168.226.25:5173",
                             "http://192.168.226.25:3001",
