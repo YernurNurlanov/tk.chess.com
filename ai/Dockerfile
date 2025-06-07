@@ -1,11 +1,14 @@
 # Use a Python base image
-FROM python:3.9-slim
+FROM python:3.11-slim
+
 
 # Install Stockfish and create symlink for macOS path
 RUN apt-get update && \
     apt-get install -y stockfish && \
     mkdir -p /opt/homebrew/bin && \
     ln -s /usr/games/stockfish /opt/homebrew/bin/stockfish
+
+
 
 # Set working directory
 WORKDIR /app
@@ -18,4 +21,4 @@ RUN pip install --no-cache-dir -r ai_requirements.txt
 COPY . .
 
 # Ensure Flask listens on all interfaces
-CMD ["python", "main.py", "--host", "0.0.0.0", "--port", "5001"]
+CMD ["python", "main.py"]

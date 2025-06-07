@@ -26,23 +26,25 @@ def get_ai_move():
 
 @app.route("/analyze-game", methods=["POST"])
 def analyze_game():
-    try:
-        data = request.json
-        if not data or "pgn" not in data:
-            return jsonify({"error": "Invalid request data"}), 400
+    data = request.get_json()
+    player_color = data.get("playerColor", "white")
 
-        result = ai_service.analyze_pgn(data["pgn"], data.get("playerColor", "white"))
+    result = ai_service.analyze_pgn(data["pgn"], player_color)
 
-        if "error" in result:
-            return jsonify(result), 400
+    move_analyses = result.get("move_analyses")
+    if isinstance(move_analyses, dict) and "move_analyses" in move_analyses:
+        move_analyses = move_analyses["move_analyses"]  # ✅ fix nested
 
-        return jsonify(result)
+    if not isinstance(move_analyses, list):
+        return jsonify({"error": "Invalid move_analyses format"}), 500
 
-    except Exception as e:
-        print(f"Error in analyze_game endpoint: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+    finalized = ai_service._finalize_analysis(move_analyses)
+    finalized["opening"] = result.get("opening", "Неизвестный дебют")
+    finalized["skill_profile"] = result.get("skill_profile", {})
+
+    return jsonify(finalized)
 
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=5001)
