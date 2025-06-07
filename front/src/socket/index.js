@@ -1,6 +1,6 @@
 import {io} from 'socket.io-client';
 
-const HOST = import.meta.env.VITE_SERVER_URL;
+const URL = import.meta.env.VITE_VIDEO_URL;
 
 const options = {
     forceNew: true,
@@ -9,6 +9,6 @@ const options = {
     transports : ["websocket"]
 }
 
-const socket = io(`http://${HOST}:3001`, options);
+const socket = io(URL, options);
 
 export default socket;
