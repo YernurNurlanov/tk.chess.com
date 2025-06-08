@@ -53,7 +53,7 @@ class ChessAIService:
             "top_suggestion": info[0]["pv"][0].uci() if info else None,
             "fen": fen,
             "move": move_uci,
-            "phase": phase,  # ✅ this is the key fix
+            "phase": phase,
         }
 
         # Store for history
@@ -112,7 +112,7 @@ class ChessAIService:
     def _identify_opening(self, san_moves: List[str]) -> str:
         """Identify opening using SAN move patterns (cleaned strings)"""
         if not san_moves or len(san_moves) < 2:
-            return "Неизвестный дебют"
+            return "Unknown opening"
 
         print("\n==== OPENING DETECTION =====")
         print("SAN sequence:", san_moves[:6])
@@ -125,29 +125,29 @@ class ChessAIService:
 
         if normalized[0] == "e4":
             if len(normalized) > 1 and normalized[1] == "e5":
-                return "Открытая партия"
+                return "Open game"
             elif normalized[1] == "c5":
-                return "Сицилианская защита"
+                return "Sicilian Defense"
             elif normalized[1] == "e6":
-                return "Французская защита"
+                return "French Defense"
             elif normalized[1] == "d6":
-                return "Защита Пирца"
+                return "Pirc Defense"
 
         if normalized[0] == "d4":
             if len(normalized) > 1 and normalized[1] == "d5":
                 if len(normalized) > 2 and normalized[2] == "c4":
-                    return "Ферзевый гамбит"
+                    return "Queen's Gambit"
             elif normalized[1] == "nf6":
-                return "Индийская защита"
+                return "Indian Defense"
 
         if normalized[0] == "c4":
-            return "Английское начало"
+            return "English Opening"
         if normalized[0] == "f4":
-            return "Дебют Берда"
+            return "Bird's Opening"
         if normalized[0] == "nf3":
-            return "Дебют Рети"
+            return "Réti Opening"
 
-        return "Неизвестный дебют"
+        return "Unknown opening"
 
     def _determine_game_phase(self, board):
         """Robust game phase detections with move number consideration"""
@@ -262,7 +262,7 @@ class ChessAIService:
                 move_analyses.append(analysis)
                 board.push(move)
             except Exception as e:
-                print(f"Ошибка анализа хода {i + 1}: {san_move} — {e}")
+                print(f"Move analysis error {i + 1}: {san_move} — {e}")
                 continue
 
         return move_analyses
@@ -276,13 +276,13 @@ class ChessAIService:
                 san_moves.append(san)
                 temp_board.push(move)
             except Exception as e:
-                print(f"Ошибка при генерации SAN: {move} — {e}")
+                print(f"Error generating SAN: {move} — {e}")
                 break
         return san_moves
 
     def _finalize_analysis(self, move_analyses, embeddings=[]):
         if not move_analyses:
-            return {"error": "Нет ходов для анализа"}
+            return {"error": "No moves to analyze"}
 
         category_weights = {
             "excellent": 1.0,
@@ -329,18 +329,18 @@ class ChessAIService:
 
         descriptions = {
             "best": {
-                "opening": "Отличное развитие фигур в дебюте",
-                "middlegame": "Сильный тактический удар в миттельшпиле",
-                "endgame": "Точная реализация преимущества в эндшпиле",
+                "opening": "Excellent piece development in the opening",
+                "middlegame": "Strong tactical strike in the middlegame",
+                "endgame": "Precise advantage conversion in the endgame",
             },
             "worst": {
-                "opening": "Ошибка в дебюте привела к потере темпа",
-                "middlegame": "Тактический просчёт в миттельшпиле",
-                "endgame": "Неточность в эндшпиле упустила победу",
+                "opening": "Opening mistake led to tempo loss",
+                "middlegame": "Tactical oversight in the middlegame",
+                "endgame": "Endgame inaccuracy missed the win",
             },
         }
 
-        return descriptions[move_type].get(phase, "Важный ход в игре")
+        return descriptions[move_type].get(phase, "Important move in the game")
 
     def _get_move_rank(self, info, move):
         """Determine how good a move is (1=best, 6=worst)"""

@@ -17,19 +17,19 @@ class LearningPath:
 
         # Weakness-specific recommendations
         weakness_map = {
-            "Дебютные ошибки": {
-                "title": "Изучение дебютов",
-                "description": "Разберите 3 классические партии в вашем основном дебюте",
+            "Opening mistakes": {
+                "title": "Study openings",
+                "description": "Analyze 3 classical games in your main opening",
                 "type": "study",
             },
-            "Слабый эндшпиль": {
-                "title": "Тренировка эндшпиля",
-                "description": "Решите 15 задач по эндшпилю",
+            "Weak endgame": {
+                "title": "Endgame training",
+                "description": "Solve 15 endgame puzzles",
                 "type": "puzzles",
             },
-            "Ошибки с пешками": {
-                "title": "Пешечные структуры",
-                "description": "Изучите 5 типичных пешечных структур",
+            "Pawn mistakes": {
+                "title": "Pawn structures",
+                "description": "Study 5 typical pawn structures",
                 "type": "study",
             },
             # Add more mappings
@@ -41,7 +41,7 @@ class LearningPath:
                     {
                         **weakness_map[weakness],
                         "priority": "high"
-                        if "ошибки" in weakness.lower()
+                        if "mistakes" in weakness.lower()
                         else "medium",
                     }
                 )
@@ -52,8 +52,8 @@ class LearningPath:
             if acc < 65:
                 recs.append(
                     {
-                        "title": f"Улучшение {self._phase_name(phase)}",
-                        "description": f"Практика: 20 позиций в {self._phase_name(phase, dative=True)}",
+                        "title": f"Improve {self._phase_name(phase)}",
+                        "description": f"Practice: 20 positions in {self._phase_name(phase, dative=True)}",
                         "type": "practice",
                         "priority": "medium",
                     }
@@ -67,9 +67,9 @@ class LearningPath:
 
     def _phase_name(self, phase, dative=False):
         names = {
-            "opening": ("дебют", "дебюте"),
-            "middlegame": ("миттельшпиль", "миттельшпиле"),
-            "endgame": ("эндшпиль", "эндшпиле"),
+            "opening": ("opening", "opening"),
+            "middlegame": ("middlegame", "middlegame"),
+            "endgame": ("endgame", "endgame"),
         }
         return names.get(phase, [phase, phase])[1 if dative else 0]
 
@@ -77,15 +77,15 @@ class LearningPath:
         """Get weaknesses from ML model"""
         # This would come from a dedicated ML model
         # For now, we'll simulate based on common patterns
-        return ["Тактические ошибки", "Позиционное понимание"]
+        return ["Tactical mistakes", "Positional understanding"]
 
     def _get_ml_recommendations(self, embeddings):
         """Generate ML-powered recommendations"""
         # This would come from a recommendation model
         return [
             {
-                "title": "Персонализированная тренировка",
-                "description": "Специальная программа на основе вашего стиля игры",
+                "title": "Personalized training",
+                "description": "Custom program based on your playing style",
                 "type": "custom",
                 "priority": "high",
             }

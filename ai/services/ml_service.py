@@ -8,11 +8,11 @@ from ml_pipeline.vectorization.chess_vectorizer import ChessVectorizer
 class SkillPredictor:
     def __init__(self):
         try:
-            base_dir = os.path.dirname(os.path.abspath(__file__))  # путь до ml_service/
+            base_dir = os.path.dirname(os.path.abspath(__file__))  # path to ml_service/
             model_path = os.path.join(base_dir, "../ml_models/skill_predictor.pkl")
             self.model = joblib.load(model_path)
             self.vectorizer = ChessVectorizer()
-            self.levels = ["Новичок", "Начинающий", "Средний", "Продвинутый", "Эксперт"]
+            self.levels = ["Beginner", "Intermediate", "Average", "Advanced", "Expert"]
             print(f"✅ SkillPredictor initialized: {type(self.model)}")
         except Exception as e:
             self.model = None
@@ -116,24 +116,24 @@ class SkillPredictor:
         weaknesses = []
 
         if accuracies["opening"] < 60:
-            weaknesses.append("Дебютные ошибки")
+            weaknesses.append("Opening mistakes")
         if accuracies["endgame"] < 50:
-            weaknesses.append("Слабый эндшпиль")
+            weaknesses.append("Weak endgame")
 
         piece_names = {
-            "pawn": "пешками",
-            "knight": "конями",
-            "bishop": "слонами",
-            "rook": "ладьями",
-            "queen": "ферзём",
-            "king": "королём",
+            "pawn": "pawns",
+            "knight": "knights",
+            "bishop": "bishops",
+            "rook": "rooks",
+            "queen": "queen",
+            "king": "king",
         }
 
         for piece, acc in piece_stats.items():
             if acc < 55:
                 base = piece.split("_")[0]
                 if base in piece_names:
-                    weaknesses.append(f"Ошибки с {piece_names[base]}")
+                    weaknesses.append(f"Mistakes with {piece_names[base]}")
 
         return weaknesses
 
