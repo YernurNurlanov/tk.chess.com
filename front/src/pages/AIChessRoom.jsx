@@ -19,7 +19,7 @@ export default function AIChessRoom() {
     const gameRef = useRef(game);
     const [moveHistory, setMoveHistory] = useState([]);
     const [mlInsights, setMlInsights] = useState(null);
-    
+    const API_URL = import.meta.env.VITE_AI_API_URL;
     const [boardSize, setBoardSize] = useState(Math.min(window.innerHeight * 0.8, 800));
    
     // Update board size on window resize
@@ -90,7 +90,7 @@ export default function AIChessRoom() {
         if (gameRef.current.isGameOver()) return;
 
         try {
-            const response = await axios.post('http://localhost:5001/get-ai-move', {
+            const response = await axios.post(`${import.meta.env.VITE_AI_API_URL}/get-ai-move`, {
                 fen: gameRef.current.fen(),
                 skillLevel: aiLevel
             });
@@ -152,7 +152,7 @@ export default function AIChessRoom() {
 
     const analyzeMove = async (move) => {
         try {
-            const response = await axios.post("http://localhost:5001/analyze-move", { 
+            const response = await axios.post(`${import.meta.env.VITE_AI_API_URL}/analyze-move`, { 
                 fen: gameRef.current.fen(), 
                 move 
             });
@@ -176,7 +176,7 @@ export default function AIChessRoom() {
         setAnalysisError(null);
 
         try {
-            const response = await axios.post('http://localhost:5001/analyze-game', { 
+            const response = await axios.post(`${import.meta.env.VITE_AI_API_URL}/analyze-game`, { 
                 pgn: pgn,
                 debug: true
             }, { timeout: 60000 });
