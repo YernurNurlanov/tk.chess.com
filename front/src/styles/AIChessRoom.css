@@ -113,25 +113,13 @@
 }
 /* Controls section */
 .chess-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
+    display: block;
     padding: 20px;
     background: white;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-
-.chess-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
 
 .control-group {
     flex: 1;
@@ -181,6 +169,21 @@
     transform: none;
     box-shadow: none;
 }
+
+.control-row {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.control-buttons-row {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
 
 /* Feedback and analysis panels */
 .feedback-panel, .analysis-panel {

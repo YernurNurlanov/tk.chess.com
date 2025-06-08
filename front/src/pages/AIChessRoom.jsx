@@ -358,62 +358,61 @@ export default function AIChessRoom() {
                 <div className="feedback-section">
                     <div className="controls-and-analysis">
                         <div className="chess-controls">
-                            <div className="control-group">
-                                <label>
-                                    Цвет:
-                                    <select 
-                                        value={playerColor}
-                                        onChange={(e) => setPlayerColor(e.target.value)}
-                                        disabled={game.history().length > 0}
-                                    >
-                                        <option value="white">Белые</option>
-                                        <option value="black">Чёрные</option>
-                                    </select>
-                                </label>
-                            </div>
-                            
-                            <div className="control-group">
-                                <label>
-                                    Уровень ИИ:
-                                    <select 
-                                        value={aiLevel}
-                                        onChange={(e) => setAiLevel(parseInt(e.target.value))}
-                                    >
-                                        {[1, 2, 3, 4, 5, 6].map(level => (
-                                            <option key={level} value={level}>Уровень {level}</option>
-                                        ))}
-                                    </select>
-                                </label>
-                            </div>
-                            
-                            <div className="control-group">
-                                <label>
-                                    Режим анализа:
-                                    <select 
-                                        value={feedbackMode}
-                                        onChange={(e) => setFeedbackMode(e.target.value)}
-                                    >
-                                        <option value="instant">Мгновенный</option>
-                                        <option value="end">После игры</option>
-                                        <option value="both">Оба режима</option>
-                                    </select>
-                                </label>
-                            </div>
-                            
-                            <button onClick={handleReset} className="control-button">
-                                Новая игра
-                            </button>
-                            
-                            {(feedbackMode === 'end' || feedbackMode === 'both') && game.isGameOver() && (
-                                <button 
-                                    onClick={analyzeGame} 
-                                    className="control-button"
-                                    disabled={isAnalyzing}
-                                >
-                                    {isAnalyzing ? 'Анализируем...' : 'Полный анализ игры'}
-                                </button>
-                            )}
-                        </div>
+    <div className="control-row">
+        <div className="control-group">
+            <label>Цвет:</label>
+            <select 
+                value={playerColor}
+                onChange={(e) => setPlayerColor(e.target.value)}
+                disabled={game.history().length > 0}
+            >
+                <option value="white">Белые</option>
+                <option value="black">Чёрные</option>
+            </select>
+        </div>
+
+        <div className="control-group">
+            <label>Уровень ИИ:</label>
+            <select 
+                value={aiLevel}
+                onChange={(e) => setAiLevel(parseInt(e.target.value))}
+            >
+                {[1, 2, 3, 4, 5, 6].map(level => (
+                    <option key={level} value={level}>Уровень {level}</option>
+                ))}
+            </select>
+        </div>
+
+        <div className="control-group">
+            <label>Режим анализа:</label>
+            <select 
+                value={feedbackMode}
+                onChange={(e) => setFeedbackMode(e.target.value)}
+            >
+                <option value="instant">Мгновенный</option>
+                <option value="end">После игры</option>
+                <option value="both">Оба режима</option>
+            </select>
+        </div>
+    </div>
+
+    <div className="control-buttons-row">
+        <button onClick={handleReset} className="control-button">
+            Новая игра
+        </button>
+
+        {(feedbackMode === 'end' || feedbackMode === 'both') && game.isGameOver() && (
+            <button 
+                onClick={analyzeGame} 
+                className="control-button"
+                disabled={isAnalyzing}
+            >
+                {isAnalyzing ? 'Анализируем...' : 'Полный анализ игры'}
+            </button>
+        )}
+    </div>
+</div>
+
 
                         {feedback && (feedbackMode === 'instant' || feedbackMode === 'both') && (
                             <div className="feedback-panel">
