@@ -19,6 +19,17 @@ export default function AIChessRoom() {
     const gameRef = useRef(game);
     const [moveHistory, setMoveHistory] = useState([]);
     const [mlInsights, setMlInsights] = useState(null);
+    
+    const [boardSize, setBoardSize] = useState(Math.min(window.innerHeight * 0.8, 800));
+   
+    // Update board size on window resize
+    useEffect(() => {
+        const handleResize = () => {
+            setBoardSize(Math.min(window.innerHeight * 0.8, 800));
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Update ref when game changes
     useEffect(() => {
@@ -34,8 +45,8 @@ export default function AIChessRoom() {
         setGameAnalysis(null);
         setAnalysisError(null);
         setMlInsights(null);
+        
 
-        // If player is black, make AI move first
         if (playerColor === 'black') {
             setIsThinking(true);
             setTimeout(makeAIMove, 500);
@@ -108,43 +119,36 @@ export default function AIChessRoom() {
     };
 
     const generateCompletePGN = () => {
-    const headers = [
-        `[Event "Casual Game"]`,
-        `[Site "Chess App"]`,
-        `[Date "${new Date().toISOString().split('T')[0]}"]`,
-        `[Round "-"]`,
-        `[White "${playerColor === 'white' ? 'Player' : 'AI'}"]`,
-        `[Black "${playerColor === 'black' ? 'Player' : 'AI'}"]`,
-        `[Result "*"]`
-    ].join('\n');
+        const headers = [
+            `[Event "Casual Game"]`,
+            `[Site "Chess App"]`,
+            `[Date "${new Date().toISOString().split('T')[0]}"]`,
+            `[Round "-"]`,
+            `[White "${playerColor === 'white' ? 'Player' : 'AI'}"]`,
+            `[Black "${playerColor === 'black' ? 'Player' : 'AI'}"]`,
+            `[Result "*"]`
+        ].join('\n');
 
-    // Reconstruct the game to get proper SAN moves
-    const tempGame = new Chess();
-    const sanMoves = [];
-    
-    moveHistory.forEach(move => {
-        try {
-            const chessMove = tempGame.move({
-                from: move.from,
-                to: move.to,
-                promotion: move.promotion || 'q' // Default to queen promotion
-            });
-            if (chessMove) {
-                sanMoves.push(chessMove.san);
-            } else {
-                console.error("Invalid move in history:", move);
+        const tempGame = new Chess();
+        const sanMoves = [];
+        
+        moveHistory.forEach(move => {
+            try {
+                const chessMove = tempGame.move({
+                    from: move.from,
+                    to: move.to,
+                    promotion: move.promotion || 'q'
+                });
+                if (chessMove) {
+                    sanMoves.push(chessMove.san);
+                }
+            } catch (e) {
+                console.error("Error processing move:", move, e);
             }
-        } catch (e) {
-            console.error("Error processing move:", move, e);
-        }
-    });
+        });
 
-    const pgn = `${headers}\n\n${sanMoves.join(' ')} *`;
-    console.log("Generated PGN:", pgn); // Log the complete PGN
-    return pgn;
-};
-
-
+        return `${headers}\n\n${sanMoves.join(' ')} *`;
+    };
 
     const analyzeMove = async (move) => {
         try {
@@ -153,7 +157,6 @@ export default function AIChessRoom() {
                 move 
             });
             
-            // Enhanced feedback with ML insights
             setFeedback({
                 ...response.data,
                 mlCategory: response.data.ml_category || response.data.category
@@ -168,68 +171,59 @@ export default function AIChessRoom() {
     };
 
     const analyzeGame = async () => {
-    const pgn = generateCompletePGN();
-    console.log("===== SENDING TO BACKEND =====");
-    console.log("Full PGN:", pgn);
+        const pgn = generateCompletePGN();
+        setIsAnalyzing(true);
+        setAnalysisError(null);
 
-    setIsAnalyzing(true);
-    setAnalysisError(null);
+        try {
+            const response = await axios.post('http://localhost:5001/analyze-game', { 
+                pgn: pgn,
+                debug: true
+            }, { timeout: 60000 });
 
-    try {
-        const response = await axios.post('http://localhost:5001/analyze-game', { 
-            pgn: pgn,
-            debug: true
-        }, { timeout: 60000 });
+            const raw = response.data;
+            const data = raw.move_analyses || raw;
 
-        console.log("Backend response:", response.data);
+            let opening = data.opening;
+            if (opening === "Неизвестный дебют") {
+                const firstMoves = game.history().slice(0, 4).join(" ");
+                opening = `Неизвестный дебют (${firstMoves})`;
+            }
 
-        // Extract actual analysis from nested structure
-        const raw = response.data;
-        const data = raw.move_analyses || raw;
+            setGameAnalysis({
+                ...data,
+                opening: opening,
+                mlData: {
+                    skillLevel: data.skill_profile?.level || "unknown",
+                    anomalies: data.anomalies || [],
+                    opening: opening
+                }
+            });
 
-        // Fallback for opening name
-        let opening = data.opening;
-        if (opening === "Неизвестный дебют") {
-            const firstMoves = game.history().slice(0, 4).join(" ");
-            opening = `Неизвестный дебют (${firstMoves})`;
+        } catch (error) {
+            console.error('Analysis failed:', error);
+            setAnalysisError(error.message);
+
+            const sanHistory = game.history();
+            const firstMoves = sanHistory.slice(0, 4).join(" ");
+
+            setGameAnalysis({
+                skill_profile: {
+                    level: "unknown",
+                    accuracy_percentage: 0,
+                    weaknesses: ["Анализ не завершен"],
+                },
+                opening: `Неизвестный дебют (ошибка: ${firstMoves})`,
+                mlData: {
+                    skillLevel: "unknown",
+                    anomalies: [],
+                    opening: `Неизвестный дебют (ошибка: ${firstMoves})`
+                }
+            });
+        } finally {
+            setIsAnalyzing(false);
         }
-
-        setGameAnalysis({
-            ...data,
-            opening: opening,
-            mlData: {
-                skillLevel: data.skill_profile?.level || "unknown",
-                anomalies: data.anomalies || [],
-                opening: opening
-            }
-        });
-
-    } catch (error) {
-        console.error('Analysis failed:', error);
-        setAnalysisError(error.message);
-
-        const sanHistory = game.history();
-        const firstMoves = sanHistory.slice(0, 4).join(" ");
-
-        setGameAnalysis({
-            skill_profile: {
-                level: "unknown",
-                accuracy_percentage: 0,
-                weaknesses: ["Анализ не завершен"],
-            },
-            opening: `Неизвестный дебют (ошибка: ${firstMoves})`,
-            mlData: {
-                skillLevel: "unknown",
-                anomalies: [],
-                opening: `Неизвестный дебют (ошибка: ${firstMoves})`
-            }
-        });
-    } finally {
-        setIsAnalyzing(false);
-        console.log("===== ANALYSIS COMPLETE =====");
-    }
-};
-
+    };
 
     const handleReset = () => {
         const newGame = new Chess();
@@ -242,6 +236,7 @@ export default function AIChessRoom() {
         setMlInsights(null);
         setIsThinking(false);
         setMoveHistory([]);
+        
 
         if (playerColor === 'black') {
             setIsThinking(true);
@@ -288,7 +283,7 @@ export default function AIChessRoom() {
         }
     };
 
-    // Render ML insights section
+    
     const renderMLInsights = () => {
         if (!mlInsights) return null;
         
@@ -298,8 +293,7 @@ export default function AIChessRoom() {
                 <div className="ml-insights-grid">
                     <div className="ml-insight-card">
                         <h5>Уровень игры</h5>
-                        <div className="ml-value">{gameAnalysis.skill_profile?.level || 'unknown'
-}</div>
+                        <div className="ml-value">{gameAnalysis.skill_profile?.level || 'unknown'}</div>
                     </div>
                     
                     <div className="ml-insight-card">
@@ -324,7 +318,6 @@ export default function AIChessRoom() {
         );
     };
 
-  
     const renderSourceBadge = (source) => {
         return (
             <span className={`source-badge source-${source.toLowerCase()}`}>
@@ -332,22 +325,24 @@ export default function AIChessRoom() {
             </span>
         );
     };
-    
-
 
     return (
         <div className="ai-chess-room">
+            
+
             <div className="chess-and-feedback-container">
                 <div className="chess-section">
                     <div className="chessboard-wrapper">
                         <Chessboard
                             position={fen}
                             onPieceDrop={onDrop}
-                            boardWidth={600}
+                            boardWidth={boardSize}
                             boardOrientation={playerColor}
                             customBoardStyle={{
                                 borderRadius: '4px',
-                                boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)'
+                                boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
+                                width: '100%',
+                                height: '100%'
                             }}
                         />
                         {isThinking && <div className="thinking-overlay">ИИ думает...</div>}
@@ -418,11 +413,8 @@ export default function AIChessRoom() {
                                     {isAnalyzing ? 'Анализируем...' : 'Полный анализ игры'}
                                 </button>
                             )}
-
-       
                         </div>
 
-                        {/* Instant Move Feedback */}
                         {feedback && (feedbackMode === 'instant' || feedbackMode === 'both') && (
                             <div className="feedback-panel">
                                 <h3 className="analysis-title">📊 Анализ хода</h3>
@@ -454,7 +446,6 @@ export default function AIChessRoom() {
                             </div>
                         )}
 
-                    {/* Game Analysis */}
                         {gameAnalysis && (
                             <div className="analysis-panel">
                                 <h3 className="analysis-title">📊 Подробный анализ партии</h3>
@@ -477,18 +468,16 @@ export default function AIChessRoom() {
                                             </span>
                                         </div>
                                         <div className="stat-item">
-                                <span className="stat-label">Дебют</span>
-                                <span className="stat-value">
-                                    {gameAnalysis.opening || 'Неизвестный дебют'}
-                                    {renderSourceBadge("System")}
-                                </span>
-                            </div>
+                                            <span className="stat-label">Дебют</span>
+                                            <span className="stat-value">
+                                                {gameAnalysis.opening || 'Неизвестный дебют'}
+                                                {renderSourceBadge("System")}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* ML Insights Section */}
                                 {renderMLInsights()}
-                                {/* {renderPieceAccuracy} */}
 
                                 <div className="analysis-section">
                                     <h4 className="section-header">Ключевые моменты</h4>
