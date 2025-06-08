@@ -110,41 +110,56 @@ class ChessAIService:
         }
 
     def _identify_opening(self, san_moves: List[str]) -> str:
-        """Identify opening using SAN move patterns (cleaned strings)"""
+        """Identify opening using cleaned SAN move patterns"""
         if not san_moves or len(san_moves) < 2:
             return "Unknown opening"
 
-        print("\n==== OPENING DETECTION =====")
-        print("SAN sequence:", san_moves[:6])
+        moves_to_check = san_moves[:6]
 
-        # Normalize first moves: remove captures, promotions, check/mate, uppercase
-        normalized = [
-            re.sub(r"[+#=NBRQKx]", "", move).lower() for move in san_moves[:6]
-        ]
-        print("Normalized:", normalized)
+        normalized = []
+        for move in moves_to_check:
+            clean = re.sub(r"[+#=NBRQKx]", "", move).lower()
+            if len(clean) >= 2:
+                normalized.append(clean)
 
-        if normalized[0] == "e4":
-            if len(normalized) > 1 and normalized[1] == "e5":
-                return "Open game"
-            elif normalized[1] == "c5":
+        if not normalized or len(normalized) < 2:
+            return "Unknown opening"
+
+        # Detect irregular openings
+        if normalized[0] not in {"e4", "d4", "c4", "nf3", "f4"}:
+            return "Irregular Opening"
+
+        first = normalized[0]
+        second = normalized[1] if len(normalized) > 1 else None
+        third = normalized[2] if len(normalized) > 2 else None
+
+        if first == "e4":
+            if second == "e5":
+                if third == "nf3":
+                    return "Open Game"
+                elif third == "nc6":
+                    return "Italian Game"
+                return "Double King's Pawn Game"
+            elif second == "c5":
                 return "Sicilian Defense"
-            elif normalized[1] == "e6":
+            elif second == "e6":
                 return "French Defense"
-            elif normalized[1] == "d6":
+            elif second == "c6":
+                return "Caro-Kann Defense"
+            elif second == "d6":
                 return "Pirc Defense"
-
-        if normalized[0] == "d4":
-            if len(normalized) > 1 and normalized[1] == "d5":
-                if len(normalized) > 2 and normalized[2] == "c4":
+        elif first == "d4":
+            if second == "d5":
+                if third == "c4":
                     return "Queen's Gambit"
-            elif normalized[1] == "nf6":
+                return "Closed Game"
+            elif second == "nf6":
                 return "Indian Defense"
-
-        if normalized[0] == "c4":
+        elif first == "c4":
             return "English Opening"
-        if normalized[0] == "f4":
+        elif first == "f4":
             return "Bird's Opening"
-        if normalized[0] == "nf3":
+        elif first == "nf3":
             return "Réti Opening"
 
         return "Unknown opening"
