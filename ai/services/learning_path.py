@@ -1,5 +1,5 @@
 import random
-from typing import Dict, List
+from typing import Counter, Dict, List
 
 import numpy as np
 
@@ -14,8 +14,10 @@ class LearningPath:
     ) -> List[Dict]:
         recs = []
         weaknesses = skill_profile.get("weaknesses", [])
+        mistake_types = Counter(weaknesses)
+        top_mistakes = mistake_types.most_common(3)
 
-        # Weakness-specific recommendations
+        # 🔹 Weakness-specific recommendations
         weakness_map = {
             "Opening mistakes": {
                 "title": "Study openings",
@@ -32,21 +34,19 @@ class LearningPath:
                 "description": "Study 5 typical pawn structures",
                 "type": "study",
             },
-            # Add more mappings
         }
 
-        for weakness in weaknesses:
+        for weakness, count in top_mistakes:
             if weakness in weakness_map:
                 recs.append(
                     {
                         **weakness_map[weakness],
-                        "priority": "high"
-                        if "mistakes" in weakness.lower()
-                        else "medium",
+                        "priority": "high" if count >= 3 else "medium",
+                        "explanation": f"Detected {count} instance(s) of '{weakness}'",
                     }
                 )
 
-        # Add phase-specific recommendations
+        # 🔹 Phase-specific accuracy
         for phase in ["opening", "middlegame", "endgame"]:
             acc = skill_profile.get(f"{phase}_accuracy", 100)
             if acc < 65:
@@ -56,14 +56,48 @@ class LearningPath:
                         "description": f"Practice: 20 positions in {self._phase_name(phase, dative=True)}",
                         "type": "practice",
                         "priority": "medium",
+                        "explanation": f"Your accuracy in the {phase} is below 65% ({acc}%)",
                     }
                 )
 
-        # Add personalized recommendations if available
+        # 🔹 Style-based advice (optional, simulated)
+        style = skill_profile.get("style", "balanced")
+        if style == "aggressive":
+            recs.append(
+                {
+                    "title": "Control aggression",
+                    "description": "Review 10 games where early sacrifices failed",
+                    "type": "review",
+                    "priority": "medium",
+                    "explanation": "You play aggressively; review control strategies",
+                }
+            )
+        elif style == "positional":
+            recs.append(
+                {
+                    "title": "Sharpen tactics",
+                    "description": "Solve 20 tactical puzzles to add sharpness",
+                    "type": "puzzle",
+                    "priority": "high",
+                    "explanation": "Your style is positional; improve tactical sharpness",
+                }
+            )
+
+        # 🔹 ML recommendations
         if embeddings and self.ml_service:
             recs.extend(self._get_ml_recommendations(embeddings))
 
-        return recs
+        return self._deduplicate_recommendations(recs)
+
+    def _deduplicate_recommendations(self, recs: List[Dict]) -> List[Dict]:
+        seen = set()
+        unique_recs = []
+        for rec in recs:
+            key = (rec["title"], rec["type"])
+            if key not in seen:
+                seen.add(key)
+                unique_recs.append(rec)
+        return unique_recs
 
     def _phase_name(self, phase, dative=False):
         names = {

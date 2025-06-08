@@ -3,6 +3,8 @@ import { Chessboard } from 'react-chessboard';
 import { Chess } from 'chess.js';
 import axios from 'axios';
 import '../styles/AIChessRoom.css';
+import { Trophy, AlertTriangle, BarChart } from 'lucide-react';
+
 
 export default function AIChessRoom() {
     const [game, setGame] = useState(new Chess());
@@ -522,6 +524,8 @@ export default function AIChessRoom() {
                                                         <span className="source-badge source-system">System</span>
                                                     </h5>
                                                     <p className="rec-description">{rec.description}</p>
+{rec.explanation && <p className="rec-explanation">💬 {rec.explanation}</p>}
+
                                                 </div>
                                                 <span className="rec-priority">
                                                     {rec.priority === 'high' && '🔥 High priority'}
