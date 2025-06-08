@@ -62,6 +62,8 @@
     flex-direction: column;
     border-left: 1px solid #ccc;
     overflow-y: auto;
+    font-size: 1rem; /* Increase base font size */
+    line-height: 1.6;
 }
 
 /* Chessboard wrapper */
@@ -186,20 +188,25 @@
 
 
 /* Feedback and analysis panels */
-.feedback-panel, .analysis-panel {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
+.feedback-panel,
+.analysis-panel,
+.recommendation-card,
+.stat-item,
+.ml-insight-card {
+    font-size: 1rem;
 }
 
 .feedback-panel {
     border-left: 4px solid #3AAFA9;
+    padding-left: 24px; /* ⬅ add padding from the border */
+    padding-right: 20px;
+    
 }
 
 .analysis-panel {
     border-left: 4px solid #91a1b3;
+    padding-left: 24px; /* ⬅ add padding from the border */
+    padding-right: 20px;
 }
 
 .error-message {
@@ -256,6 +263,7 @@
     color: #7f8c8d;
     margin-bottom: 5px;
     display: block;
+    font-size: 0.95rem;
 }
 
 .stat-value {
@@ -263,6 +271,7 @@
     font-weight: 700;
     color: #2c3e50;
     display: block;
+    font-size: 1.6rem;
 }
 
 .stat-value.highlight {
@@ -281,6 +290,7 @@
     background: #ffffff;
     border-radius: 4px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    font-size: 1rem;
 }
 
 .best-move {
@@ -303,7 +313,7 @@
 }
 
 .move-description {
-    font-size: 1rem;
+    font-size: 1.5rem;
     line-height: 1.4;
     margin-bottom: 10px;
 }
@@ -327,29 +337,32 @@
     background: #ffffff;
     box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     border-left: 3px solid;
+    font-size: 1rem;
 }
 
 .rec-title {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     color: #2c3e50;
     margin-top: 0;
     margin-bottom: 8px;
     display: flex;
     align-items: center;
     gap: 8px;
+    
 }
 
-.rec-description {
-    font-size: 0.95rem;
+.rec-description, .rec-explanation {
+    font-size: 1.5rem;
+    line-height: 1.5;
     color: #34495e;
-    line-height: 1.4;
 }
 
 .rec-priority {
     display: inline-block;
     padding: 4px 8px;
     border-radius: 20px;
-    font-size: 0.8rem;
+       font-size: 0.9rem;
+    font-weight: 600;
     font-weight: bold;
     margin-top: 10px;
 }
@@ -498,4 +511,11 @@
         grid-template-columns: 1fr;
     }
 }
+.title-icon {
+  margin-right: 8px;
+  vertical-align: middle;
+}
 
+.move-icon {
+  color: var(--info, #3498db);
+}

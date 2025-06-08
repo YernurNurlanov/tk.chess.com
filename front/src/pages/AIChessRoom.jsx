@@ -11,7 +11,7 @@ export default function AIChessRoom() {
     const [fen, setFen] = useState('start');
     const [gameOverMessage, setGameOverMessage] = useState(null);
     const [feedbackMode, setFeedbackMode] = useState('instant');
-    const [aiLevel, setAiLevel] = useState(3);
+    const [aiLevel, ] = useState(3);
     const [feedback, setFeedback] = useState(null);
     const [gameAnalysis, setGameAnalysis] = useState(null);
     const [playerColor, setPlayerColor] = useState('white');
@@ -331,6 +331,7 @@ export default function AIChessRoom() {
     return (
         <div className="ai-chess-room">
             
+            
 
             <div className="chess-and-feedback-container">
                 <div className="chess-section">
@@ -373,17 +374,7 @@ export default function AIChessRoom() {
             </select>
         </div>
 
-        <div className="control-group">
-            <label>AI Level:</label>
-            <select 
-                value={aiLevel}
-                onChange={(e) => setAiLevel(parseInt(e.target.value))}
-            >
-                {[1, 2, 3, 4, 5, 6].map(level => (
-                    <option key={level} value={level}>Level {level}</option>
-                ))}
-            </select>
-        </div>
+        
 
         <div className="control-group">
             <label>Analysis Mode:</label>
@@ -418,7 +409,11 @@ export default function AIChessRoom() {
 
                         {feedback && (feedbackMode === 'instant' || feedbackMode === 'both') && (
                             <div className="feedback-panel">
-                                <h3 className="analysis-title">📊 Move Analysis</h3>
+                                <h3 className="analysis-title">
+  <BarChart size={18} className="title-icon" />
+  Move Analysis
+</h3>
+
                                 <div className="analysis-section">
                                     <div className="stats-grid">
                                         <div className="stat-item">
@@ -449,7 +444,10 @@ export default function AIChessRoom() {
 
                         {gameAnalysis && (
                             <div className="analysis-panel">
-                                <h3 className="analysis-title">📊 Detailed Game Analysis</h3>
+                                <h3 className="analysis-title">
+  <BarChart size={18} className="title-icon" /> Detailed Game Analysis
+</h3>
+
                                 
                                 <div className="analysis-section">
                                     <h4 className="section-header">Overall Assessment</h4>
@@ -485,7 +483,8 @@ export default function AIChessRoom() {
                                     <div className="key-moments">
                                         <div className="move-card best-move">
                                             <div className="move-header">
-                                                <span className="move-icon">🏆</span>
+                                                <Trophy size={18} className="move-icon" />
+
                                                 <h5>Best Move</h5>
                                             </div>
                                             <p className="move-description">
@@ -499,7 +498,8 @@ export default function AIChessRoom() {
                                         
                                         <div className="move-card worst-move">
                                             <div className="move-header">
-                                                <span className="move-icon">⚠️</span>
+                                                <AlertTriangle size={18} className="move-icon" />
+
                                                 <h5>Weak Move</h5>
                                             </div>
                                             <p className="move-description">
@@ -524,13 +524,33 @@ export default function AIChessRoom() {
                                                         <span className="source-badge source-system">System</span>
                                                     </h5>
                                                     <p className="rec-description">{rec.description}</p>
-{rec.explanation && <p className="rec-explanation">💬 {rec.explanation}</p>}
+<p className="rec-explanation">
+  <AlertTriangle size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+  {rec.explanation}
+</p>
+
 
                                                 </div>
                                                 <span className="rec-priority">
-                                                    {rec.priority === 'high' && '🔥 High priority'}
-                                                    {rec.priority === 'medium' && '⏳ Medium priority'}
-                                                    {rec.priority === 'low' && '💡 Low priority'}
+                                                    {rec.priority === 'high' && (
+  <>
+    <AlertTriangle size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+    High priority
+  </>
+)}
+{rec.priority === 'medium' && (
+  <>
+    <BarChart size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+    Medium priority
+  </>
+)}
+{rec.priority === 'low' && (
+  <>
+    <Trophy size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+    Low priority
+  </>
+)}
+
                                                 </span>
                                             </div>
                                         )) || <p>No recommendations available</p>}
