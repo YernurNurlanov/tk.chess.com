@@ -1,12 +1,13 @@
 import React, {useEffect} from "react";
 import {useLocation, useParams} from 'react-router';
 import useWebRTC from '../hooks/server/useWebRTC.jsx';
-import VideoSection from "../components/roomPage/VideoSection.jsx";
 import ChessBoardSection from "../components/roomPage/ChessBoardSection.jsx";
 import styles from "../styles/roomPage.module.css"
 import MaterialsModal from "../components/modals/room/MaterialsModal.jsx";
 import NewPositionModal from "../components/modals/room/NewPositionModal.jsx";
 import axios from "../axiosInstance.js";
+import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 export default function Room() {
     const {id: roomID} = useParams();
@@ -36,39 +37,42 @@ export default function Room() {
             }
         };
 
-        fetchTasks().then();
+        if (role === "ROLE_TEACHER") {
+            fetchTasks().then();
+        }
     }, []);
 
     return (
         <div className={styles["page-container"]}>
-            {role === "ROLE_TEACHER" && (
-                <header className={styles["header"]}>
-                    <button className="btn" onClick={() => setMaterialsModalOpen(true)}>
-                        Materials
+            <header className={styles["header"]}>
+                {role === "ROLE_TEACHER" ? (
+                    <>
+                        <button className="btn" onClick={() => window.location.href = "/teacher"}>
+                            <FontAwesomeIcon icon={faArrowLeft}/>
+                        </button>
+                        <button className="btn" onClick={() => setMaterialsModalOpen(true)}>
+                            Materials
+                        </button>
+                        <button className="btn" onClick={() => setNewPositionModalOpen(true)}>
+                            Set your position
+                        </button>
+                    </>
+                ) : (
+                    <button className="btn" onClick={() => window.location.href = "/student"}>
+                        <FontAwesomeIcon icon={faArrowLeft} />
                     </button>
-                    <button className="btn" onClick={() => setNewPositionModalOpen(true)}>
-                        Set your position
-                    </button>
-                </header>
-            )}
-            <div className={styles["main-content"]}>
-                <div className={styles["chessboard-section"]}>
-                    <ChessBoardSection
-                        roomID={roomID}
-                    />
-                </div>
-                <div>
-                    <VideoSection
-                        mainClientID={mainClientID}
-                        secondaryClients={secondaryClients}
-                        provideMediaRef={provideMediaRef}
-                        toggleAudio={toggleAudio}
-                        toggleVideo={toggleVideo}
-                        isMicOn={isMicOn}
-                        isCameraOn={isCameraOn}
-                    />
-                </div>
-            </div>
+                )}
+            </header>
+            <ChessBoardSection
+                roomID={roomID}
+                mainClientID={mainClientID}
+                secondaryClients={secondaryClients}
+                provideMediaRef={provideMediaRef}
+                toggleAudio={toggleAudio}
+                toggleVideo={toggleVideo}
+                isMicOn={isMicOn}
+                isCameraOn={isCameraOn}
+            />
             {isMaterialsModalOpen && (
                 <MaterialsModal
                     onClose={() => setMaterialsModalOpen(false)}

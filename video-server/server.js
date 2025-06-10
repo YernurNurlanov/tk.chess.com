@@ -1,9 +1,10 @@
 import express from 'express';
-import { createServer } from 'http';
-import { Server } from 'socket.io';
+import {createServer} from 'http';
+import {Server} from 'socket.io';
 import ACTIONS from './actions.js';
 import {Chess} from "chess.js";
 import dotenv from 'dotenv';
+
 dotenv.config();
 
 const PORT = 3001;
@@ -26,9 +27,7 @@ io.on('connection', socket => {
         const { room: roomID, role } = config;
         socket.role = role;
 
-        const joinedRooms = socket.rooms;
-
-        if (joinedRooms.has(roomID)) {
+        if (socket.rooms.has(roomID)) {
             return console.warn(`Already joined to ${roomID}`);
         }
 
@@ -49,8 +48,13 @@ io.on('connection', socket => {
         socket.join(roomID);
 
         if (roomStates[roomID]) {
-            const fen = roomStates[roomID].game.fen();
-            socket.emit(ACTIONS.CHESS_STATE, { fen });
+            const { game, history, fenHistory } = roomStates[roomID];
+            socket.emit(ACTIONS.CHESS_STATE, {
+                fen: game.fen(),
+                history,
+                fenHistory,
+                currentMoveIndex: history.length - 1
+            });
         }
     });
 
@@ -102,26 +106,74 @@ io.on('connection', socket => {
     });
 
     socket.on(ACTIONS.CHESS_MOVE, ({ roomID, from, to, promotion }) => {
-        const state = roomStates[roomID] || { game: new Chess() };
+        let state = roomStates[roomID];
+        if (!state) {
+            state = {
+                game: new Chess(),
+                history: [],
+                fenHistory: ['start'],
+                currentMoveIndex: -1
+            };
+            roomStates[roomID] = state;
+        }
 
-        const move = state.game.move({ from, to, promotion });
+        try {
+            if (state.currentMoveIndex < state.history.length - 1) {
+                state.history = state.history.slice(0, state.currentMoveIndex + 1);
+                state.fenHistory = state.fenHistory.slice(0, state.currentMoveIndex + 2);
+            }
 
-        if (move) {
-            const fen = state.game.fen();
-            roomStates[roomID] = { game: state.game };
-            socket.to(roomID).emit('chess-move', { from, to, promotion, fen });
+            const moveObj = { from, to };
+            const piece = state.game.get(from);
+            if (piece && piece.type === 'p' &&
+                ((piece.color === 'w' && to[1] === '8') ||
+                    (piece.color === 'b' && to[1] === '1'))) {
+                moveObj.promotion = promotion || 'q';
+            }
+
+            const move = state.game.move(moveObj);
+
+            if (move) {
+                state.history.push(move);
+                state.fenHistory.push(state.game.fen());
+                state.currentMoveIndex = state.history.length - 1;
+
+                io.to(roomID).emit('chess-move', {
+                    fen: state.game.fen(),
+                    history: state.history,
+                    fenHistory: state.fenHistory,
+                    currentMoveIndex: state.currentMoveIndex
+                });
+            }
+        } catch (err) {
+            console.error("Invalid move attempted:", { from, to, promotion }, err.message);
         }
     });
 
     socket.on(ACTIONS.CHESS_RESET, ({ roomID, fen }) => {
         const game = new Chess(fen);
-        roomStates[roomID] = { game };
-        io.to(roomID).emit(ACTIONS.CHESS_STATE, { fen });
+        roomStates[roomID] = { game, history: [], fenHistory: [fen] };
+        io.to(roomID).emit(ACTIONS.CHESS_STATE, { fen, history: [], fenHistory: [fen] });
+    });
+
+    socket.on(ACTIONS.CHESS_GO_TO_MOVE, ({ roomID, moveIndex }) => {
+        const state = roomStates[roomID];
+        if (state && state.fenHistory[moveIndex + 1]) {
+            state.currentMoveIndex = moveIndex;
+            state.game = new Chess(state.fenHistory[moveIndex + 1]);
+
+            io.to(roomID).emit(ACTIONS.CHESS_GO_TO_MOVE, {
+                fen: state.fenHistory[moveIndex + 1],
+                currentMoveIndex: moveIndex,
+                history: state.history,
+                fenHistory: state.fenHistory
+            });
+        }
     });
 
     socket.on(ACTIONS.CHESS_GAME_OVER, ({ roomID, message }) => {
         console.log(`[GAME OVER] Room: ${roomID}, Message: ${message}`);
-        io.to(roomID).emit('chess-game-over', { message });
+        io.to(roomID).emit(ACTIONS.CHESS_GAME_OVER, { message });
     });
 });
 
