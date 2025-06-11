@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import axios from "../../axiosInstance.js";
 import "../../styles/StudentSidebar.css";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faChessBoard, faRightFromBracket} from "@fortawesome/free-solid-svg-icons";
@@ -8,26 +8,18 @@ import {faChessBoard, faRightFromBracket} from "@fortawesome/free-solid-svg-icon
 const StudentSidebar = ({ currentUser, activeTab, setActiveTab, onLogout, userId }) => {
     const [isCreatingRoom, setIsCreatingRoom] = useState(false);
 
-    const url = import.meta.env.VITE_API_URL;
-
     const createAIRoom = async () => {
         setIsCreatingRoom(true);
         try {
             console.log("Attempting to create AI room with userId:", userId);
-            const response = await axios.post(
-                `${url}/api/ai-rooms`,
+            const response = await axios.post("/games/",
                 {
                     userId,
-                    aiLevel: 3,
                     playerColor: "white"
-                }, 
-                {
-                    withCredentials: true
                 }
             );
 
-            // Redirect to the new AI room
-            window.location.href = `/ai-room/${response.data}`;
+            window.location.href = `/ai-room/${response.data}?color=white`;
         } catch (error) {
             console.error("Error creating AI room:", error);
             alert("Failed to create AI room: " + (error.response?.data?.message || error.message));

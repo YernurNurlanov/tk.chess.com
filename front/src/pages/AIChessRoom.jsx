@@ -2,11 +2,26 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Chessboard } from 'react-chessboard';
 import { Chess } from 'chess.js';
 import axios from 'axios';
+import axios2 from "../axiosInstance.js";
 import '../styles/AIChessRoom.css';
 import { Trophy, AlertTriangle, BarChart } from 'lucide-react';
+import {
+    handleCreateGame,
+    handleLoadGame,
+    handleSaveAiMove,
+    handleSaveGame,
+    handleSaveGameAnalysis,
+    handleSaveMove
+} from "../handlers/student/gameHandlers.js";
+import {useParams, useSearchParams} from "react-router";
 
 
 export default function AIChessRoom() {
+    const { id } = useParams();
+    const [searchParams] = useSearchParams();
+    const colorParam = searchParams.get('color');
+    const [currentUser, setCurrentUser] = useState(null);
+
     const [game, setGame] = useState(new Chess());
     const [fen, setFen] = useState('start');
     const [gameOverMessage, setGameOverMessage] = useState(null);
@@ -14,17 +29,93 @@ export default function AIChessRoom() {
     const [aiLevel, ] = useState(3);
     const [feedback, setFeedback] = useState(null);
     const [gameAnalysis, setGameAnalysis] = useState(null);
-    const [playerColor, setPlayerColor] = useState('white');
+    const [playerColor, setPlayerColor] = useState(colorParam || 'white');
     const [isThinking, setIsThinking] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [, setAnalysisError] = useState(null);
     const gameRef = useRef(game);
     const [moveHistory, setMoveHistory] = useState([]);
-    const [mlInsights, setMlInsights] = useState(null);
-    const API_URL = import.meta.env.VITE_AI_API_URL;
+    const [mlInsights, ] = useState(null);
     const [boardSize, setBoardSize] = useState(Math.min(window.innerHeight * 0.8, 800));
-   
-    // Update board size on window resize
+    const [isLoading, setIsLoading] = useState(true);
+
+    const makeAIMove = async () => {
+        if (gameRef.current.isGameOver()) return;
+
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_AI_API_URL}/get-ai-move`, {
+                fen: gameRef.current.fen(),
+                skillLevel: aiLevel
+            });
+
+            const newGame = new Chess(gameRef.current.fen());
+            newGame.move(response.data.move);
+
+            setMoveHistory(prev => [...prev, {
+                from: response.data.move.substring(0,2),
+                to: response.data.move.substring(2,4),
+                san: newGame.history().slice(-1)[0]
+            }]);
+
+            const request = {
+                fromSquare: response.data.move.substring(0,2),
+                toSquare: response.data.move.substring(2,4),
+                san: newGame.history().slice(-1)[0],
+                fenBefore: gameRef.current.fen(),
+                fenAfter: newGame.fen()
+            };
+
+            handleSaveAiMove(id, request).then();
+
+            setGame(newGame);
+            setFen(newGame.fen());
+
+            const isOver = checkGameOver(newGame);
+            if (isOver) {
+                let result;
+                if (newGame.isCheckmate()) {
+                    result = newGame.turn() === 'w' ? 'BLACK_WON' : 'WHITE_WON';
+                } else if (newGame.isDraw()) {
+                    result = 'DRAW';
+                } else if (newGame.isStalemate()) {
+                    result = 'STALEMATE';
+                } else {
+                    result = 'ABANDONED';
+                }
+                const gameRequest = {
+                    result: result
+                }
+                handleSaveGame(id, gameRequest).then();
+
+                if (feedbackMode === 'end' || feedbackMode === 'both') {
+                    analyzeGame().then();
+                }
+            }
+        } catch (error) {
+            console.error('AI move error:', error);
+        } finally {
+            setIsThinking(false);
+        }
+    };
+
+    useEffect(() => {
+        const fetchCurrentUser = async () => {
+            try {
+                const response = await axios2.get(`/me`);
+                setCurrentUser(response.data);
+                console.log("Current user received")
+            } catch (error) {
+                console.error("Error fetching current user", error);
+            }
+        };
+
+        fetchCurrentUser().then();
+    }, []);
+
+    useEffect(() => {
+        gameRef.current = game;
+    }, [game]);
+
     useEffect(() => {
         const handleResize = () => {
             setBoardSize(Math.min(window.innerHeight * 0.8, 800));
@@ -33,27 +124,70 @@ export default function AIChessRoom() {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Update ref when game changes
     useEffect(() => {
-        gameRef.current = game;
-    }, [game]);
+        const loadGameState = async () => {
+            try {
+                const response = await handleLoadGame(id);
+                if (response) {
+                    setPlayerColor(response.playerColor || 'white');
 
-    useEffect(() => {
-        const newGame = new Chess();
-        setGame(newGame);
-        setFen(newGame.fen());
-        setGameOverMessage(null);
-        setFeedback(null);
-        setGameAnalysis(null);
-        setAnalysisError(null);
-        setMlInsights(null);
-        
+                    const tempGame = new Chess();
+                    const loadedMoveHistory = [];
 
-        if (playerColor === 'black') {
-            setIsThinking(true);
-            setTimeout(makeAIMove, 500);
-        }
-    }, [playerColor]);
+                    response.moves.forEach(move => {
+                        try {
+                            const chessMove = tempGame.move({
+                                from: move.fromSquare,
+                                to: move.toSquare,
+                                promotion: 'q'
+                            });
+                            if (chessMove) {
+                                loadedMoveHistory.push({
+                                    from: move.fromSquare,
+                                    to: move.toSquare,
+                                    san: move.san
+                                });
+                            }
+                        } catch (e) {
+                            console.error("Error loading move:", move, e);
+                        }
+                    });
+
+                    setMoveHistory(loadedMoveHistory);
+                    setGame(tempGame);
+                    setFen(tempGame.fen());
+                    gameRef.current = tempGame;
+
+                    if (response.result) {
+                        let message;
+                        switch(response.result) {
+                            case 'WHITE_WON':
+                                message = 'White wins by checkmate';
+                                break;
+                            case 'BLACK_WON':
+                                message = 'Black wins by checkmate';
+                                break;
+                            case 'DRAW':
+                                message = 'Draw';
+                                break;
+                            case 'STALEMATE':
+                                message = 'Stalemate (draw)';
+                                break;
+                            default:
+                                message = 'Game over';
+                        }
+                        setGameOverMessage(message);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load game:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadGameState().then();
+    }, [id]);
 
     useEffect(() => {
         if (!gameOverMessage && game.turn() !== playerColor[0] && !isThinking) {
@@ -62,9 +196,27 @@ export default function AIChessRoom() {
         }
     }, [fen, gameOverMessage]);
 
+    if (isLoading) {
+        return <div className="loading-overlay">Loading game...</div>;
+    }
+
+    const handleColorChange = async (e) => {
+        const newColor = e.target.value;
+        try {
+            const response = await handleCreateGame({
+                userId: currentUser.id,
+                playerColor: newColor
+            });
+
+            window.location.href = `/ai-room/${response}?color=${newColor}`;
+        } catch (error) {
+            console.error('Error creating new game:', error);
+        }
+    };
+
     const checkGameOver = (gameInstance) => {
         if (gameInstance.isGameOver()) {
-            let message = '';
+            let message;
             if (gameInstance.isCheckmate()) {
                 const winner = gameInstance.turn() === 'w' ? 'Black' : 'White';
                 message = `${winner} wins by checkmate`;
@@ -86,38 +238,6 @@ export default function AIChessRoom() {
             return true;
         }
         return false;
-    };
-
-    const makeAIMove = async () => {
-        if (gameRef.current.isGameOver()) return;
-
-        try {
-            const response = await axios.post(`${import.meta.env.VITE_AI_API_URL}/get-ai-move`, {
-                fen: gameRef.current.fen(),
-                skillLevel: aiLevel
-            });
-
-            const newGame = new Chess(gameRef.current.fen());
-            newGame.move(response.data.move);
-
-            setMoveHistory(prev => [...prev, {
-                from: response.data.move.substring(0,2),
-                to: response.data.move.substring(2,4),
-                san: newGame.history().slice(-1)[0]
-            }]);
-
-            setGame(newGame);
-            setFen(newGame.fen());
-            
-            const isOver = checkGameOver(newGame);
-            if (isOver && (feedbackMode === 'end' || feedbackMode === 'both')) {
-                analyzeGame();
-            }
-        } catch (error) {
-            console.error('AI move error:', error);
-        } finally {
-            setIsThinking(false);
-        }
     };
 
     const generateCompletePGN = () => {
@@ -152,17 +272,30 @@ export default function AIChessRoom() {
         return `${headers}\n\n${sanMoves.join(' ')} *`;
     };
 
-    const analyzeMove = async (move) => {
+    const analyzeMove = async (move, moveRequest) => {
         try {
             const response = await axios.post(`${import.meta.env.VITE_AI_API_URL}/analyze-move`, { 
                 fen: gameRef.current.fen(), 
                 move 
             });
-            
             setFeedback({
                 ...response.data,
                 mlCategory: response.data.ml_category || response.data.category
             });
+
+            const analysisRequest = {
+                strength: response.data.strength,
+                suggestion: response.data.suggestion,
+                topSuggestion: response.data.top_suggestion,
+                category: response.data.category.toUpperCase()
+            }
+
+            const request = {
+                move: moveRequest,
+                moveAnalysis: analysisRequest
+            }
+
+            handleSaveMove(id, request).then()
         } catch (error) {
             console.error('Move analysis error:', error);
             setFeedback({
@@ -202,6 +335,14 @@ export default function AIChessRoom() {
                 }
             });
 
+            const request = {
+                accuracyScore: gameAnalysis?.skill_profile?.accuracy_percentage || null,
+                opening: gameAnalysis?.opening || null,
+                skillLevel: gameAnalysis?.skill_profile?.level || null
+            }
+
+            handleSaveGameAnalysis(id, request).then();
+
         } catch (error) {
             console.error('Analysis failed:', error);
             setAnalysisError(error.message);
@@ -227,22 +368,16 @@ export default function AIChessRoom() {
         }
     };
 
-    const handleReset = () => {
-        const newGame = new Chess();
-        setGame(newGame);
-        setFen(newGame.fen());
-        setGameOverMessage(null);
-        setFeedback(null);
-        setGameAnalysis(null);
-        setAnalysisError(null);
-        setMlInsights(null);
-        setIsThinking(false);
-        setMoveHistory([]);
-        
+    const handleReset = async () => {
+        try {
+            const response = await handleCreateGame({
+                userId: currentUser.id,
+                playerColor: 'white'
+            });
 
-        if (playerColor === 'black') {
-            setIsThinking(true);
-            setTimeout(makeAIMove, 500);
+            window.location.href = `/ai-room/${response}?color=white`;
+        } catch (error) {
+            console.error('Error creating new game:', error);
         }
     };
 
@@ -268,23 +403,48 @@ export default function AIChessRoom() {
                 san: newGame.history().slice(-1)[0]
             }]);
 
+            const request = {
+                fromSquare: sourceSquare,
+                toSquare: targetSquare,
+                san: newGame.history().slice(-1)[0],
+                fenBefore: gameRef.current.fen(),
+                fenAfter: newGame.fen(),
+                isPlayerMove: true
+            };
+
             setGame(newGame);
             setFen(newGame.fen());
 
             if (feedbackMode === 'instant' || feedbackMode === 'both') {
-                await analyzeMove(`${sourceSquare}${targetSquare}`);
+                await analyzeMove(`${sourceSquare}${targetSquare}`, request);
             }
 
             const isOver = checkGameOver(newGame);
-            if (isOver && (feedbackMode === 'end' || feedbackMode === 'both')) {
-                await analyzeGame();
+            if (isOver) {
+                let result;
+                if (newGame.isCheckmate()) {
+                    result = newGame.turn() === 'w' ? 'BLACK_WON' : 'WHITE_WON';
+                } else if (newGame.isDraw()) {
+                    result = 'DRAW';
+                } else if (newGame.isStalemate()) {
+                    result = 'STALEMATE';
+                } else {
+                    result = 'ABANDONED';
+                }
+                const gameRequest = {
+                    result: result
+                }
+                handleSaveGame(id, gameRequest).then();
+
+                if (feedbackMode === 'end' || feedbackMode === 'both') {
+                    analyzeGame().then();
+                }
             }
             return true;
         } catch {
             return false;
         }
     };
-
     
     const renderMLInsights = () => {
         if (!mlInsights) return null;
@@ -366,8 +526,8 @@ export default function AIChessRoom() {
             <label>Color:</label>
             <select 
                 value={playerColor}
-                onChange={(e) => setPlayerColor(e.target.value)}
-                disabled={game.history().length > 0}
+                onChange={handleColorChange}
+                // disabled={game.history().length > 0}
             >
                 <option value="white">White</option>
                 <option value="black">Black</option>
